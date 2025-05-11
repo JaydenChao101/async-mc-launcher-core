@@ -23,11 +23,6 @@ jobs:
 
       - name: Push changes to dev branch
         run: |
-          # 如果是 PR merge commit，則跳過
-          if git log -1 --pretty=%B | grep -q "Merge pull request"; then
-            echo "Skip: This is a PR merge commit."
-            exit 0
-          fi
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git checkout dev
