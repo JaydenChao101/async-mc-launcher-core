@@ -2,6 +2,7 @@ name: Publish to PyPI
 
 permissions:
   contents: write
+
 on:
   release:
     types: [published]
@@ -10,48 +11,45 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      # 1. 先 checkout 出主倉庫，並開啟憑證持久化
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0       # fetch all branches and history
+          fetch-depth: 0
+          persist-credentials: true
 
+      # 2. 寫入 version.txt
+      - name: Set version from tag
+        run: echo "${{ github.ref_name }}" > launcher_core/version.txt
+
+      # 3. Commit & push 到 main
+      - name: Commit version.txt to main
+        if: github.event_name == 'release'
+        run: |
+          git switch main
+          git pull origin main --ff-only
+          git add launcher_core/version.txt
+          git diff --quiet && echo "No changes to commit" || git commit -m "chore: bump version to ${{ github.ref_name }}"
+          git push origin main
+
+      # 4. Commit & push 到 dev
+      - name: Commit version.txt to dev
+        if: github.event_name == 'release'
+        run: |
+          git switch dev
+          git pull origin dev --ff-only
+          git add launcher_core/version.txt
+          git diff --quiet && echo "No changes to commit" || git commit -m "chore: bump version to ${{ github.ref_name }}"
+          git push origin dev
+
+      # 5. Build & Publish
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
-
-      - name: Set version from tag
-        run: |
-          echo "${{ github.ref_name }}" > launcher_core/version.txt
-
-      - name: Commit version.txt to main
-        if: github.ref == 'refs/heads/main' || github.event_name == 'release'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout main
-          git pull origin main --ff-only
-          git add launcher_core/version.txt
-          git commit -m "chore: update version.txt to ${{ github.ref_name }}" || echo "No changes to commit"
-          git push origin main
-
-      - name: Commit version.txt to dev
-        if: github.event_name == 'release'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin dev
-          git checkout dev
-          git pull origin dev --ff-only
-          git add launcher_core/version.txt
-          git commit -m "chore: update version.txt to ${{ github.ref_name }}" || echo "No changes to commit"
-          git push origin dev
-
       - name: Install uv
         run: python -m pip install uv
-
       - name: Build application
         run: uv build
-
       - name: Publish to PyPI
         run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
