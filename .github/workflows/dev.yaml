@@ -17,6 +17,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0  # 取得所有 commit
+          persist-credentials: true  # 新增：允許後續 git push 使用權限
 
       - name: Fetch all branches
         run: git fetch --all
@@ -26,5 +27,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git checkout dev
+          git pull --rebase origin dev
           git merge main --no-ff -m "Sync changes from main to dev"
           git push origin dev
