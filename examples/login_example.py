@@ -2,8 +2,9 @@ import logging
 from launcher_core import microsoft_account
 import asyncio
 from launcher_core.setting import setup_logger
+from launcher_core.mojang import have_minecraft
 
-logger = setup_logger(enable_console=True, level=logging.INFO, filename="microsoft_account.log")
+logger = setup_logger(enable_console=False, level=logging.INFO, filename="microsoft_account.log")
 
 async def login_microsoft_account():
     AZURE_APP = microsoft_account.AzureApplication()
@@ -13,11 +14,12 @@ async def login_microsoft_account():
     code_url = input()
     code = await microsoft_account.Login.extract_code_from_url(code_url)
     auth_code = await Login.get_ms_token(code)
+    print(f"Refresh token: {auth_code['refresh_token']}")
     xbl_token = await microsoft_account.Login.get_xbl_token(auth_code["access_token"])
     xsts_token = await microsoft_account.Login.get_xsts_token(xbl_token["Token"])
     uhs = xbl_token["DisplayClaims"]["xui"][0]["uhs"]
     mc_token = await microsoft_account.Login.get_minecraft_access_token(xsts_token["Token"], uhs)
-    await microsoft_account.have_minecraft(mc_token["access_token"])
+    await have_minecraft(mc_token["access_token"])
     login_data = {
         "access_token": mc_token["access_token"],
         "refresh_token": auth_code["refresh_token"],
