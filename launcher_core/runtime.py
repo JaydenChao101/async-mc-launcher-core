@@ -1,7 +1,19 @@
 # This file is part of minecraft-launcher-lib (https://codeberg.org/JakobDev/minecraft-launcher-lib)
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
-"runtime allows to install the java runtime. This module is used by :func:`~launcher_coreinstall.install_minecraft_version`, so you don't need to use it in your code most of the time."
+'''
+runtime allows to install the java runtime. This module is used by 
+:func:`~launcher_core.install.install_minecraft_version`, 
+so you don't need to use it in your code most of the time.
+'''
+import subprocess
+import datetime
+import platform
+import os
+import asyncio
+import aiohttp
+import aiofiles
+
 from ._helper import (
     get_user_agent,
     download_file,
@@ -17,13 +29,7 @@ from ._internal_types.runtime_types import (
 )
 from ._types import CallbackDict, JvmRuntimeInformation, VersionRuntimeInformation
 from .exceptions import VersionNotFound, PlatformNotSupported
-import asyncio
-import aiohttp
-import aiofiles
-import subprocess
-import datetime
-import platform
-import os
+
 
 _JVM_MANIFEST_URL = "https://launchermeta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json"
 

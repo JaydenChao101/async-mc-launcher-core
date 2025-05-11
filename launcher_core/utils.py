@@ -2,9 +2,6 @@
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "utils contains a few functions for helping you that doesn't fit in any other category"
-from ._types import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
-from ._internal_types.shared_types import ClientJson, VersionListManifestJson
-from ._helper import get_requests_response_cache, assert_func
 from datetime import datetime
 import platform
 import pathlib
@@ -15,6 +12,10 @@ import json
 import os
 import asyncio
 import aiofiles
+from ._types import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
+from ._internal_types.shared_types import ClientJson, VersionListManifestJson
+from ._helper import get_requests_response_cache, assert_func
+
 
 
 async def get_minecraft_directory() -> str:
@@ -217,27 +218,30 @@ async def get_java_executable() -> str:
             return await asyncio.to_thread(shutil.which, "java") or "java"
 
 
-_version_cache = None
+class VersionCache:
+    _version_cache = None
+
+    @classmethod
+    async def get_library_version(cls) -> str:
+        """
+        Returns the version of minecraft-launcher-lib
+
+        Example:
+
+        .. code:: python
+
+            print(f"You are using version {await launcher_coreutils.get_library_version()} of minecraft-launcher-lib")
+        """
+        if cls._version_cache is not None:
+            return cls._version_cache
+        else:
+            version_path = os.path.join(os.path.dirname(__file__), "version.txt")
+            async with aiofiles.open(version_path, "r", encoding="utf-8") as f:
+                cls._version_cache = (await f.read()).strip()
+                return cls._version_cache
 
 
-async def get_library_version() -> str:
-    """
-    Returns the version of minecraft-launcher-lib
-
-    Example:
-
-    .. code:: python
-
-        print(f"You are using version {await launcher_coreutils.get_library_version()} of minecraft-launcher-lib")
-    """
-    global _version_cache
-    if _version_cache is not None:
-        return _version_cache
-    else:
-        version_path = os.path.join(os.path.dirname(__file__), "version.txt")
-        async with aiofiles.open(version_path, "r", encoding="utf-8") as f:
-            _version_cache = (await f.read()).strip()
-            return _version_cache
+get_library_version = VersionCache.get_library_version
 
 
 async def generate_test_options() -> MinecraftOptions:

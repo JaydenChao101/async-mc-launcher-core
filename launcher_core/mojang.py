@@ -6,31 +6,35 @@ It provides functions to get the skin URL, get the skin data, and download the s
 Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 """
 
-from ._types import Skin, Credential, MinecraftProfileResponse
-from .exceptions import AccountNotOwnMinecraft, NeedAccountInfo
 from base64 import b64decode
 import json
 from typing import Optional
 import aiohttp
 import aiofiles
+from ._types import SkinData, Credential, MinecraftProfileResponse
+from .exceptions import AccountNotOwnMinecraft, NeedAccountInfo
+
 
 
 class Skin:
-
+    '''
+    用于处理 Minecraft 皮肤的类。
+    提供获取皮肤 URL、上传皮肤、重置皮肤等功能。
+    '''
     def __init__(self, Credential: Credential):
         self.Credential = Credential
 
-    async def get_skin_and_cape(self) -> Optional[Skin]:
+    async def get_skin_and_cape(self) -> Optional[SkinData]:
         """
         取得指定 UUID 的外觀與披風 URL。
 
         :param Credential: 玩家凭证，需包含 uuid
         :return: dict，包含 skin 和 cape（如无披風则 cape 为 None）
         """
-        Credential = self.Credential
-        uuid = Credential.uuid
+        credential = self.Credential
+        uuid = credential.uuid
         if not uuid:
-            raise AccountNotOwnMinecraft("UUID is required to get skin and cape.")
+            raise AccountNotOwnMinecraft
         # 使用 UUID 取得玩家的外觀與披風 URL
         url = f"https://sessionserver.mojang.com/session/minecraft/profile/{uuid}"
         async with aiohttp.ClientSession() as session:
@@ -60,9 +64,9 @@ class Skin:
         :param cape_url: 未使用，保留参数
         :return: bool，是否成功更改
         """
-        Credential = self.Credential
-        uuid = Credential.uuid
-        access_token = Credential.access_token
+        credential = self.Credential
+        uuid = credential.uuid
+        access_token = credential.access_token
         url = f"https://api.mojang.com/user/profile/{uuid}/skin"
         headers = {"Authorization": f"Bearer {access_token}"}
         data = {"model": model, "url": skin_url}
@@ -79,13 +83,12 @@ class Skin:
         :param model: "slim" 或 ""，默认为 ""
         :return: bool，是否成功上传
         """
-        Credential = self.Credential
-        uuid = Credential.uuid
-        access_token = Credential.access_token
+        credential = self.Credential
+        uuid = credential.uuid
+        access_token = credential.access_token
 
         if not uuid or not access_token:
-            raise NeedAccountInfo("UUID and access token are required to upload skin.")
-        
+            raise NeedAccountInfo("UUID and access token are required to upload skin.") 
         url = f"https://api.mojang.com/user/profile/{uuid}/skin"
         headers = {"Authorization": f"Bearer {access_token}"}
 
@@ -107,12 +110,11 @@ class Skin:
         :param Credential: 玩家凭证，需包含 uuid 和 access_token
         :return: bool，是否成功重设
         """
-        Credential = self.Credential
-        uuid = Credential.uuid
-        access_token = Credential.access_token
+        credential = self.Credential
+        uuid = credential.uuid
+        access_token = credential.access_token
         if not uuid or not access_token:
-            raise NeedAccountInfo("UUID and access token are required to reset skin.")
-        
+            raise NeedAccountInfo("UUID and access token are required to reset skin.")       
         url = f"https://api.mojang.com/user/profile/{uuid}/skin"
         headers = {"Authorization": f"Bearer {access_token}"}
         async with aiohttp.ClientSession() as session:

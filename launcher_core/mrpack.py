@@ -205,7 +205,7 @@ async def install_mrpack(
 
         if "forge" in index["dependencies"]:
             forge_version = None
-            FORGE_DOWNLOAD_URL = "https://maven.minecraftforge.net/net/minecraftforge/forge/{version}/forge-{version}-installer.jar"
+            forge_download_url = "https://maven.minecraftforge.net/net/minecraftforge/forge/{version}/forge-{version}-installer.jar"
 
             # Check forge version availability
             async with aiohttp.ClientSession() as session:
@@ -219,7 +219,7 @@ async def install_mrpack(
                     + "-"
                     + index["dependencies"]["minecraft"],
                 ):
-                    url = FORGE_DOWNLOAD_URL.format(version=current_forge_version)
+                    url = forge_download_url.format(version=current_forge_version)
                     async with session.head(url) as response:
                         if response.status == 200:
                             forge_version = current_forge_version

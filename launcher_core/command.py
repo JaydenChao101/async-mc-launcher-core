@@ -1,7 +1,11 @@
 # This file is part of minecraft-launcher-lib (https://codeberg.org/JakobDev/minecraft-launcher-lib)
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
-"command contains the function for creating the minecraft command"
+'''command contains the function for creating the minecraft command'''
+import json
+import copy
+import os
+import aiofiles
 from ._helper import (
     parse_rule_list,
     inherit_json,
@@ -14,10 +18,6 @@ from .exceptions import VersionNotFound
 from .utils import get_library_version
 from ._types import MinecraftOptions, Credential
 from .natives import get_natives
-import aiofiles
-import json
-import copy
-import os
 
 __all__ = ["get_minecraft_command"]
 
@@ -36,7 +36,11 @@ def get_libraries(data: ClientJson, path: str) -> str:
         native = get_natives(i)
         if native != "":
             if "downloads" in i and "path" in i["downloads"]["classifiers"][native]:  # type: ignore
-                libstr += os.path.join(path, "libraries", i["downloads"]["classifiers"][native]["path"]) + classpath_seperator  # type: ignore
+                libstr += os.path.join(
+                    path,
+                    "libraries",
+                    i["downloads"]["classifiers"][native]["path"],  # type: ignore
+                ) + classpath_seperator
             else:
                 libstr += (
                     get_library_path(i["name"] + "-" + native, path)
@@ -57,7 +61,7 @@ def get_libraries(data: ClientJson, path: str) -> str:
 
 async def replace_arguments(
     argstr: str,
-    versionData: ClientJson,
+    version_data: ClientJson,
     path: str,
     options: MinecraftOptions,
     classpath: str,
@@ -70,14 +74,14 @@ async def replace_arguments(
         ),
         "${classpath}": classpath,
         "${auth_player_name}": options.get("username", "{username}"),
-        "${version_name}": versionData["id"],
+        "${version_name}": version_data["id"],
         "${game_directory}": options.get("gameDir", path),
         "${assets_root}": os.path.join(path, "assets"),
-        "${assets_index_name}": versionData.get("assets", versionData["id"]),
+        "${assets_index_name}": version_data.get("assets", version_data["id"]),
         "${auth_uuid}": options.get("uuid", "{uuid}"),
         "${auth_access_token}": options.get("token", "{token}"),
         "${user_type}": "msa",
-        "${version_type}": versionData["type"],
+        "${version_type}": version_data["type"],
         "${user_properties}": "{}",
         "${resolution_width}": options.get("resolutionWidth", "854"),
         "${resolution_height}": options.get("resolutionHeight", "480"),
@@ -100,15 +104,15 @@ async def replace_arguments(
 
 
 async def get_arguments_string(
-    versionData: ClientJson, path: str, options: MinecraftOptions, classpath: str
+    version_data: ClientJson, path: str, options: MinecraftOptions, classpath: str
 ) -> list[str]:
     """
     Turns the argument string from the client.json into a list
     """
     arglist: list[str] = []
 
-    for v in versionData["minecraftArguments"].split(" "):
-        v = await replace_arguments(v, versionData, path, options, classpath)
+    for v in version_data["minecraftArguments"].split(" "):
+        v = await replace_arguments(v, version_data, path, options, classpath)
         arglist.append(v)
 
     # Custom resolution is not in the list
@@ -126,7 +130,7 @@ async def get_arguments_string(
 
 async def get_arguments(
     data: list[str | ClientJsonArgumentRule],
-    versionData: ClientJson,
+    version_data: ClientJson,
     path: str,
     options: MinecraftOptions,
     classpath: str,
@@ -139,7 +143,7 @@ async def get_arguments(
         # i could be the argument
         if isinstance(i, str):
             arglist.append(
-                await replace_arguments(i, versionData, path, options, classpath)
+                await replace_arguments(i, version_data, path, options, classpath)
             )
         else:
             # Rules might has 2 different names in different client.json
@@ -155,14 +159,14 @@ async def get_arguments(
             if isinstance(i["value"], str):
                 arglist.append(
                     await replace_arguments(
-                        i["value"], versionData, path, options, classpath
+                        i["value"], version_data, path, options, classpath
                     )
                 )
             # Sometimes i["value"] is a list of arguments
             else:
                 for v in i["value"]:
                     v = await replace_arguments(
-                        v, versionData, path, options, classpath
+                        v, version_data, path, options, classpath
                     )
                     arglist.append(v)
     return arglist
