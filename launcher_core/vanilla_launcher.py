@@ -2,6 +2,11 @@
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "vanilla_launcher contains some functions for interacting with the Vanilla Minecraft Launcher"
+import datetime
+import json
+import uuid
+import os
+import aiofiles
 from ._internal_types.vanilla_launcher_types import (
     VanillaLauncherProfilesJson,
     VanillaLauncherProfilesJsonProfile,
@@ -9,11 +14,7 @@ from ._internal_types.vanilla_launcher_types import (
 from ._types import VanillaLauncherProfile, MinecraftOptions
 from .exceptions import InvalidVanillaLauncherProfile
 from .utils import get_latest_version
-import datetime
-import aiofiles
-import json
-import uuid
-import os
+
 
 __all__ = [
     "load_vanilla_launcher_profiles",
@@ -172,7 +173,7 @@ async def vanilla_launcher_profile_to_minecraft_options(
     vanilla_profile: VanillaLauncherProfile,
 ) -> MinecraftOptions:
     """
-    Converts a VanillaLauncherProfile into a Options dict, that can be used by :func:`~launcher_corecommand.get_minecraft_command`.
+    Converts a VanillaLauncherProfile into a Options dict, that can be used by :func:`~launcher_core.command.get_minecraft_command`.
     You still need to add the Login Data to the Options before you can use it.
 
     :param vanilla_profile: The profile as returned by :func:`load_vanilla_launcher_profiles`

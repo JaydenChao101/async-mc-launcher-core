@@ -10,11 +10,14 @@ import shutil
 import uuid
 import json
 import os
+from typing import Coroutine, Any
 import asyncio
 import aiofiles
+from .logging_utils import logger
 from ._types import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
 from ._internal_types.shared_types import ClientJson, VersionListManifestJson
 from ._helper import get_requests_response_cache, assert_func
+
 
 
 
@@ -277,7 +280,7 @@ async def is_version_valid(
     """
     Checks if the given version exists.
     This checks if the given version is installed or offered to download by Mojang.
-    Basically you can use this tho check, if the given version can be used with :func:`~launcher_coreinstall.install_minecraft_version`.
+    Basically you can use this tho check, if the given version can be used with :func:`~launcher_core.install.install_minecraft_version`.
 
     Example:
 
@@ -374,3 +377,29 @@ async def is_minecraft_installed(minecraft_directory: str | os.PathLike) -> bool
         return True
     except AssertionError:
         return False
+
+def sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
+    """将异步函数/协程强制同步执行（仿 bilibili_api 设计）[6]
+    
+    Args:
+        coroutine: 需要同步化的协程对象或异步函数调用
+        
+    Returns:
+        同步执行后的结果
+        
+    Example:
+        >>> async def async_func(): ...
+        >>> result = sync(async_func())  # 同步执行异步函数
+    """
+    try:
+        # 获取或创建事件循环
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
+    try:
+        return loop.run_until_complete(coroutine)
+    except Exception as e:
+        logger.error(f"同步执行失败: {e}")  # 使用现有日志系统[3][4]
+        raise

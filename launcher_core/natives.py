@@ -68,7 +68,7 @@ async def extract_natives(
 
     :param version: The Minecraft version
     :param minecraft_directory: The path to your Minecraft directory
-    :param callback: The same dict as for :func:`~launcher_coreinstall.install_minecraft_version`
+    :param callback: The same dict as for :func:`~launcher_core.install.install_minecraft_version`
     :raises VersionNotFound: The Minecraft version was not found
     :raises FileOutsideMinecraftDirectory: A File should be placed outside the given Minecraft directory
 

@@ -124,10 +124,10 @@ async def install_forge_version(
 
     :param versionid: A Forge Version. You can get a List of Forge versions using :func:`list_forge_versions`
     :param path: The path to your Minecraft directory
-    :param callback: The same dict as for :func:`~launcher_coreinstall.install_minecraft_version`
+    :param callback: The same dict as for :func:`~launcher_core.install.install_minecraft_version`
     :param java: A Path to a custom Java executable
 
-    Raises a :class:`~launcher_coreexceptions.VersionNotFound` exception when the given forge version is not found
+    Raises a :class:`~launcher_core.exceptions.VersionNotFound` exception when the given forge version is not found
     """
     if callback is None:
         callback = {}

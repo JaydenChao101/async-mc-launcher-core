@@ -67,8 +67,9 @@ class Login:
         logger.info("Generated login URL for Microsoft account authentication: %s", url)
 
         return url
-
-    async def extract_code_from_url(self, url: str) -> str:
+    
+    @staticmethod
+    async def extract_code_from_url(url: str) -> str:
         """
         Extract the code from the redirect url.
 
@@ -111,7 +112,8 @@ class Login:
                 logger.info("Microsoft token response: %s", data)
                 return data
 
-    async def get_xbl_token(self, ms_access_token: str) -> XBLResponse:
+    @staticmethod
+    async def get_xbl_token(ms_access_token: str) -> XBLResponse:
         '''Get the Xbox Live token using the Microsoft access token.'''
         payload = {
             "Properties": {
@@ -134,8 +136,9 @@ class Login:
                 data = await resp.json()
                 logger.info("Xbox Token response: %s", data)
                 return data
-
-    async def get_xsts_token(self, xbl_token: str) -> XSTSResponse:
+    
+    @staticmethod
+    async def get_xsts_token(xbl_token: str) -> XSTSResponse:
         """
         Get the XSTS token using the Xbox Live token.
 
@@ -201,9 +204,9 @@ class Login:
 
                 logger.info("XSTS Token response: %s", data)
                 return data
-
+    @staticmethod
     async def get_minecraft_access_token(
-        self, xsts_token: str, uhs: str
+        xsts_token: str, uhs: str
     ) -> MinecraftAuthenticateResponse:
         """
         Get the Minecraft access token using the XSTS token and user hash.
@@ -235,6 +238,10 @@ class Login:
 
 
 class device_code_login:
+    '''
+    This class is used to login to a Microsoft account using the device code flow.
+    It uses the Microsoft OAuth2.0 authentication flow to get the access token.
+    '''
     def __init__(
         self,
         azure_app: AzureApplication = AzureApplication(),
@@ -263,6 +270,14 @@ class device_code_login:
                 return await resp.json()
 
     async def poll_device_code(self, device_code: str, interval: int, expires_in: int):
+        '''
+        Poll the device code to get the access token.
+        :param device_code: The device code
+        :param interval: The interval to poll the device code
+        :param expires_in: The expires in time
+        :return: The ms_token
+        :raises DeviceCodeExpiredError: If the device code is expired or not authorized in time.
+        '''
         data = {
             "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
             "client_id": self.client_id,
@@ -304,7 +319,8 @@ async def refresh_minecraft_token(
     :param azure_app: A dictionary containing Azure application details with keys:
                       - 'client_id': The client ID of the Azure application.
                       - 'client_secret': The client secret of the Azure application (optional).
-    :return: The refreshed Minecraft token
+    :return: The refreshed ms_token
+    :raises ValueError: If the refresh token is not provided.
     """
     refresh_token = Credential.refresh_token if Credential else None
     if not refresh_token:

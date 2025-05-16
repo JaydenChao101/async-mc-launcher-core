@@ -179,7 +179,7 @@ async def get_minecraft_command(
     Credential: Credential | None = None,
 ) -> list[str]:
     """
-    Returns the command for running minecraft as list. The given command can be executed with subprocess. Use :func:`~launcher_coreutils.get_minecraft_directory` to get the default Minecraft directory.
+    Returns the command for running minecraft as list. The given command can be executed with subprocess. Use :func:`~launcher_core.utils.get_minecraft_directory` to get the default Minecraft directory.
 
     :param version: The Minecraft version
     :param minecraft_directory: The path to your Minecraft directory

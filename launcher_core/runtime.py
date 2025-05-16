@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 '''
 runtime allows to install the java runtime. This module is used by 
-:func:`~launcher_core.install.install_minecraft_version`, 
+:func:`~launcher_core..install.install_minecraft_version`, 
 so you don't need to use it in your code most of the time.
 '''
 import subprocess
@@ -121,7 +121,7 @@ async def install_jvm_runtime(
 
     :param jvm_version: The Name of the JVM version
     :param minecraft_directory: The path to your Minecraft directory
-    :param callback: the same dict as for :func:`~launcher_coreinstall.install_minecraft_version`
+    :param callback: the same dict as for :func:`~launcher_core.install.install_minecraft_version`
     :param max_concurrency: number of concurrent tasks for asynchronous downloads. If None, it will be set automatically.
     :raises VersionNotFound: The given JVM Version was not found
     :raises FileOutsideMinecraftDirectory: A File should be placed outside the given Minecraft directory
@@ -180,7 +180,7 @@ async def install_jvm_runtime(
             # Make files executable on unix systems
             if value["executable"]:
                 try:
-                    subprocess.run(["chmod", "+x", current_path])
+                    subprocess.run(["chmod", "+x", current_path],check=True)
                 except FileNotFoundError:
                     pass
             file_list.append(key)
