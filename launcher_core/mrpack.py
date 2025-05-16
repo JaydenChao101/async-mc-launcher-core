@@ -118,7 +118,7 @@ async def install_mrpack(
     :param path: The Path the the .mrpack file
     :param minecraft_directory: he path to your Minecraft directory
     :param modpack_directory: If you want to install the Pack in another Directory than your Minecraft directory, set it here.
-    :param callback: The same dict as for :func:`~launcher_coreinstall.install_minecraft_version`
+    :param callback: The same dict as for :func:`~launcher_core.install.install_minecraft_version`
     :param mrpack_install_options: Some Options to install the Pack (see below)
     :raises FileOutsideMinecraftDirectory: A File should be placed outside the given Minecraft directory
     """
@@ -205,7 +205,7 @@ async def install_mrpack(
 
         if "forge" in index["dependencies"]:
             forge_version = None
-            FORGE_DOWNLOAD_URL = "https://maven.minecraftforge.net/net/minecraftforge/forge/{version}/forge-{version}-installer.jar"
+            forge_download_url = "https://maven.minecraftforge.net/net/minecraftforge/forge/{version}/forge-{version}-installer.jar"
 
             # Check forge version availability
             async with aiohttp.ClientSession() as session:
@@ -219,7 +219,7 @@ async def install_mrpack(
                     + "-"
                     + index["dependencies"]["minecraft"],
                 ):
-                    url = FORGE_DOWNLOAD_URL.format(version=current_forge_version)
+                    url = forge_download_url.format(version=current_forge_version)
                     async with session.head(url) as response:
                         if response.status == 200:
                             forge_version = current_forge_version
@@ -263,7 +263,7 @@ async def install_mrpack(
 
 async def get_mrpack_launch_version(path: str | os.PathLike) -> str:
     """
-    Returns that Version that needs to be used with :func:`~launcher_corecommand.get_minecraft_command`.
+    Returns that Version that needs to be used with :func:`~launcher_core.command.get_minecraft_command`.
 
     Example:
 

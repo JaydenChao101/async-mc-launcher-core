@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 """
-This module contains all Types for minecraft-launcher-lib. It may help your IDE. You don't need to use this module directly in your code.
+This module contains all Types for minecraft-launcher-lib.
 If you are not interested in static typing just ignore it.
 For more information about TypedDict see `PEP 589 <https://peps.python.org/pep-0589/>`_.
 """
@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 
 class MinecraftOptions(TypedDict, total=False):
+    '''The options for the Minecraft Launcher'''
     username: str
     uuid: UUID
     token: str
@@ -46,11 +47,13 @@ class CallbackDict(TypedDict, total=False):
 
 
 class LatestMinecraftVersions(TypedDict):
+    '''The latest Minecraft versions'''
     release: str
     snapshot: str
 
 
 class MinecraftVersionInfo(TypedDict):
+    '''The Minecraft version information'''
     id: str
     type: str
     releaseTime: datetime.datetime
@@ -61,11 +64,13 @@ class MinecraftVersionInfo(TypedDict):
 
 
 class FabricMinecraftVersion(TypedDict):
+    '''The Minecraft version information'''
     version: str
     stable: bool
 
 
 class FabricLoader(TypedDict):
+    '''The Fabric loader information'''
     separator: str
     build: int
     maven: str
@@ -77,11 +82,13 @@ class FabricLoader(TypedDict):
 
 
 class QuiltMinecraftVersion(TypedDict):
+    '''The Minecraft version information'''
     version: str
     stable: bool
 
 
 class QuiltLoader(TypedDict):
+    '''The Quilt loader information'''
     separator: str
     build: int
     maven: str
@@ -92,6 +99,7 @@ class QuiltLoader(TypedDict):
 
 
 class JavaInformation(TypedDict):
+    '''The Java information'''
     path: str
     name: str
     version: str
@@ -105,11 +113,13 @@ class JavaInformation(TypedDict):
 
 
 class VanillaLauncherProfileResolution(TypedDict):
+    '''The resolution of the Vanilla Launcher profile'''
     height: int
     width: int
 
 
 class VanillaLauncherProfile(TypedDict, total=False):
+    '''The Vanilla Launcher profile'''
     name: str
     version: str | None
     versionType: Literal["latest-release", "latest-snapshot", "custom"]
@@ -123,6 +133,7 @@ class VanillaLauncherProfile(TypedDict, total=False):
 
 
 class MrpackInformation(TypedDict):
+    '''The MRPack information'''
     name: str
     summary: str
     versionId: str
@@ -132,6 +143,7 @@ class MrpackInformation(TypedDict):
 
 
 class MrpackInstallOptions(TypedDict, total=False):
+    '''The MRPack install options'''
     optionalFiles: list[str]
     skipDependenciesInstall: bool
 
@@ -140,26 +152,31 @@ class MrpackInstallOptions(TypedDict, total=False):
 
 
 class JvmRuntimeInformation(TypedDict):
+    '''The Java runtime information'''
     name: str
     released: datetime.datetime
 
 
 class VersionRuntimeInformation(TypedDict):
+    '''The Minecraft version runtime information'''
     name: str
     javaMajorVersion: int
 
 
 class _NewsEntryPlayPageImage(TypedDict):
+    '''The image for the play page'''
     title: str
     url: str
 
 
 class _NewsEntryNewsPageImageDimensions(TypedDict):
+    '''The dimensions of the news page image'''
     width: int
     height: int
 
 
 class _NewsEntryNewsPageImage(TypedDict):
+    '''The image for the news page'''
     title: str
     url: str
     dimensions: _NewsEntryNewsPageImageDimensions
@@ -178,6 +195,7 @@ class _NewsEntry(TypedDict):
 
 
 class MinecraftNews(TypedDict):
+    '''The Minecraft news'''
     version: Literal[1]
     entries: list[_NewsEntry]
 
@@ -197,30 +215,35 @@ class _JavaPatchNoteEntry(TypedDict):
 
 
 class JavaPatchNotes(TypedDict):
+    '''The Java patch notes'''
     version: Literal[1]
     entries: list[_JavaPatchNoteEntry]
 
 
 @dataclass
 class Credential:
+    '''The credential of the player'''
     access_token: str = None
     username: str = None
     uuid: UUID = None
     refresh_token: str = None
 
 
-class Skin(TypedDict):
+class SkinData(TypedDict):
+    '''The skin of the player'''
     skin: str
     cape: str
 
 
 class MinecraftProfileProperty(TypedDict, total=False):
+    '''The property of the player'''
     name: str
     value: str
     signature: str
 
 
 class MinecraftProfileSkin(TypedDict, total=False):
+    '''The skin of the player'''
     id: str
     state: str
     url: str
@@ -229,6 +252,7 @@ class MinecraftProfileSkin(TypedDict, total=False):
 
 
 class MinecraftProfileCape(TypedDict, total=False):
+    '''The cape of the player'''
     id: str
     state: str
     url: str
@@ -236,6 +260,7 @@ class MinecraftProfileCape(TypedDict, total=False):
 
 
 class MinecraftProfileResponse(TypedDict, total=False):
+    '''The response of the player'''
     id: str
     name: str
     properties: list[MinecraftProfileProperty]  # 舊版
@@ -245,6 +270,8 @@ class MinecraftProfileResponse(TypedDict, total=False):
 
 @dataclass
 class AzureApplication:
+    '''The Azure Application ID and Secret'''
+    # The client ID of the Azure Application
     client_id: str = "00000000402b5328"
     client_secret: str = None
     redirect_uri: str = "https://login.live.com/oauth20_desktop.srf"

@@ -338,7 +338,7 @@ async def install_minecraft_version(
     callback: CallbackDict | None = None,
 ) -> None:
     """
-    Installs a minecraft version into the given path. e.g. ``install_version("1.14", "/tmp/minecraft")``. Use :func:`~launcher_coreutils.get_minecraft_directory` to get the default Minecraft directory.
+    Installs a minecraft version into the given path. e.g. ``install_version("1.14", "/tmp/minecraft")``. Use :func:`~launcher_core.utils.get_minecraft_directory` to get the default Minecraft directory.
 
     :param versionid: The Minecraft version
     :param minecraft_directory: The path to your Minecraft directory

@@ -22,7 +22,8 @@ class VersionNotFound(ValueError):
 
 class UnsupportedVersion(ValueError):
     """
-    This Exception is raised when you try to run :func:`~launcher_corefabric.install_fabric` or :func:`~launcher_corequilt.install_quilt` with a unsupported version
+    This Exception is raised when you try to run :func:`~launcher_core.fabric.install_fabric`
+    or :func:`~launcher_core.quilt.install_quilt` with a unsupported version
     """
 
     def __init__(self, version: str) -> None:
@@ -53,15 +54,21 @@ class ExternalProgramError(Exception):
 
 class InvalidRefreshToken(ValueError):
     """
-    Raised when :func:`~launcher_coremicrosoft_account.complete_refresh` is called with a invalid refresh token
+    Raised when 
+    :func:`~launcher_core.microsoft_account.complete_refresh` is called with a invalid refresh token
     """
 
-    pass
+    def __init__(self, token: str) -> None:
+        self.token: str = token
+        "The invalid refresh token"
+
+        super().__init__("Invalid refresh token")
 
 
 class InvalidVanillaLauncherProfile(ValueError):
     """
-    Raised when a function from the :doc:`vanilla_launcher` module is called with a invalid vanilla profile
+    Raised when a function from the 
+    :doc:`vanilla_launcher` module is called with a invalid vanilla profile
     """
 
     def __init__(self, profile: VanillaLauncherProfile) -> None:
@@ -133,12 +140,11 @@ class InvalidChecksum(SecurityError):
 class AzureAppNotPermitted(Exception):
     """
     Raised when you try to use a Azure App, that don't have the Permission to use the Minecraft API.
-    Take a look at the For more information about the options take a look at the :doc:`/tutorial/microsoft_login` tutorial to learn how to fix this.
     """
 
     def __init__(self) -> None:
         super().__init__(
-            "It looks like your Azure App don't have the Permission to use the Minecraft API. Take a look at the Documentation for more Information."
+            "It looks like your Azure App don't have the Permission to use the Minecraft API."
         )
 
 
@@ -153,7 +159,10 @@ class PlatformNotSupported(Exception):
 
 class AccountNotOwnMinecraft(Exception):
     """
-    Raised by :func:`~launcher_coremicrosoft_account.complete_login` and :func:`~launcher_coremicrosoft_account.complete_login` when the Account does not own Minecraft
+    Raised by 
+    :func:`~launcher_core.microsoft_account.complete_login` 
+    and :func:`~launcher_core.microsoft_account.complete_login` 
+    when the Account does not own Minecraft
     """
 
     def __init__(self) -> None:
@@ -201,4 +210,20 @@ class NeedAccountInfo(ValueError):
     """
 
     def __init__(self, message: str = "The Account needs to be verified") -> None:
+        super().__init__(message)
+
+class XErrNotFound(ValueError):
+    """
+    Raised when the XBox Error Code is not found
+    """
+
+    def __init__(self, message: str = "The XBox Error Code is not found") -> None:
+        super().__init__(message)
+
+class DeviceCodeExpiredError(ValueError):
+    """
+    Raised when the Device Code is expired
+    """
+
+    def __init__(self, message: str = "The Device Code is expired") -> None:
         super().__init__(message)

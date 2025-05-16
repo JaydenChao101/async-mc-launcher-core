@@ -21,6 +21,7 @@ from . import (
     _types,
     microsoft_types,
 )
+from .utils import sync
 
 __all__ = [
     "command",
@@ -39,4 +40,5 @@ __all__ = [
     "_types",
     "microsoft_types",
     "logger",
+    "sync",
 ]

@@ -2,6 +2,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "fabric contains functions for dealing with the `Fabric modloader <https://fabricmc.net/>`_."
+import asyncio
+import tempfile
+import os
 from ._helper import (
     download_file,
     get_requests_response_cache,
@@ -12,9 +15,7 @@ from .exceptions import VersionNotFound, UnsupportedVersion, ExternalProgramErro
 from ._types import FabricMinecraftVersion, FabricLoader, CallbackDict
 from .install import install_minecraft_version
 from .utils import is_version_valid
-import asyncio
-import tempfile
-import os
+
 
 
 async def get_all_minecraft_versions() -> list[FabricMinecraftVersion]:
@@ -170,7 +171,7 @@ async def install_fabric(
     :param minecraft_version: A vanilla version that is supported by Fabric
     :param minecraft_directory: The path to your Minecraft directory
     :param loader_version: The fabric loader version. If not given it will use the latest
-    :param callback: The same dict as for :func:`~launcher_coreinstall.install_minecraft_version`
+    :param callback: The same dict as for :func:`~launcher_core.install.install_minecraft_version`
     :param java: A Path to a custom Java executable
     :raises VersionNotFound: The given Minecraft does not exists
     :raises UnsupportedVersion: The given Minecraft version is not supported by Fabric

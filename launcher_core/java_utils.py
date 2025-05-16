@@ -1,11 +1,12 @@
 "java_utils contains some functions to help with Java"
 
-from ._helper import SUBPROCESS_STARTUP_INFO
-from ._types import JavaInformation
 import asyncio
 import platform
 import re
 import os
+from ._helper import SUBPROCESS_STARTUP_INFO
+from ._types import JavaInformation
+
 
 
 async def get_java_information(path: str | os.PathLike) -> JavaInformation:
@@ -13,7 +14,8 @@ async def get_java_information(path: str | os.PathLike) -> JavaInformation:
     Returns Some Information about the given Java Installation
 
     .. note::
-        This Function executes the Java executable to determine details such as the version. This might be a security risk.
+        This Function executes the Java executable to determine details such as the version. 
+        This might be a security risk.
 
     Example:
 
@@ -25,7 +27,10 @@ async def get_java_information(path: str | os.PathLike) -> JavaInformation:
         print("Version: " + information["version"])
         print("Java path: " + information["java_path"])
 
-    :param path: The Path to the Installation. It must be the Directory. If your Java executable is e.g. /usr/lib/jvm/java-19-openjdk-amd64/bin/java this Parameter must be /usr/lib/jvm/java-19-openjdk-amd64.
+    :param path: The Path to the Installation. It must be the Directory. 
+    If your Java executable is e.g. /usr/lib/jvm/java-19-openjdk-amd64/bin/java 
+    this Parameter must be /usr/lib/jvm/java-19-openjdk-amd64.
+
     :return: A dict with Information about the given java installation
     :raises ValueError: Wrong path
     """
@@ -55,7 +60,7 @@ async def get_java_information(path: str | os.PathLike) -> JavaInformation:
     information: JavaInformation = {}  # type: ignore
     information["path"] = str(path)
     information["name"] = os.path.basename(path)
-    information["version"] = re.search(r'(?<=version ")[\d|\.|_]+(?=")', lines[0]).group()  # type: ignore
+    information["version"] = re.search(r'(?<=version ")[\d|\.|_]+(?=")', lines[0]).group()
     information["is_64bit"] = "64-Bit" in lines[2]
     information["openjdk"] = lines[0].startswith("openjdk")
 
@@ -97,7 +102,8 @@ async def find_system_java_versions(
     additional_directories: list[str | os.PathLike] | None = None,
 ) -> list[str]:
     """
-    Try to find all Java Versions installed on the System. You can use this to e.g. let the User choose between different Java Versions in a Dropdown.
+    Try to find all Java Versions installed on the System.
+    You can use this to e.g. let the User choose between different Java Versions in a Dropdown.
     macOS is not supported yet.
 
     Example:
@@ -107,7 +113,8 @@ async def find_system_java_versions(
         for version in await launcher_corejava_utils.find_system_java_versions():
             print(version)
 
-    :param additional_directories: A List of additional Directories to search for Java in custom locations
+    :param additional_directories: 
+    A List of additional Directories to search for Java in custom locations
     :return: A List with all Directories of Java Installations
     """
     java_list: list[str] = []
@@ -131,17 +138,20 @@ async def find_system_java_versions_information(
     additional_directories: list[str | os.PathLike] | None = None,
 ) -> list[JavaInformation]:
     """
-    Same as :func:`find_system_java_version`, but uses :func:`get_java_information` to get some Information about the Installation instead of just proving a Path.
+    Same as :func:`find_system_java_version`, 
+    but uses :func:`get_java_information` to get some Information about 
+    the Installation instead of just proving a Path.
     macOS is not supported yet
 
     .. note::
-        This Function executes the Java executable to determine details such as the version. This might be a security risk.
+        This Function executes the Java executable to determine details such as the version. 
+        This might be a security risk.
 
     Example:
 
     .. code:: python
 
-        for version_information in await launcher_corejava_utils.find_system_java_versions_information():
+        for version_information in await launcher_core.java_utils.find_system_java_versions_information():
             print("Path: " + version_information["path"])
             print("Name: " + version_information["name"])
             print("Version: " + version_information["version"])

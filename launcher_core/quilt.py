@@ -178,7 +178,7 @@ async def install_quilt(
     :param minecraft_version: A vanilla version that is supported by Quilt
     :param minecraft_directory: The path to your Minecraft directory
     :param loader_version: The Quilt loader version. If not given it will use the latest
-    :param callback: The same dict as for :func:`~launcher_coreinstall.install_minecraft_version`
+    :param callback: The same dict as for :func:`~launcher_core.install.install_minecraft_version`
     :param java: A Path to a custom Java executable
     :raises VersionNotFound: The given Minecraft does not exists
     :raises UnsupportedVersion: The given Minecraft version is not supported by Quilt
