@@ -38,6 +38,7 @@ dependencies = [
   "aiohttp>=3.11.18",
   "requests>=2.32.3",
   "requests-mock>=1.12.1",
+  "tomli>=2.2.1",
 ]
 dynamic = ["version"]
 

@@ -1,0 +1,4 @@
+[Credential]
+username = "{MC_USERNAME}"
+access_token = "{MC_ACCESS_TOKEN}"
+uuid = "{MC_UUID}"
