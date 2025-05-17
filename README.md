@@ -3,6 +3,7 @@
 
 [![Test](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/test.yml/badge.svg)](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/test.yml)
 [![Build Python Package](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/uv_build.yaml/badge.svg)](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/uv_build.yaml)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/JaydenChao101/async-mc-launcher-core)
 
 > This project is a fork of [JakobDev/minecraft-launcher-lib](https://codeberg.org/JakobDev/minecraft-launcher-lib).
 
