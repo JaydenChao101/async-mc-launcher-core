@@ -6,7 +6,7 @@ This module contains all Types for minecraft-launcher-lib.
 If you are not interested in static typing just ignore it.
 For more information about TypedDict see `PEP 589 <https://peps.python.org/pep-0589/>`_.
 """
-from typing import Literal, TypedDict, Callable
+from typing import Literal, TypedDict, Callable, Union
 import datetime
 from uuid import UUID
 from dataclasses import dataclass
@@ -25,8 +25,8 @@ class MinecraftOptions(TypedDict, total=False):
     gameDirectory: str
     demo: bool
     customResolution: bool
-    resolutionWidth: str
-    resolutionHeight: str
+    resolutionWidth: Union[int, str, None]
+    resolutionHeight: Union[int, str, None]
     server: str
     port: str
     nativesDirectory: str
@@ -103,9 +103,9 @@ class JavaInformation(TypedDict):
     path: str
     name: str
     version: str
-    java_path: str
-    javaw_path: str | None
-    is_64bit: bool
+    javaPath: str
+    javawPath: str | None
+    is64Bit: bool
     openjdk: bool
 
 

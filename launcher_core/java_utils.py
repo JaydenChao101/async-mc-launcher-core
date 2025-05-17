@@ -21,11 +21,11 @@ async def get_java_information(path: str | os.PathLike) -> JavaInformation:
 
     .. code:: python
 
-        java_path = "<path>"
-        information = await launcher_corejava_utils.get_java_information(java_path)
+        javaPath = "<path>"
+        information = await launcher_core.java_utils.get_java_information(javaPath)
         print("Name: " + information["name"])
         print("Version: " + information["version"])
-        print("Java path: " + information["java_path"])
+        print("Java path: " + information["javaPath"])
 
     :param path: The Path to the Installation. It must be the Directory. 
     If your Java executable is e.g. /usr/lib/jvm/java-19-openjdk-amd64/bin/java 
@@ -61,19 +61,19 @@ async def get_java_information(path: str | os.PathLike) -> JavaInformation:
     information["path"] = str(path)
     information["name"] = os.path.basename(path)
     information["version"] = re.search(r'(?<=version ")[\d|\.|_]+(?=")', lines[0]).group()
-    information["is_64bit"] = "64-Bit" in lines[2]
+    information["is64Bit"] = "64-Bit" in lines[2]
     information["openjdk"] = lines[0].startswith("openjdk")
 
     if platform.system() == "Windows":
-        information["java_path"] = os.path.join(
+        information["javaPath"] = os.path.join(
             os.path.abspath(path), "bin", "java.exe"
         )
-        information["javaw_path"] = os.path.join(
+        information["javawPath"] = os.path.join(
             os.path.abspath(path), "bin", "javaw.exe"
         )
     else:
-        information["java_path"] = os.path.join(os.path.abspath(path), "bin", "java")
-        information["javaw_path"] = None
+        information["javaPath"] = os.path.join(os.path.abspath(path), "bin", "java")
+        information["javawPath"] = None
 
     return information
 
@@ -110,7 +110,7 @@ async def find_system_java_versions(
 
     .. code:: python
 
-        for version in await launcher_corejava_utils.find_system_java_versions():
+        for version in await launcher_core.java_utils.find_system_java_versions():
             print(version)
 
     :param additional_directories: 
@@ -155,7 +155,7 @@ async def find_system_java_versions_information(
             print("Path: " + version_information["path"])
             print("Name: " + version_information["name"])
             print("Version: " + version_information["version"])
-            print("Java path: " + version_information["java_path"])
+            print("Java path: " + version_information["javaPath"])
             print()
 
     :param additional_directories: A List of additional Directories to search for Java in custom locations

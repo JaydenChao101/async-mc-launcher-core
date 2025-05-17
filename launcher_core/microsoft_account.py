@@ -22,7 +22,8 @@ from .exceptions import (
     XErrNotFound,
     DeviceCodeExpiredError,
 )
-from ._types import AzureApplication, Credential
+from ._types import AzureApplication
+from ._types import Credential as AuthCredential
 from .logging_utils import logger
 
 __AUTH_URL__ = "https://login.live.com/oauth20_authorize.srf"
@@ -310,7 +311,7 @@ class device_code_login:
 
 async def refresh_minecraft_token(
     azure_app: AzureApplication = AzureApplication(),
-    Credential: Credential = None,
+    Credential: AuthCredential = None,
 ) -> AuthorizationTokenResponse:
     """
     Refresh the Minecraft token using the refresh token.
