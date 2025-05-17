@@ -6,16 +6,17 @@ This module contains all Types for minecraft-launcher-lib.
 If you are not interested in static typing just ignore it.
 For more information about TypedDict see `PEP 589 <https://peps.python.org/pep-0589/>`_.
 """
-from typing import Literal, TypedDict, Callable
+from typing import Literal, TypedDict, Callable, Union, NewType
 import datetime
 from uuid import UUID
 from dataclasses import dataclass
 
+MinecraftUUID = NewType("MinecraftUUID", UUID)
 
 class MinecraftOptions(TypedDict, total=False):
     '''The options for the Minecraft Launcher'''
     username: str
-    uuid: UUID
+    uuid: MinecraftUUID
     token: str
     executablePath: str
     defaultExecutablePath: str
@@ -23,10 +24,10 @@ class MinecraftOptions(TypedDict, total=False):
     launcherName: str
     launcherVersion: str
     gameDirectory: str
-    demo: bool
+    demo: bool = False
     customResolution: bool
-    resolutionWidth: str
-    resolutionHeight: str
+    resolutionWidth: Union[int, str, None]
+    resolutionHeight: Union[int, str, None]
     server: str
     port: str
     nativesDirectory: str
@@ -103,9 +104,9 @@ class JavaInformation(TypedDict):
     path: str
     name: str
     version: str
-    java_path: str
-    javaw_path: str | None
-    is_64bit: bool
+    javaPath: str
+    javawPath: str | None
+    is64Bit: bool
     openjdk: bool
 
 
@@ -220,12 +221,12 @@ class JavaPatchNotes(TypedDict):
     entries: list[_JavaPatchNoteEntry]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Credential:
     '''The credential of the player'''
     access_token: str = None
     username: str = None
-    uuid: UUID = None
+    uuid: MinecraftUUID = None
     refresh_token: str = None
 
 
@@ -268,7 +269,7 @@ class MinecraftProfileResponse(TypedDict, total=False):
     capes: list[MinecraftProfileCape]  # 新版
 
 
-@dataclass
+@dataclass(frozen=True)
 class AzureApplication:
     '''The Azure Application ID and Secret'''
     # The client ID of the Azure Application

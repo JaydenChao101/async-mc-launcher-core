@@ -11,7 +11,8 @@ import json
 from typing import Optional
 import aiohttp
 import aiofiles
-from ._types import SkinData, Credential, MinecraftProfileResponse
+from ._types import SkinData, MinecraftProfileResponse
+from ._types import Credential as AuthCredential
 from .exceptions import AccountNotOwnMinecraft, NeedAccountInfo
 
 
@@ -21,7 +22,7 @@ class Skin:
     用于处理 Minecraft 皮肤的类。
     提供获取皮肤 URL、上传皮肤、重置皮肤等功能。
     '''
-    def __init__(self, Credential: Credential):
+    def __init__(self, Credential: AuthCredential):
         self.Credential = Credential
 
     async def get_skin_and_cape(self) -> Optional[SkinData]:

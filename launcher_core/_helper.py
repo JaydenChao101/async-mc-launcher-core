@@ -2,15 +2,9 @@
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "This module contains some helper functions. It should nt be used outside minecraft_launcher_lib"
-from .exceptions import FileOutsideMinecraftDirectory, InvalidChecksum, VersionNotFound
-from ._internal_types.shared_types import ClientJson, ClientJsonRule, ClientJsonLibrary
-from ._internal_types.helper_types import RequestsResponseCache, MavenMetadata
-from ._types import MinecraftOptions, CallbackDict
 from typing import Literal, Any
 import subprocess
 import datetime
-import aiohttp
-import aiofiles
 import platform
 import hashlib
 import zipfile
@@ -19,6 +13,13 @@ import json
 import sys
 import re
 import os
+import aiohttp
+import aiofiles
+from .exceptions import FileOutsideMinecraftDirectory, InvalidChecksum, VersionNotFound
+from ._internal_types.shared_types import ClientJson, ClientJsonRule, ClientJsonLibrary
+from ._internal_types.helper_types import RequestsResponseCache, MavenMetadata
+from ._types import MinecraftOptions, CallbackDict
+
 
 if os.name == "nt":
     info = subprocess.STARTUPINFO()  # type: ignore
@@ -112,11 +113,14 @@ def parse_single_rule(rule: ClientJsonRule, options: MinecraftOptions) -> bool:
     """
     Parse a single rule from the versions.json
     """
+        # 1. 处理 action 并初始化 returnvalue
     if rule["action"] == "allow":
         returnvalue = False
     elif rule["action"] == "disallow":
         returnvalue = True
-
+    else:
+        raise ValueError(f"Invalid rule action: {rule['action']}")
+    # 2. 检查 OS 条件
     for os_key, os_value in rule.get("os", {}).items():
         if os_key == "name":
             if os_value == "windows" and platform.system() != "Windows":
@@ -131,36 +135,23 @@ def parse_single_rule(rule: ClientJsonRule, options: MinecraftOptions) -> bool:
         elif os_key == "version":
             if not re.match(os_value, get_os_version()):
                 return returnvalue
-
+    # 3. 检查 features 条件
     for features_key in rule.get("features", {}).keys():
-        if features_key == "has_custom_resolution" and not options.get(
-            "customResolution", False
-        ):
+        if features_key == "has_custom_resolution" and not options.get("customResolution", False):
             return returnvalue
         elif features_key == "is_demo_user" and not options.get("demo", False):
             return returnvalue
-        elif (
-            features_key == "has_quick_plays_support"
-            and options.get("quickPlayPath") is None
-        ):
+        elif features_key == "has_quick_plays_support" and options.get("quickPlayPath") is None:
             return returnvalue
-        elif (
-            features_key == "is_quick_play_singleplayer"
-            and options.get("quickPlaySingleplayer") is None
-        ):
+        elif features_key == "is_quick_play_singleplayer" and options.get("quickPlaySingleplayer") is None:
             return returnvalue
-        elif (
-            features_key == "is_quick_play_multiplayer"
-            and options.get("quickPlayMultiplayer") is None
-        ):
+        elif features_key == "is_quick_play_multiplayer" and options.get("quickPlayMultiplayer") is None:
             return returnvalue
-        elif (
-            features_key == "is_quick_play_realms"
-            and options.get("quickPlayRealms") is None
-        ):
+        elif features_key == "is_quick_play_realms" and options.get("quickPlayRealms") is None:
             return returnvalue
-
+    # 4. 默认返回相反值
     return not returnvalue
+
 
 
 def parse_rule_list(rules: list[ClientJsonRule], options: MinecraftOptions) -> bool:

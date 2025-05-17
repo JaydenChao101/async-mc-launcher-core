@@ -16,7 +16,8 @@ from ._internal_types.shared_types import ClientJson, ClientJsonArgumentRule
 from .runtime import get_executable_path
 from .exceptions import VersionNotFound
 from .utils import get_library_version
-from ._types import MinecraftOptions, Credential
+from ._types import MinecraftOptions
+from ._types import Credential as AuthCredential
 from .natives import get_natives
 
 __all__ = ["get_minecraft_command"]
@@ -83,8 +84,8 @@ async def replace_arguments(
         "${user_type}": "msa",
         "${version_type}": version_data["type"],
         "${user_properties}": "{}",
-        "${resolution_width}": options.get("resolutionWidth", "854"),
-        "${resolution_height}": options.get("resolutionHeight", "480"),
+        "${resolution_width}": options.get("resolutionWidth", 854),
+        "${resolution_height}": options.get("resolutionHeight", 480),
         "${game_assets}": os.path.join(path, "assets", "virtual", "legacy"),
         "${auth_session}": options.get("token", "{token}"),
         "${library_directory}": os.path.join(path, "libraries"),
@@ -176,7 +177,7 @@ async def get_minecraft_command(
     version: str,
     minecraft_directory: str | os.PathLike,
     options: MinecraftOptions,
-    Credential: Credential | None = None,
+    Credential: AuthCredential | None = None,
 ) -> list[str]:
     """
     Returns the command for running minecraft as list. The given command can be executed with subprocess. Use :func:`~launcher_core.utils.get_minecraft_directory` to get the default Minecraft directory.
@@ -252,11 +253,11 @@ async def get_minecraft_command(
     if "executablePath" in options:
         command.append(options["executablePath"])
     elif "javaVersion" in data:
-        java_path = await get_executable_path(data["javaVersion"]["component"], path)
-        if java_path is None:
+        javaPath = await get_executable_path(data["javaVersion"]["component"], path)
+        if javaPath is None:
             command.append("java")
         else:
-            command.append(java_path)
+            command.append(javaPath)
     else:
         command.append(options.get("defaultExecutablePath", "java"))
 

@@ -267,7 +267,7 @@ async def get_executable_path(
     :param jvm_version: The Name of the JVM version
     :param minecraft_directory: The path to your Minecraft directory
     """
-    java_path = os.path.join(
+    javaPath = os.path.join(
         minecraft_directory,
         "runtime",
         jvm_version,
@@ -276,16 +276,16 @@ async def get_executable_path(
         "bin",
         "java",
     )
-    if os.path.isfile(java_path):
-        return java_path
-    elif os.path.isfile(java_path + ".exe"):
-        return java_path + ".exe"
-    java_path = java_path.replace(
+    if os.path.isfile(javaPath):
+        return javaPath
+    elif os.path.isfile(javaPath + ".exe"):
+        return javaPath + ".exe"
+    javaPath = javaPath.replace(
         os.path.join("bin", "java"),
         os.path.join("jre.bundle", "Contents", "Home", "bin", "java"),
     )
-    if os.path.isfile(java_path):
-        return java_path
+    if os.path.isfile(javaPath):
+        return javaPath
     else:
         return None
 

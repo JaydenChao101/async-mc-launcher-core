@@ -197,8 +197,8 @@ async def vanilla_launcher_profile_to_minecraft_options(
 
     if (custom_resolution := vanilla_profile.get("customResolution")) is not None:
         options["customResolution"] = True
-        options["resolutionWidth"] = str(custom_resolution["width"])
-        options["resolutionHeight"] = str(custom_resolution["height"])
+        options["resolutionWidth"] = custom_resolution["width"]
+        options["resolutionHeight"] = custom_resolution["height"]
 
     return options
 
