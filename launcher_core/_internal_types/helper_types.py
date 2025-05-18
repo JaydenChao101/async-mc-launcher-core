@@ -2,12 +2,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 from typing import TypedDict
-import requests
+from aiohttp.client_reqrep import ClientResponse
 import datetime
 
 
 class RequestsResponseCache(TypedDict):
-    response: requests.models.Response
+    response: ClientResponse
     datetime: datetime.datetime
 
 
