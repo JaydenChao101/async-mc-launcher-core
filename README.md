@@ -1,4 +1,5 @@
-# minecraft-launcher-lib
+# async-mc-launcher-core 🚀  
+**A Modern Async Python Library for Building Minecraft Launchers**  
 > [中文說明請見 README-Chinese.md](./README-Chinese.md)
 
 [![Test](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/test.yml/badge.svg)](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/test.yml)
@@ -40,25 +41,41 @@ uv pip install async-mc-launcher-core
 ## Microsoft Account Login Example
 
 ```python
+import logging
 from launcher_core import microsoft_account
-from launcher_core._types import AzureApplication, Credential
+import asyncio
+from launcher_core.setting import setup_logger
+from launcher_core.mojang import have_minecraft
 
-async def main():
-    # refresh my token
-    AZURE_APP = AzureApplication(client_id="your_client_id")
-    Credential1 = Credential(refresh_token="abc")
-    token = await microsoft_account.refresh_minecraft_token(AZURE_APP=AZURE_APP,Credential=Credential1)
-    xbl_token = await microsoft_account.Login.get_xbl_token(token["access_token"])
+logger = setup_logger(enable_console=False, level=logging.INFO, filename="microsoft_account.log")
+
+async def login_microsoft_account():
+    AZURE_APP = microsoft_account.AzureApplication()
+    Login = microsoft_account.Login(azure_app=AZURE_APP)
+    login_url = await Login.get_login_url()
+    print(f"Please open {login_url} in your browser and copy the URL you are redirected into the prompt below.")
+    code_url = input()
+    code = await microsoft_account.Login.extract_code_from_url(code_url)
+    auth_code = await Login.get_ms_token(code)
+    print(f"Refresh token: {auth_code['refresh_token']}")
+    xbl_token = await microsoft_account.Login.get_xbl_token(auth_code["access_token"])
     xsts_token = await microsoft_account.Login.get_xsts_token(xbl_token["Token"])
-    minecraft_token = await microsoft_account.Login.get_minecraft_access_token(
-        xsts_token["Token"],
-        xsts_token["DisplayClaims"]["xui"][0]["uhs"]
-    )
-    print("Minecraft Access Token:", minecraft_token["access_token"])
+    uhs = xbl_token["DisplayClaims"]["xui"][0]["uhs"]
+    mc_token = await microsoft_account.Login.get_minecraft_access_token(xsts_token["Token"], uhs)
+    await have_minecraft(mc_token["access_token"])
+    login_data = {
+        "access_token": mc_token["access_token"],
+        "refresh_token": auth_code["refresh_token"],
+        "expires_in": auth_code["expires_in"],
+        "uhs": uhs,
+        "xsts_token": xsts_token["Token"],
+        "xbl_token": xbl_token["Token"]
+    }
+    return login_data["access_token"]
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    access_token = asyncio.run(login_microsoft_account())
+    print(f"Access token: {access_token}")
 ```
 
 ## Documentation & More Examples

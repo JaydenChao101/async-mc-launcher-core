@@ -1,8 +1,12 @@
-# This file is part of minecraft-launcher-lib (https://codeberg.org/JakobDev/minecraft-launcher-lib)
-# SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
+# This file is part of async-mc-launcher-core (https://github.com/JaydenChao101/async-mc-launcher-core)
+# SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 
 from .logging_utils import logger
+from ._types import (
+    Credential,
+    AzureApplication,
+)
 
 from . import (
     command,
@@ -41,4 +45,6 @@ __all__ = [
     "microsoft_types",
     "logger",
     "sync",
+    "Credential",
+    "AzureApplication",
 ]

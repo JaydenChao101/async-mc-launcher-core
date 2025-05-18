@@ -3,9 +3,11 @@ from launcher_core._types import AzureApplication, Credential
 
 async def main():
     # refresh my token
-    AZURE_APP = AzureApplication(client_id="your_client_id")
-    Credential1 = Credential(refresh_token="abc")
-    token = await microsoft_account.refresh_minecraft_token(AZURE_APP=AZURE_APP,Credential=Credential1)
+    client_id = input("請輸入你的 Azure 應用程式 client_id：")
+    refresh_token = input("請輸入你的 refresh token：")
+    AZURE_APP = AzureApplication(client_id=client_id)
+    Credential1 = Credential(refresh_token=refresh_token)
+    token = await microsoft_account.refresh_minecraft_token(azure_app=AZURE_APP, Credential=Credential1)
     xbl_token = await microsoft_account.Login.get_xbl_token(token["access_token"])
     xsts_token = await microsoft_account.Login.get_xsts_token(xbl_token["Token"])
     minecraft_token = await microsoft_account.Login.get_minecraft_access_token(

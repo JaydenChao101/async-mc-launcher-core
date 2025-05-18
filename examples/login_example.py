@@ -8,7 +8,7 @@ logger = setup_logger(enable_console=False, level=logging.INFO, filename="micros
 
 async def login_microsoft_account():
     AZURE_APP = microsoft_account.AzureApplication()
-    Login = microsoft_account.Login(AZURE_APP=AZURE_APP)
+    Login = microsoft_account.Login(azure_app=AZURE_APP)
     login_url = await Login.get_login_url()
     print(f"Please open {login_url} in your browser and copy the URL you are redirected into the prompt below.")
     code_url = input()
