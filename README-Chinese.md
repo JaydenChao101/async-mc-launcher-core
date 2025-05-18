@@ -41,23 +41,27 @@ uv pip install minecraft-launcher-lib
 
 ```python
 import logging
-from minecraft_launcher_lib import microsoft_account
+from launcher_core import microsoft_account
 import asyncio
-from launcher_coresetting import setup_logger
+from launcher_core.setting import setup_logger
+from launcher_core.mojang import have_minecraft
 
-logger = setup_logger(enable_console=True, level=logging.INFO, filename="microsoft_account.log")
+logger = setup_logger(enable_console=False, level=logging.INFO, filename="microsoft_account.log")
 
 async def login_microsoft_account():
-    login_url = await microsoft_account.get_login_url()
+    AZURE_APP = microsoft_account.AzureApplication()
+    Login = microsoft_account.Login(azure_app=AZURE_APP)
+    login_url = await Login.get_login_url()
     print(f"Please open {login_url} in your browser and copy the URL you are redirected into the prompt below.")
     code_url = input()
-    code = await microsoft_account.extract_code_from_url(code_url)
-    auth_code = await microsoft_account.get_ms_token(code)
-    xbl_token = await microsoft_account.get_xbl_token(auth_code["access_token"])
-    xsts_token = await microsoft_account.get_xsts_token(xbl_token["Token"])
+    code = await microsoft_account.Login.extract_code_from_url(code_url)
+    auth_code = await Login.get_ms_token(code)
+    print(f"Refresh token: {auth_code['refresh_token']}")
+    xbl_token = await microsoft_account.Login.get_xbl_token(auth_code["access_token"])
+    xsts_token = await microsoft_account.Login.get_xsts_token(xbl_token["Token"])
     uhs = xbl_token["DisplayClaims"]["xui"][0]["uhs"]
-    mc_token = await microsoft_account.get_minecraft_access_token(xsts_token["Token"], uhs)
-    await microsoft_account.have_minecraft(mc_token["access_token"])
+    mc_token = await microsoft_account.Login.get_minecraft_access_token(xsts_token["Token"], uhs)
+    await have_minecraft(mc_token["access_token"])
     login_data = {
         "access_token": mc_token["access_token"],
         "refresh_token": auth_code["refresh_token"],
