@@ -14,9 +14,26 @@ import aiofiles
 from ._types import SkinData, MinecraftProfileResponse
 from ._types import Credential as AuthCredential
 from .exceptions import AccountNotOwnMinecraft, NeedAccountInfo
+import jwt
+from cryptography.hazmat.primitives import serialization
 
 
-
+__MOGANG_SIGNATURE__ = b'''
+-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtz7jy4jRH3psj5AbVS6W
+NHjniqlr/f5JDly2M8OKGK81nPEq765tJuSILOWrC3KQRvHJIhf84+ekMGH7iGlO
+4DPGDVb6hBGoMMBhCq2jkBjuJ7fVi3oOxy5EsA/IQqa69e55ugM+GJKUndLyHeNn
+X6RzRzDT4tX/i68WJikwL8rR8Jq49aVJlIEFT6F+1rDQdU2qcpfT04CBYLM5gMxE
+fWRl6u1PNQixz8vSOv8pA6hB2DU8Y08VvbK7X2ls+BiS3wqqj3nyVWqoxrwVKiXR
+kIqIyIAedYDFSaIq5vbmnVtIonWQPeug4/0spLQoWnTUpXRZe2/+uAKN1RY9mmaB
+pRFV/Osz3PDOoICGb5AZ0asLFf/qEvGJ+di6Ltt8/aaoBuVw+7fnTw2BhkhSq1S/
+va6LxHZGXE9wsLj4CN8mZXHfwVD9QG0VNQTUgEGZ4ngf7+0u30p7mPt5sYy3H+Fm
+sWXqFZn55pecmrgNLqtETPWMNpWc2fJu/qqnxE9o2tBGy/MqJiw3iLYxf7U+4le4
+jM49AUKrO16bD1rdFwyVuNaTefObKjEMTX9gyVUF6o7oDEItp5NHxFm3CqnQRmch
+HsMs+NxEnN4E9a8PDB23b4yjKOQ9VHDxBxuaZJU60GBCIOF9tslb7OAkheSJx5Xy
+EYblHbogFGPRFU++NrSQRX0CAwEAAQ==
+-----END PUBLIC KEY-----
+'''
 class Skin:
     '''
     用于处理 Minecraft 皮肤的类。
@@ -123,7 +140,7 @@ class Skin:
                 return response.status == 204
 
 
-async def have_minecraft(access_token: str) -> bool:
+async def have_minecraft(access_token: str, check: bool = True) -> bool:
     """
     Check if the user owns Minecraft using the access token.
 
@@ -140,6 +157,10 @@ async def have_minecraft(access_token: str) -> bool:
             data = await resp.json()
             if not data.get("items"):
                 raise AccountNotOwnMinecraft()
+            if check:
+                await verify_mojang_jwt(data.get("signature"))
+                for item in data.get("items", []):
+                    await verify_mojang_jwt(item["signature"])
             return True
 
 
@@ -177,3 +198,14 @@ async def get_minecraft_player_attributes(
         ) as resp:
             resp.raise_for_status()
             return await resp.json()
+
+async def verify_mojang_jwt(token: str) -> bool:
+    """
+    Verify the Mojang JWT token.
+
+    :param token: The JWT token to verify
+    :return: True if the token is valid, False otherwise
+    """
+    public_key = serialization.load_pem_public_key(__MOGANG_SIGNATURE__)
+    jwt.decode(token, public_key, algorithms=["RS256"])
+    return True

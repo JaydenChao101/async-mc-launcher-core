@@ -1,6 +1,6 @@
 import asyncio
 from launcher_core.microsoft_account import device_code_login, Login
-from launcher_core._types import AzureApplication
+from launcher_core import AzureApplication
 
 async def device_code_login_flow(client_id: str):
     # 建立 device_code_login 實例

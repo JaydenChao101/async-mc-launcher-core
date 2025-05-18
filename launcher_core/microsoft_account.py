@@ -35,6 +35,12 @@ __DEVICE_CODE_URL__ = (
 )
 
 
+__all__ = [
+    "Login",
+    "device_code_login",
+    "refresh_minecraft_token",
+]
+
 class Login:
     '''
     This class is used to login to a Microsoft account and get the access token.
@@ -248,7 +254,7 @@ class device_code_login:
         azure_app: AzureApplication = AzureApplication(),
         language: str = "en",
     ):
-        self.client_id = azure_app["client_id"]
+        self.client_id = azure_app.client_id
         self.language = language
 
     async def get_device_code(self) -> dict:
@@ -310,8 +316,8 @@ class device_code_login:
 
 
 async def refresh_minecraft_token(
+    Credential: AuthCredential,
     azure_app: AzureApplication = AzureApplication(),
-    Credential: AuthCredential = None,
 ) -> AuthorizationTokenResponse:
     """
     Refresh the Minecraft token using the refresh token.
@@ -345,6 +351,7 @@ async def refresh_minecraft_token(
             data = await resp.json()
             logger.info("Refreshed Minecraft token response: %s", data)
             return data
+
 
 
 # This example shows how to login to a Microsoft account and get the access token.

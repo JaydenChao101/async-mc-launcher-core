@@ -1,5 +1,5 @@
-# This file is part of minecraft-launcher-lib (https://codeberg.org/JakobDev/minecraft-launcher-lib)
-# SPDX-FileCopyrightText: Copyright (c) 2019-2025 JakobDev <jakobdev@gmx.de> and contributors
+# This file is part of async-mc-launcher-core (https://github.com/JaydenChao101/async-mc-launcher-core)
+# SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "utils contains a few functions for helping you that doesn't fit in any other category"
 from datetime import datetime
@@ -401,5 +401,5 @@ def sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
     try:
         return loop.run_until_complete(coroutine)
     except Exception as e:
-        logger.error(f"同步执行失败: {e}")  # 使用现有日志系统[3][4]
+        logger.error("同步执行失败: %s", e)  # 使用现有日志系统[3][4]
         raise
