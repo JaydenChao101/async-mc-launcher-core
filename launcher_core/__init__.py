@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 from .logging_utils import logger
+from ._types import (
+    Credential,
+    AzureApplication,
+)
 
 from . import (
     command,
@@ -41,4 +45,6 @@ __all__ = [
     "microsoft_types",
     "logger",
     "sync",
+    "Credential",
+    "AzureApplication",
 ]
