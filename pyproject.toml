@@ -4,41 +4,35 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "async-mc-launcher-core"
-description = "A library for creating a custom Minecraft launcher"
+description = "A Modern Async Python Library for Minecraft Launcher Development"
 readme = "README.md"
 requires-python = ">=3.10"
-keywords = ["JakobDev", "Minecraft", "Mojang", "launcher", "minecraft-launcher", "java"]
+keywords = ["Minecraft", "Mojang", "launcher", "minecraft-launcher", "java", "async"]
 license = "BSD-2-Clause"
 authors = [
   { name = "JaydenChao101", email = "jaydenchao@proton.me" }
 ]
 classifiers = [
-  "Development Status :: 5 - Production/Stable",
-  "Intended Audience :: Developers",
-  "Environment :: Other Environment",
-  "Topic :: Games/Entertainment",
-  "Operating System :: OS Independent",
-  "Operating System :: POSIX",
-  "Operating System :: POSIX :: BSD",
-  "Operating System :: POSIX :: Linux",
-  "Operating System :: MacOS :: MacOS X",
-  "Operating System :: Microsoft :: Windows",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
-  "Typing :: Typed"
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Games/Entertainment",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Typing :: Typed",
+    "Operating System :: OS Independent",
+    "Framework :: AsyncIO",
 ]
 dependencies = [
   "aiofiles>=24.1.0",
   "aiohttp>=3.11.18",
   "cryptography>=45.0.2",
   "pyjwt>=2.10.1",
-  "requests>=2.32.3",
   "requests-mock>=1.12.1",
   "tomli-w>=1.2.0",
 ]
