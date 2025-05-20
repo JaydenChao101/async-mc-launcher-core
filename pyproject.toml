@@ -47,3 +47,9 @@ version = { file = "launcher_core/version.txt" }
 
 [tool.setuptools]
 packages = ["launcher_core"]
+include-package-data = true  # 启用非 Python 文件包含
+
+# 可选：显式排除无关文件
+[tool.setuptools.exclude-package-data]
+launcher_core = ["*.tmp", "*.log"]
+
