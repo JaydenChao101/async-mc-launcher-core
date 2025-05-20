@@ -46,4 +46,4 @@ Source = "https://github.com/JaydenChao101/asyncio-mc-launcher-lib"
 version = { file = "launcher_core/version.txt" }
 
 [tool.setuptools]
-packages = ["launcher_core"]
+packages = ["launcher_core", "launcher_core._internal_types"]  # 手动列出所有包
