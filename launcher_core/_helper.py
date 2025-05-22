@@ -271,11 +271,11 @@ async def get_sha1_hash(path: str) -> str:
     Calculate the sha1 checksum of a file
     Source: https://stackoverflow.com/questions/22058048/hashing-a-file-in-python
     """
-    BUF_SIZE = 65536
+    buf_size = 65536
     sha1 = hashlib.sha1()
     async with aiofiles.open(path, "rb") as f:
         while True:
-            data = await f.read(BUF_SIZE)
+            data = await f.read(buf_size)
             if not data:
                 break
             sha1.update(data)
@@ -296,21 +296,21 @@ def get_os_version() -> str:
         return platform.uname().release
 
 
-_user_agent_cache = None
+_USER_AGENT_CACHE = None
 
 
 async def get_user_agent() -> str:
     """
     Returns the user agent of minecraft-launcher-lib
     """
-    global _user_agent_cache
-    if _user_agent_cache is not None:
-        return _user_agent_cache
+    global _USER_AGENT_CACHE
+    if _USER_AGENT_CACHE is not None:
+        return _USER_AGENT_CACHE
     else:
         file_path = os.path.join(os.path.dirname(__file__), "version.txt")
         async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-            _user_agent_cache = "minecraft-launcher-lib/" + (await f.read()).strip()
-            return _user_agent_cache
+            _USER_AGENT_CACHE = "minecraft-launcher-lib/" + (await f.read()).strip()
+            return _USER_AGENT_CACHE
 
 
 def get_classpath_separator() -> Literal[":", ";"]:
