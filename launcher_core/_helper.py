@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "This module contains some helper functions. It should nt be used outside minecraft_launcher_lib"
-from typing import Literal, Any
+from typing import Literal, Any, NoReturn
 import subprocess
 import datetime
 import platform
@@ -30,7 +30,7 @@ else:
     SUBPROCESS_STARTUP_INFO = None
 
 
-def empty(arg: Any) -> None:
+def empty(arg: Any) -> NoReturn:
     """
     This function is just a placeholder
     """
@@ -52,7 +52,7 @@ def check_path_inside_minecraft_directory(
 async def download_file(
     url: str,
     path: str,
-    callback: CallbackDict = {},
+    callback: CallbackDict = None,
     sha1: str | None = None,
     lzma_compressed: bool | None = False,
     session: aiohttp.ClientSession | None = None,
@@ -65,6 +65,9 @@ async def download_file(
     # Check if the Path is outside the given Minecraft Directory
     if minecraft_directory is not None:
         check_path_inside_minecraft_directory(minecraft_directory, path)
+
+    if callback is None:
+        callback = {}
 
     if os.path.isfile(path) and not overwrite:
         if sha1 is None:
@@ -287,7 +290,7 @@ def get_os_version() -> str:
     if platform.system() == "Windows":
         ver = sys.getwindowsversion()  # type: ignore
         return f"{ver.major}.{ver.minor}"
-    elif platform.system == "Darwin":
+    if platform.system() == "Darwin":
         return ""
     else:
         return platform.uname().release
@@ -312,12 +315,12 @@ async def get_user_agent() -> str:
 
 def get_classpath_separator() -> Literal[":", ";"]:
     """
-    Returns the classpath separator for the current os
+    Determines the classpath separator based on the operating system.
+    Returns:
+        str: The classpath separator (":" for Unix-like systems, ";" for Windows).
     """
-    if platform.system() == "Windows":
-        return ";"
-    else:
-        return ":"
+
+    return ";" if platform.system() == "Windows" else ":"
 
 
 _requests_response_cache: dict[str, RequestsResponseCache] = {}

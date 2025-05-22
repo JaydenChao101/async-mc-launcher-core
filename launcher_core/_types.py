@@ -221,15 +221,6 @@ class JavaPatchNotes(TypedDict):
     entries: list[_JavaPatchNoteEntry]
 
 
-@dataclass(frozen=True)
-class Credential:
-    '''The credential of the player'''
-    access_token: str = None
-    username: str = None
-    uuid: MinecraftUUID = None
-    refresh_token: str = None
-
-
 class SkinData(TypedDict):
     '''The skin of the player'''
     skin: str
@@ -276,3 +267,11 @@ class AzureApplication:
     client_id: str = "00000000402b5328"
     client_secret: str = None
     redirect_uri: str = "https://login.live.com/oauth20_desktop.srf"
+
+@dataclass(frozen=True)
+class Credential:
+    '''The credential of the player'''
+    access_token: str = None
+    username: str = None
+    uuid: MinecraftUUID = None
+    refresh_token: str = None
