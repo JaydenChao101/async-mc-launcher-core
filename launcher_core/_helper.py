@@ -1,7 +1,7 @@
 # This file is part of async-mc-launcher-core (https://github.com/JaydenChao101/async-mc-launcher-core)
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
-"This module contains some helper functions. It should nt be used outside minecraft_launcher_lib"
+"This module contains some helper functions. It should not be used outside minecraft_launcher_lib"
 from typing import Literal, Any, NoReturn
 import subprocess
 import datetime
@@ -89,17 +89,25 @@ async def download_file(
 
     try:
         headers = {"user-agent": get_user_agent()}
-        async with session.get(url, headers=headers) as r:
+        async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=300)) as r:
             if r.status != 200:
                 return False
 
-            content = await r.read()
-
             async with aiofiles.open(path, "wb") as f:
                 if lzma_compressed:
+                    content = await r.read()
                     await f.write(lzma.decompress(content))
                 else:
-                    await f.write(content)
+                    # Use streaming download with 64KB chunks
+                    chunk_size = 65536
+                    while True:
+                        chunk = await r.content.read(chunk_size)
+                        if not chunk:
+                            break
+                        await f.write(chunk)
+                        # Update progress if callback provided
+                        if callback.get("setProgress"):
+                            callback["setProgress"](r.content_length, f.tell())
     finally:
         if close_session:
             await session.close()
@@ -116,14 +124,14 @@ def parse_single_rule(rule: ClientJsonRule, options: MinecraftOptions) -> bool:
     """
     Parse a single rule from the versions.json
     """
-        # 1. 处理 action 并初始化 returnvalue
+    # 1. Handle action and initialize returnvalue
     if rule["action"] == "allow":
         returnvalue = False
     elif rule["action"] == "disallow":
         returnvalue = True
     else:
         raise ValueError(f"Invalid rule action: {rule['action']}")
-    # 2. 检查 OS 条件
+    # 2. Check OS conditions
     for os_key, os_value in rule.get("os", {}).items():
         if os_key == "name":
             if os_value == "windows" and platform.system() != "Windows":
@@ -138,7 +146,7 @@ def parse_single_rule(rule: ClientJsonRule, options: MinecraftOptions) -> bool:
         elif os_key == "version":
             if not re.match(os_value, get_os_version()):
                 return returnvalue
-    # 3. 检查 features 条件
+    # 3. Check features conditions
     for features_key in rule.get("features", {}).keys():
         if features_key == "has_custom_resolution" and not options.get("customResolution", False):
             return returnvalue
@@ -152,7 +160,7 @@ def parse_single_rule(rule: ClientJsonRule, options: MinecraftOptions) -> bool:
             return returnvalue
         elif features_key == "is_quick_play_realms" and options.get("quickPlayRealms") is None:
             return returnvalue
-    # 4. 默认返回相反值
+    # 4. Return opposite value by default
     return not returnvalue
 
 
@@ -296,7 +304,7 @@ def get_os_version() -> str:
         return platform.uname().release
 
 
-_USER_AGENT_CACHE = None
+_USER_AGENT_CACHE: str | None = None
 
 
 async def get_user_agent() -> str:
@@ -306,11 +314,11 @@ async def get_user_agent() -> str:
     global _USER_AGENT_CACHE
     if _USER_AGENT_CACHE is not None:
         return _USER_AGENT_CACHE
-    else:
-        file_path = os.path.join(os.path.dirname(__file__), "version.txt")
-        async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-            _USER_AGENT_CACHE = "minecraft-launcher-lib/" + (await f.read()).strip()
-            return _USER_AGENT_CACHE
+    
+    file_path = os.path.join(os.path.dirname(__file__), "version.txt")
+    async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+        _USER_AGENT_CACHE = "minecraft-launcher-lib/" + (await f.read()).strip()
+    return _USER_AGENT_CACHE
 
 
 def get_classpath_separator() -> Literal[":", ";"]:
@@ -328,52 +336,65 @@ _requests_response_cache: dict[str, RequestsResponseCache] = {}
 
 async def get_requests_response_cache(url: str) -> aiohttp.ClientResponse:
     """
-    Caches the result of request.get(). If a request was made to the same URL within the last hour, the cache will be used, so you don't need to make a request to a URl each timje you call a function.
+    Caches the result of request.get(). If a request was made to the same URL within the last hour, 
+    the cache will be used, so you don't need to make a request to a URL each time you call a function.
+    
+    Args:
+        url: The URL to request or get from cache
+        
+    Returns:
+        A dictionary containing cached response data
     """
     now = datetime.datetime.now()
+    
+    # Return cached response if valid
+    if url in _requests_response_cache:
+        cache_entry = _requests_response_cache[url]
+        if (now - cache_entry["datetime"]).total_seconds() < 3600:  # 1 hour in seconds
+            return cache_entry["response"]
 
-    if (
-        url not in _requests_response_cache
-        or (now - _requests_response_cache[url]["datetime"]).total_seconds() / 60 / 60
-        >= 1
-    ):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                url, headers={"user-agent": await get_user_agent()}
-            ) as r:
-                if r.status == 200:
-                    # 將響應體複製出來避免連接關閉後無法訪問
-                    content = await r.read()
-                    text = await r.text()
-                    json_data = (
-                        await r.json()
-                        if "application/json" in r.headers.get("Content-Type", "")
-                        else None
-                    )
+    # Make new request if cache expired or missing
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+            url, headers={"user-agent": await get_user_agent()}
+        ) as r:
+            if r.status == 200:
+                # Copy response data to avoid connection closed issues
+                content = await r.read()
+                text = await r.text()
+                json_data = (
+                    await r.json()
+                    if "application/json" in r.headers.get("Content-Type", "")
+                    else None
+                )
 
-                    # 創建一個模擬的 response 物件來存儲在緩存中
-                    response_cache = {
-                        "status": r.status,
-                        "content": content,
-                        "text": text,
-                        "json_data": json_data,
-                        "headers": dict(r.headers),
-                    }
-
-                    _requests_response_cache[url] = {
-                        "response": response_cache,
-                        "datetime": now,
-                    }
-                    return response_cache
-                return {
+                # Create a response cache object
+                response_cache = {
                     "status": r.status,
-                    "content": await r.read(),
-                    "text": await r.text(),
-                    "json_data": None,
+                    "content": content,
+                    "text": text,
+                    "json_data": json_data,
                     "headers": dict(r.headers),
                 }
-    else:
-        return _requests_response_cache[url]["response"]
+
+                # Update cache (with simple size limit)
+                if len(_requests_response_cache) > 100:  # Keep max 100 entries
+                    _requests_response_cache.clear()
+                
+                _requests_response_cache[url] = {
+                    "response": response_cache,
+                    "datetime": now,
+                }
+                return response_cache
+            
+            # Handle non-200 responses
+            return {
+                "status": r.status,
+                "content": await r.read(),
+                "text": await r.text(),
+                "json_data": None,
+                "headers": dict(r.headers),
+            }
 
 
 async def parse_maven_metadata(url: str) -> MavenMetadata:
