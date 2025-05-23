@@ -6,16 +6,11 @@ mrpack allows you to install Modpacks from the `Mrpack Format <https://support.m
 You should also take a look at the :doc:`complete example </examples/Mrpack>`.
 """
 
-# 標準庫導入
 import zipfile
 import json
 import os
-
-# 第三方庫導入
 import aiohttp
 import aiofiles
-
-# 本地導入
 from ._helper import download_file, empty, check_path_inside_minecraft_directory
 from ._types import MrpackInformation, MrpackInstallOptions, CallbackDict
 from ._internal_types.mrpack_types import MrpackIndex, MrpackFile

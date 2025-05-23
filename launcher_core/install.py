@@ -2,6 +2,12 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "install allows you to install minecraft."
+import shutil
+import json
+import os
+import asyncio
+import aiohttp
+import aiofiles
 from ._helper import (
     download_file,
     parse_rule_list,
@@ -16,12 +22,6 @@ from ._internal_types.install_types import AssetsJson
 from .runtime import install_jvm_runtime
 from .exceptions import VersionNotFound
 from ._types import CallbackDict
-import aiohttp
-import aiofiles
-import asyncio
-import shutil
-import json
-import os
 
 __all__ = ["install_minecraft_version"]
 
@@ -96,14 +96,13 @@ async def install_libraries(
             pass
 
         if "downloads" not in i:
-            if "extract" in i:
+            if "extract" in i and native != "":
+                jar_filename_native = f"{name}-{version}-{native}.jar"
                 await extract_natives_file(
                     os.path.join(current_path, jar_filename_native),
                     os.path.join(path, "versions", id, "natives"),
                     i["extract"],
                 )
-            return
-
         if (
             "artifact" in i["downloads"]
             and i["downloads"]["artifact"]["url"] != ""

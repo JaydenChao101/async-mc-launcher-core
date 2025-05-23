@@ -26,6 +26,7 @@ from . import (
     microsoft_types,
 )
 from .utils import sync
+from .mojang import verify_mojang_jwt
 
 __all__ = [
     "command",
@@ -47,4 +48,5 @@ __all__ = [
     "sync",
     "Credential",
     "AzureApplication",
+    "verify_mojang_jwt",
 ]
