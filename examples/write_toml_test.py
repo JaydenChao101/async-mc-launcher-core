@@ -1,5 +1,5 @@
 import asyncio
-from launcher_core.load_config import load_config, save_config
+from launcher_core.config.load_launcher_config import load_config, save_config
 
 async def main():
     # 加載配置
