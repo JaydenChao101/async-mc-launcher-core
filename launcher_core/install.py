@@ -382,3 +382,23 @@ async def install_minecraft_version(
             )
             return
     raise VersionNotFound(versionid)
+
+# 發布版本安裝開始事件
+try:
+    from .plugins.events_types import VersionInstallStartEvent
+    from . import EVENT_MANAGER
+    await EVENT_MANAGER.publish(VersionInstallStartEvent(version, str(minecraft_directory)))
+except (ImportError, AttributeError):
+    pass  # 如果事件系統未初始化，忽略
+
+# 調用 pre_version_install 掛鉤點
+try:
+    from .plugins.hooks import pre_version_install
+    install_options = await pre_version_install(version, str(minecraft_directory))
+
+    # 檢查掛鉤點返回值，決定是否繼續
+    if not install_options.get("allow_install", True):
+        callback.get("setStatus", empty)(f"安裝已被插件取消: {version}")
+        return
+except ImportError:
+    pass  # 如果掛鉤點未定義，忽略

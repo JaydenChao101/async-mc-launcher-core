@@ -23,9 +23,18 @@ from . import (
     exceptions,
     _types,
     microsoft_types,
+    plugins,
 )
 from .utils import sync
 from .mojang import verify_mojang_jwt
+
+# 創建全局事件管理器實例供插件使用
+from .plugins.events import EventManager
+EVENT_MANAGER = EventManager()
+
+# 創建全局插件管理器實例
+from .plugins import PluginManager
+PLUGIN_MANAGER = PluginManager()
 
 __all__ = [
     "command",
@@ -39,6 +48,7 @@ __all__ = [
     "quilt",
     "runtime",
     "mrpack",
+    "plugins",
     "exceptions",
     "_types",
     "microsoft_types",
@@ -47,4 +57,6 @@ __all__ = [
     "Credential",
     "AzureApplication",
     "verify_mojang_jwt",
+    "EVENT_MANAGER",
+    "PLUGIN_MANAGER",
 ]
