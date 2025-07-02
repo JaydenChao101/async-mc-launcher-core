@@ -131,7 +131,8 @@ async def get_arguments_string(
 # 調用 post_command_generation 掛鉤點，可能修改命令
 try:
     from .plugins.hooks import post_command_generation
-    result = await post_command_generation(version, options, result)
+    from .. import sync
+    result = sync(post_command_generation(version, options, result))
 except ImportError:
     pass  # 如果掛鉤點未定義，忽略
 

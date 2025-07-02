@@ -15,7 +15,7 @@ from typing import Dict, List, Callable, Any, Type, TypeVar, Optional, Set
 
 T = TypeVar('T')
 EventHandler = Callable[[Any], None]
-AsyncEventHandler = Callable[[Any], asyncio.coroutine]
+AsyncEventHandler = Callable[[Any], asyncio.coroutines]
 
 
 class Event:

@@ -387,14 +387,15 @@ async def install_minecraft_version(
 try:
     from .plugins.events_types import VersionInstallStartEvent
     from . import EVENT_MANAGER
-    await EVENT_MANAGER.publish(VersionInstallStartEvent(version, str(minecraft_directory)))
+    from . import sync
+    sync(EVENT_MANAGER.publish(VersionInstallStartEvent(version, str(minecraft_directory))))
 except (ImportError, AttributeError):
     pass  # 如果事件系統未初始化，忽略
 
 # 調用 pre_version_install 掛鉤點
 try:
     from .plugins.hooks import pre_version_install
-    install_options = await pre_version_install(version, str(minecraft_directory))
+    install_options = sync(pre_version_install(version, str(minecraft_directory)))
 
     # 檢查掛鉤點返回值，決定是否繼續
     if not install_options.get("allow_install", True):
