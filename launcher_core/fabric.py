@@ -17,7 +17,6 @@ from .install import install_minecraft_version
 from .utils import is_version_valid
 
 
-
 async def get_all_minecraft_versions() -> list[FabricMinecraftVersion]:
     """
     Returns all available Minecraft Versions for Fabric

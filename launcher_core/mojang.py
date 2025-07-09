@@ -18,7 +18,7 @@ from ._types import Credential as AuthCredential
 from .exceptions import AccountNotOwnMinecraft, NeedAccountInfo
 
 
-__MOGANG_SIGNATURE__ = b'''
+__MOGANG_SIGNATURE__ = b"""
 -----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtz7jy4jRH3psj5AbVS6W
 NHjniqlr/f5JDly2M8OKGK81nPEq765tJuSILOWrC3KQRvHJIhf84+ekMGH7iGlO
@@ -33,12 +33,15 @@ jM49AUKrO16bD1rdFwyVuNaTefObKjEMTX9gyVUF6o7oDEItp5NHxFm3CqnQRmch
 HsMs+NxEnN4E9a8PDB23b4yjKOQ9VHDxBxuaZJU60GBCIOF9tslb7OAkheSJx5Xy
 EYblHbogFGPRFU++NrSQRX0CAwEAAQ==
 -----END PUBLIC KEY-----
-'''
+"""
+
+
 class Skin:
-    '''
+    """
     用于处理 Minecraft 皮肤的类。
     提供获取皮肤 URL、上传皮肤、重置皮肤等功能。
-    '''
+    """
+
     def __init__(self, Credential: AuthCredential):
         self.Credential = Credential
 
@@ -198,6 +201,7 @@ async def get_minecraft_player_attributes(
         ) as resp:
             resp.raise_for_status()
             return await resp.json()
+
 
 async def verify_mojang_jwt(token: str) -> bool:
     """

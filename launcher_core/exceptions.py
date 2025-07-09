@@ -54,7 +54,7 @@ class ExternalProgramError(Exception):
 
 class InvalidRefreshToken(ValueError):
     """
-    Raised when 
+    Raised when
     :func:`~launcher_core.microsoft_account.complete_refresh` is called with a invalid refresh token
     """
 
@@ -67,7 +67,7 @@ class InvalidRefreshToken(ValueError):
 
 class InvalidVanillaLauncherProfile(ValueError):
     """
-    Raised when a function from the 
+    Raised when a function from the
     :doc:`vanilla_launcher` module is called with a invalid vanilla profile
     """
 
@@ -159,9 +159,9 @@ class PlatformNotSupported(Exception):
 
 class AccountNotOwnMinecraft(Exception):
     """
-    Raised by 
-    :func:`~launcher_core.microsoft_account.complete_login` 
-    and :func:`~launcher_core.microsoft_account.complete_login` 
+    Raised by
+    :func:`~launcher_core.microsoft_account.complete_login`
+    and :func:`~launcher_core.microsoft_account.complete_login`
     when the Account does not own Minecraft
     """
 
@@ -204,6 +204,7 @@ class AccountNeedAdultVerification(Exception):
     def __init__(self) -> None:
         super().__init__("This Account needs adult verification")
 
+
 class NeedAccountInfo(ValueError):
     """
     Raised when the Account needs to be verified
@@ -212,6 +213,7 @@ class NeedAccountInfo(ValueError):
     def __init__(self, message: str = "The Account needs to be verified") -> None:
         super().__init__(message)
 
+
 class XErrNotFound(ValueError):
     """
     Raised when the XBox Error Code is not found
@@ -219,6 +221,7 @@ class XErrNotFound(ValueError):
 
     def __init__(self, message: str = "The XBox Error Code is not found") -> None:
         super().__init__(message)
+
 
 class DeviceCodeExpiredError(ValueError):
     """

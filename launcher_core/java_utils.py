@@ -8,13 +8,12 @@ from ._helper import SUBPROCESS_STARTUP_INFO
 from ._types import JavaInformation
 
 
-
 async def get_java_information(path: str | os.PathLike) -> JavaInformation:
     """
     Returns Some Information about the given Java Installation
 
     .. note::
-        This Function executes the Java executable to determine details such as the version. 
+        This Function executes the Java executable to determine details such as the version.
         This might be a security risk.
 
     Example:
@@ -27,8 +26,8 @@ async def get_java_information(path: str | os.PathLike) -> JavaInformation:
         print("Version: " + information["version"])
         print("Java path: " + information["javaPath"])
 
-    :param path: The Path to the Installation. It must be the Directory. 
-    If your Java executable is e.g. /usr/lib/jvm/java-19-openjdk-amd64/bin/java 
+    :param path: The Path to the Installation. It must be the Directory.
+    If your Java executable is e.g. /usr/lib/jvm/java-19-openjdk-amd64/bin/java
     this Parameter must be /usr/lib/jvm/java-19-openjdk-amd64.
 
     :return: A dict with Information about the given java installation
@@ -60,14 +59,14 @@ async def get_java_information(path: str | os.PathLike) -> JavaInformation:
     information: JavaInformation = {}  # type: ignore
     information["path"] = str(path)
     information["name"] = os.path.basename(path)
-    information["version"] = re.search(r'(?<=version ")[\d|\.|_]+(?=")', lines[0]).group()
+    information["version"] = re.search(
+        r'(?<=version ")[\d|\.|_]+(?=")', lines[0]
+    ).group()
     information["is64Bit"] = "64-Bit" in lines[2]
     information["openjdk"] = lines[0].startswith("openjdk")
 
     if platform.system() == "Windows":
-        information["javaPath"] = os.path.join(
-            os.path.abspath(path), "bin", "java.exe"
-        )
+        information["javaPath"] = os.path.join(os.path.abspath(path), "bin", "java.exe")
         information["javawPath"] = os.path.join(
             os.path.abspath(path), "bin", "javaw.exe"
         )
@@ -113,7 +112,7 @@ async def find_system_java_versions(
         for version in await launcher_core.java_utils.find_system_java_versions():
             print(version)
 
-    :param additional_directories: 
+    :param additional_directories:
     A List of additional Directories to search for Java in custom locations
     :return: A List with all Directories of Java Installations
     """
@@ -138,13 +137,13 @@ async def find_system_java_versions_information(
     additional_directories: list[str | os.PathLike] | None = None,
 ) -> list[JavaInformation]:
     """
-    Same as :func:`find_system_java_version`, 
-    but uses :func:`get_java_information` to get some Information about 
+    Same as :func:`find_system_java_version`,
+    but uses :func:`get_java_information` to get some Information about
     the Installation instead of just proving a Path.
     macOS is not supported yet
 
     .. note::
-        This Function executes the Java executable to determine details such as the version. 
+        This Function executes the Java executable to determine details such as the version.
         This might be a security risk.
 
     Example:

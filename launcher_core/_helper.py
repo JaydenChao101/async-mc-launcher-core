@@ -89,7 +89,9 @@ async def download_file(
 
     try:
         headers = {"user-agent": get_user_agent()}
-        async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=300)) as r:
+        async with session.get(
+            url, headers=headers, timeout=aiohttp.ClientTimeout(total=300)
+        ) as r:
             if r.status != 200:
                 return False
 
@@ -148,21 +150,34 @@ def parse_single_rule(rule: ClientJsonRule, options: MinecraftOptions) -> bool:
                 return returnvalue
     # 3. Check features conditions
     for features_key in rule.get("features", {}).keys():
-        if features_key == "has_custom_resolution" and not options.get("customResolution", False):
+        if features_key == "has_custom_resolution" and not options.get(
+            "customResolution", False
+        ):
             return returnvalue
         elif features_key == "is_demo_user" and not options.get("demo", False):
             return returnvalue
-        elif features_key == "has_quick_plays_support" and options.get("quickPlayPath") is None:
+        elif (
+            features_key == "has_quick_plays_support"
+            and options.get("quickPlayPath") is None
+        ):
             return returnvalue
-        elif features_key == "is_quick_play_singleplayer" and options.get("quickPlaySingleplayer") is None:
+        elif (
+            features_key == "is_quick_play_singleplayer"
+            and options.get("quickPlaySingleplayer") is None
+        ):
             return returnvalue
-        elif features_key == "is_quick_play_multiplayer" and options.get("quickPlayMultiplayer") is None:
+        elif (
+            features_key == "is_quick_play_multiplayer"
+            and options.get("quickPlayMultiplayer") is None
+        ):
             return returnvalue
-        elif features_key == "is_quick_play_realms" and options.get("quickPlayRealms") is None:
+        elif (
+            features_key == "is_quick_play_realms"
+            and options.get("quickPlayRealms") is None
+        ):
             return returnvalue
     # 4. Return opposite value by default
     return not returnvalue
-
 
 
 def parse_rule_list(rules: list[ClientJsonRule], options: MinecraftOptions) -> bool:
@@ -314,7 +329,7 @@ async def get_user_agent() -> str:
     global _USER_AGENT_CACHE
     if _USER_AGENT_CACHE is not None:
         return _USER_AGENT_CACHE
-    
+
     file_path = os.path.join(os.path.dirname(__file__), "version.txt")
     async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
         _USER_AGENT_CACHE = "minecraft-launcher-lib/" + (await f.read()).strip()
@@ -336,17 +351,17 @@ _requests_response_cache: dict[str, RequestsResponseCache] = {}
 
 async def get_requests_response_cache(url: str) -> aiohttp.ClientResponse:
     """
-    Caches the result of request.get(). If a request was made to the same URL within the last hour, 
+    Caches the result of request.get(). If a request was made to the same URL within the last hour,
     the cache will be used, so you don't need to make a request to a URL each time you call a function.
-    
+
     Args:
         url: The URL to request or get from cache
-        
+
     Returns:
         A dictionary containing cached response data
     """
     now = datetime.datetime.now()
-    
+
     # Return cached response if valid
     if url in _requests_response_cache:
         cache_entry = _requests_response_cache[url]
@@ -380,13 +395,13 @@ async def get_requests_response_cache(url: str) -> aiohttp.ClientResponse:
                 # Update cache (with simple size limit)
                 if len(_requests_response_cache) > 100:  # Keep max 100 entries
                     _requests_response_cache.clear()
-                
+
                 _requests_response_cache[url] = {
                     "response": response_cache,
                     "datetime": now,
                 }
                 return response_cache
-            
+
             # Handle non-200 responses
             return {
                 "status": r.status,

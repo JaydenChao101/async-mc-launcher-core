@@ -1,5 +1,6 @@
 import asyncio
-from launcher_core.load_config import load_config, save_config
+from launcher_core.config.load_launcher_config import load_config, save_config
+
 
 async def main():
     # 加載配置
@@ -13,5 +14,6 @@ async def main():
     # 保存回文件
     await save_config("config.toml", config)
     print("配置已更新！")
+
 
 asyncio.run(main())

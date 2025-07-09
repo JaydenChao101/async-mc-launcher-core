@@ -1,11 +1,11 @@
 # This file is part of async-mc-launcher-core (https://github.com/JaydenChao101/async-mc-launcher-core)
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
-'''
-runtime allows to install the java runtime. This module is used by 
-:func:`~launcher_core..install.install_minecraft_version`, 
+"""
+runtime allows to install the java runtime. This module is used by
+:func:`~launcher_core..install.install_minecraft_version`,
 so you don't need to use it in your code most of the time.
-'''
+"""
 import subprocess
 import datetime
 import platform
@@ -180,7 +180,7 @@ async def install_jvm_runtime(
             # Make files executable on unix systems
             if value["executable"]:
                 try:
-                    subprocess.run(["chmod", "+x", current_path],check=True)
+                    subprocess.run(["chmod", "+x", current_path], check=True)
                 except FileNotFoundError:
                     pass
             file_list.append(key)

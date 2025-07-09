@@ -33,6 +33,7 @@ dependencies = [
   "aiohttp>=3.11.18",
   "cryptography>=45.0.2",
   "pyjwt>=2.10.1",
+  "pytest>=8.4.1",
   "requests-mock>=1.12.1",
   "tomli-w>=1.2.0",
 ]
@@ -44,6 +45,14 @@ Source = "https://github.com/JaydenChao101/asyncio-mc-launcher-lib"
 
 [tool.setuptools.dynamic]
 version = { file = "launcher_core/version.txt" }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.2.1",
+    "pytest-mock>=3.14.1",
+]
 
 [tool.setuptools]
 packages = ["launcher_core", "launcher_core._internal_types"]  # 手动列出所有包
