@@ -1,6 +1,6 @@
-'''
+"""
 This code is used to login to a Microsoft account and get the access token.
-'''
+"""
 
 # This file is part of asyncio-minecraft-launcher-lib (https://github.com/JaydenChao101/asyncio-mc-lancher-lib)
 # Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
@@ -41,11 +41,13 @@ __all__ = [
     "refresh_minecraft_token",
 ]
 
+
 class Login:
-    '''
+    """
     This class is used to login to a Microsoft account and get the access token.
     It uses the Microsoft OAuth2.0 authentication flow to get the access token.
-    '''
+    """
+
     def __init__(
         self,
         azure_app: AzureApplication = AzureApplication(),
@@ -74,7 +76,7 @@ class Login:
         logger.info("Generated login URL for Microsoft account authentication: %s", url)
 
         return url
-    
+
     @staticmethod
     async def extract_code_from_url(url: str) -> str:
         """
@@ -121,7 +123,7 @@ class Login:
 
     @staticmethod
     async def get_xbl_token(ms_access_token: str) -> XBLResponse:
-        '''Get the Xbox Live token using the Microsoft access token.'''
+        """Get the Xbox Live token using the Microsoft access token."""
         payload = {
             "Properties": {
                 "AuthMethod": "RPS",
@@ -143,7 +145,7 @@ class Login:
                 data = await resp.json()
                 logger.info("Xbox Token response: %s", data)
                 return data
-    
+
     @staticmethod
     async def get_xsts_token(xbl_token: str) -> XSTSResponse:
         """
@@ -206,11 +208,12 @@ class Login:
                         raise AccountNeedAdultVerification()
                     else:
                         raise XErrNotFound(
-        f"Loginning of the XSTS token error: {error_code}, full response: {data}"
-    )
+                            f"Loginning of the XSTS token error: {error_code}, full response: {data}"
+                        )
 
                 logger.info("XSTS Token response: %s", data)
                 return data
+
     @staticmethod
     async def get_minecraft_access_token(
         xsts_token: str, uhs: str
@@ -245,10 +248,11 @@ class Login:
 
 
 class device_code_login:
-    '''
+    """
     This class is used to login to a Microsoft account using the device code flow.
     It uses the Microsoft OAuth2.0 authentication flow to get the access token.
-    '''
+    """
+
     def __init__(
         self,
         azure_app: AzureApplication = AzureApplication(),
@@ -277,14 +281,14 @@ class device_code_login:
                 return await resp.json()
 
     async def poll_device_code(self, device_code: str, interval: int, expires_in: int):
-        '''
+        """
         Poll the device code to get the access token.
         :param device_code: The device code
         :param interval: The interval to poll the device code
         :param expires_in: The expires in time
         :return: The ms_token
         :raises DeviceCodeExpiredError: If the device code is expired or not authorized in time.
-        '''
+        """
         data = {
             "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
             "client_id": self.client_id,
@@ -312,7 +316,9 @@ class device_code_login:
                         await asyncio.sleep(interval)
                         elapsed += interval
                     else:
-                        raise DeviceCodeExpiredError("Device code expired or not authorized in time.")
+                        raise DeviceCodeExpiredError(
+                            "Device code expired or not authorized in time."
+                        )
 
 
 async def refresh_minecraft_token(
@@ -351,7 +357,6 @@ async def refresh_minecraft_token(
             data = await resp.json()
             logger.info("Refreshed Minecraft token response: %s", data)
             return data
-
 
 
 # This example shows how to login to a Microsoft account and get the access token.

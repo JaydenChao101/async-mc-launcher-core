@@ -1,7 +1,7 @@
 # This file is part of async-mc-launcher-core (https://github.com/JaydenChao101/async-mc-launcher-core)
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
-'''command contains the function for creating the minecraft command'''
+"""command contains the function for creating the minecraft command"""
 import json
 import copy
 import os
@@ -37,11 +37,14 @@ def get_libraries(data: ClientJson, path: str) -> str:
         native = get_natives(i)
         if native != "":
             if "downloads" in i and "path" in i["downloads"]["classifiers"][native]:  # type: ignore
-                libstr += os.path.join(
-                    path,
-                    "libraries",
-                    i["downloads"]["classifiers"][native]["path"],  # type: ignore
-                ) + classpath_seperator
+                libstr += (
+                    os.path.join(
+                        path,
+                        "libraries",
+                        i["downloads"]["classifiers"][native]["path"],  # type: ignore
+                    )
+                    + classpath_seperator
+                )
             else:
                 libstr += (
                     get_library_path(i["name"] + "-" + native, path)

@@ -78,11 +78,15 @@ class ProfileValidator:
                     return False
 
             # Validate java arguments
-            if not ProfileValidator._validate_java_arguments(profile.get("javaArguments")):
+            if not ProfileValidator._validate_java_arguments(
+                profile.get("javaArguments")
+            ):
                 return False
 
             # Validate custom resolution
-            if not ProfileValidator._validate_custom_resolution(profile.get("customResolution")):
+            if not ProfileValidator._validate_custom_resolution(
+                profile.get("customResolution")
+            ):
                 return False
 
             return True
@@ -95,7 +99,9 @@ class ProfileValidator:
         """Validate java arguments structure."""
         if java_arguments is None:
             return True
-        return isinstance(java_arguments, list) and all(isinstance(arg, str) for arg in java_arguments)
+        return isinstance(java_arguments, list) and all(
+            isinstance(arg, str) for arg in java_arguments
+        )
 
     @staticmethod
     def _validate_custom_resolution(custom_resolution: Optional[dict]) -> bool:
@@ -136,7 +142,9 @@ class ProfileFileHandler:
                 content = await file.read()
                 return json.loads(content)
         except FileNotFoundError:
-            raise FileNotFoundError(f"Launcher profiles file not found: {self.profiles_path}")
+            raise FileNotFoundError(
+                f"Launcher profiles file not found: {self.profiles_path}"
+            )
         except json.JSONDecodeError as e:
             raise json.JSONDecodeError(f"Invalid JSON in profiles file: {e}")
 
@@ -165,7 +173,9 @@ class ProfileConverter:
     """Handles conversion between different profile formats."""
 
     @staticmethod
-    def from_json_profile(json_profile: VanillaLauncherProfilesJsonProfile) -> VanillaLauncherProfile:
+    def from_json_profile(
+        json_profile: VanillaLauncherProfilesJsonProfile,
+    ) -> VanillaLauncherProfile:
         """
         Converts a JSON profile to a VanillaLauncherProfile.
 
@@ -219,7 +229,9 @@ class ProfileConverter:
         return profile
 
     @staticmethod
-    def to_json_profile(vanilla_profile: VanillaLauncherProfile) -> VanillaLauncherProfilesJsonProfile:
+    def to_json_profile(
+        vanilla_profile: VanillaLauncherProfile,
+    ) -> VanillaLauncherProfilesJsonProfile:
         """
         Converts a VanillaLauncherProfile to a JSON profile format.
 
@@ -357,14 +369,16 @@ async def get_vanilla_launcher_profile_version(
 
     if version_type in ("latest-release", "latest-snapshot"):
         latest_version = await get_latest_version()
-        return latest_version["release" if version_type == "latest-release" else "snapshot"]
+        return latest_version[
+            "release" if version_type == "latest-release" else "snapshot"
+        ]
     else:  # custom
         return vanilla_profile["version"]  # type: ignore
 
 
 async def add_vanilla_launcher_profile(
     minecraft_directory: Union[str, os.PathLike],
-    vanilla_profile: VanillaLauncherProfile
+    vanilla_profile: VanillaLauncherProfile,
 ) -> None:
     """
     Adds a new profile to the Vanilla Launcher.

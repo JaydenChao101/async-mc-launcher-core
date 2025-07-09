@@ -19,8 +19,6 @@ from ._internal_types.shared_types import ClientJson, VersionListManifestJson
 from ._helper import get_requests_response_cache, assert_func
 
 
-
-
 async def get_minecraft_directory() -> str:
     """
     Returns the default path to the .minecraft directory
@@ -378,15 +376,16 @@ async def is_minecraft_installed(minecraft_directory: str | os.PathLike) -> bool
     except AssertionError:
         return False
 
+
 def sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
     """将异步函数/协程强制同步执行（仿 bilibili_api 设计）[6]
-    
+
     Args:
         coroutine: 需要同步化的协程对象或异步函数调用
-        
+
     Returns:
         同步执行后的结果
-        
+
     Example:
         >>> async def async_func(): ...
         >>> result = sync(async_func())  # 同步执行异步函数
@@ -397,7 +396,7 @@ def sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
     except RuntimeError:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-    
+
     try:
         return loop.run_until_complete(coroutine)
     except Exception as e:
