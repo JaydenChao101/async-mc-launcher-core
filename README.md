@@ -1,5 +1,5 @@
-# async-mc-launcher-core 🚀  
-**A Modern Async Python Library for Building Minecraft Launchers**  
+# Async MC Launcher Core 🚀
+**A modern async Python library for custom Minecraft launchers**
 > [中文說明請見 README-Chinese.md](./README-Chinese.md)
 
 [![Test](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/test.yml/badge.svg)](https://github.com/JaydenChao101/asyncio-mc-launcher-lib/actions/workflows/test.yml)
@@ -28,12 +28,12 @@ A Python library for building custom Minecraft launchers. Supports installing, l
 
 ## Installation
 
-Using pip:
+Install via pip:
 ```bash
 pip install async-mc-launcher-core
 ```
 
-Or using uv (recommended for faster installation):
+Or with uv (faster install):
 ```bash
 uv pip install async-mc-launcher-core
 ```
