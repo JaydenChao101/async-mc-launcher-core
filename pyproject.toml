@@ -55,4 +55,4 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["launcher_core", "launcher_core._internal_types"]  # 手动列出所有包
+packages = {find = {where = ["."], include = ["launcher_core*"]}}  # 自動發現所有 launcher_core 子包

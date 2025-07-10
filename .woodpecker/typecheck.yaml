@@ -1,6 +1,0 @@
-steps:
-    mypy:
-        image: python:latest
-        commands:
-              - pip install requests types-requests mypy
-              - mypy
