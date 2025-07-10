@@ -236,10 +236,10 @@ class VersionCache:
         if cls._version_cache is not None:
             return cls._version_cache
         else:
-            version_path = os.path.join(os.path.dirname(__file__), "version.txt")
-            async with aiofiles.open(version_path, "r", encoding="utf-8") as f:
-                cls._version_cache = (await f.read()).strip()
-                return cls._version_cache
+            # 直接從 __init__.py 導入 __version__
+            from . import __version__
+            cls._version_cache = __version__
+            return cls._version_cache
 
 
 get_library_version = VersionCache.get_library_version
@@ -390,15 +390,35 @@ def sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
         >>> async def async_func(): ...
         >>> result = sync(async_func())  # 同步执行异步函数
     """
-    try:
-        # 获取或创建事件循环
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+    import platform
+
+    # 在 Windows 上不尝试使用 uvloop，因为它不支持
+    if platform.system() != "Windows":
+        try:
+            import uvloop
+            # 获取或创建事件循环
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = uvloop.new_event_loop()
+                asyncio.set_event_loop(loop)
+        except ImportError:
+            # 如果没有安装uvloop，回退到默认事件循环
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+    else:
+        # Windows 系统使用默认事件循环
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
     try:
         return loop.run_until_complete(coroutine)
     except Exception as e:
-        logger.error("同步执行失败: %s", e)  # 使用现有日志系统[3][4]
+        logger.error("同步执行失败: %s", e)  # 使用现有日志系统
         raise
