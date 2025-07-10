@@ -1,7 +1,7 @@
 # This file is part of async-mc-launcher-core (https://github.com/JaydenChao101/async-mc-launcher-core)
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
-"utils contains a few functions for helping you that doesn't fit in any other category"
+"""utils contains a few functions for helping you that doesn't fit in any other category"""
 from datetime import datetime
 import platform
 import pathlib
@@ -30,19 +30,25 @@ async def get_minecraft_directory() -> str:
         minecraft_directory = await launcher_coreutils.get_minecraft_directory()
         print(f"The default minecraft directory is {minecraft_directory}")
     """
-    if platform.system() == "Windows":
-        return os.path.join(
+    system = platform.system()
+    logger.debug(f"檢測到系統類型: {system}")
+
+    if system == "Windows":
+        minecraft_dir = os.path.join(
             os.getenv(
                 "APPDATA", os.path.join(pathlib.Path.home(), "AppData", "Roaming")
             ),
             ".minecraft",
         )
-    elif platform.system() == "Darwin":
-        return os.path.join(
+    elif system == "Darwin":
+        minecraft_dir = os.path.join(
             str(pathlib.Path.home()), "Library", "Application Support", "minecraft"
         )
     else:
-        return os.path.join(str(pathlib.Path.home()), ".minecraft")
+        minecraft_dir = os.path.join(str(pathlib.Path.home()), ".minecraft")
+
+    logger.debug(f"Minecraft 目錄路徑: {minecraft_dir}")
+    return minecraft_dir
 
 
 async def get_latest_version() -> LatestMinecraftVersions:
@@ -57,12 +63,18 @@ async def get_latest_version() -> LatestMinecraftVersions:
         print("Latest Release " + latest_version["release"])
         print("Latest Snapshot " + latest_version["snapshot"])
     """
-    response = await get_requests_response_cache(
-        "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json"
-    )
-
-    data = json.loads(response["content"])
-    return data["latest"]
+    logger.debug("正在獲取最新 Minecraft 版本信息")
+    try:
+        response = await get_requests_response_cache(
+            "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json"
+        )
+        data = json.loads(response["content"])
+        latest = data["latest"]
+        logger.info(f"最新版本 - Release: {latest['release']}, Snapshot: {latest['snapshot']}")
+        return latest
+    except Exception as e:
+        logger.error(f"獲取最新版本失敗: {e}")
+        raise
 
 
 async def get_version_list() -> list[MinecraftVersionInfo]:
@@ -110,17 +122,20 @@ async def get_installed_versions(
 
     :param minecraft_directory: The path to your Minecraft directory
     """
+    logger.debug(f"正在掃描已安裝版本，目錄: {minecraft_directory}")
     try:
         dir_list = await asyncio.to_thread(
             os.listdir, os.path.join(minecraft_directory, "versions")
         )
     except FileNotFoundError:
+        logger.warning(f"版本目錄不存在: {minecraft_directory}/versions")
         return []
 
     version_list: list[MinecraftVersionInfo] = []
     for i in dir_list:
         json_path = os.path.join(minecraft_directory, "versions", i, i + ".json")
         if not await asyncio.to_thread(os.path.isfile, json_path):
+            logger.debug(f"跳過無效版本目錄: {i}")
             continue
 
         try:
@@ -131,6 +146,7 @@ async def get_installed_versions(
                 release_time = datetime.fromisoformat(version_data["releaseTime"])
             except ValueError:
                 # In case some custom client has a invalid time
+                logger.warning(f"版本 {i} 有無效的發布時間")
                 release_time = datetime.fromtimestamp(0)
 
             version_list.append(
@@ -141,9 +157,12 @@ async def get_installed_versions(
                     "complianceLevel": version_data.get("complianceLevel", 0),
                 }
             )
-        except Exception:
+            logger.debug(f"找到已安裝版本: {version_data['id']}")
+        except Exception as e:
+            logger.error(f"讀取版本 {i} 失敗: {e}")
             continue
 
+    logger.info(f"共找到 {len(version_list)} 個已安裝版本")
     return version_list
 
 
