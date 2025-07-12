@@ -75,10 +75,8 @@ async def download_file(
         elif await get_sha1_hash(path) == sha1:
             return False
 
-    try:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-    except Exception:
-        pass
+    # Create directory once, outside try-except for better performance
+    os.makedirs(os.path.dirname(path), exist_ok=True)
 
     callback.get("setStatus", empty)("Download " + os.path.basename(path))
 
@@ -88,28 +86,34 @@ async def download_file(
         close_session = True
 
     try:
-        headers = {"user-agent": get_user_agent()}
+        headers = {"user-agent": await get_user_agent()}  # Await the async function
         async with session.get(
             url, headers=headers, timeout=aiohttp.ClientTimeout(total=300)
         ) as r:
             if r.status != 200:
                 return False
 
+            content_length = r.headers.get("Content-Length")
+            if content_length:
+                content_length = int(content_length)
+
             async with aiofiles.open(path, "wb") as f:
                 if lzma_compressed:
                     content = await r.read()
                     await f.write(lzma.decompress(content))
                 else:
-                    # Use streaming download with 64KB chunks
-                    chunk_size = 65536
-                    while True:
-                        chunk = await r.content.read(chunk_size)
-                        if not chunk:
-                            break
+                    # Optimized streaming download with larger chunks and progress tracking
+                    chunk_size = 1024 * 1024  # Increased to 1MB for better performance
+                    downloaded = 0
+                    progress_callback = callback.get("setProgress")
+
+                    async for chunk in r.content.iter_chunked(chunk_size):
                         await f.write(chunk)
+                        downloaded += len(chunk)
+
                         # Update progress if callback provided
-                        if callback.get("setProgress"):
-                            callback["setProgress"](r.content_length, f.tell())
+                        if progress_callback and content_length:
+                            progress_callback(content_length, downloaded)
     finally:
         if close_session:
             await session.close()

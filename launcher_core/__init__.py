@@ -9,6 +9,7 @@ from ._types import (
     Credential,
     AzureApplication,
 )
+from .check_version import check_version
 
 from . import (
     command,
@@ -49,4 +50,6 @@ __all__ = [
     "Credential",
     "AzureApplication",
     "verify_mojang_jwt",
+    "__version__",
+    "check_version",
 ]
