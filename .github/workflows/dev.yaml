@@ -12,47 +12,60 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main branch
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: main
           fetch-depth: 0
-          persist-credentials: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git config --local advice.diverging false
 
       - name: Fetch all branches
         run: git fetch --all
 
-      - name: Check if dev branch needs update
-        id: check
+      - name: Check if dev branch exists
+        id: check_dev
         run: |
-          git checkout dev
-          git pull origin dev
-
-          # 檢查 dev 分支是否已經包含 main 分支的最新 commit
-          MAIN_COMMIT=$(git rev-parse origin/main)
-          DEV_COMMIT=$(git rev-parse HEAD)
-
-          # 檢查 main 的 commit 是否已經在 dev 分支中
-          if git merge-base --is-ancestor $MAIN_COMMIT HEAD; then
-            echo "Dev branch is already up to date with main"
-            echo "needs_update=false" >> $GITHUB_OUTPUT
+          if git show-ref --verify --quiet refs/remotes/origin/dev; then
+            echo "dev_exists=true" >> $GITHUB_OUTPUT
           else
-            echo "Dev branch needs update"
-            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "dev_exists=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Create dev branch if it doesn't exist
+        if: steps.check_dev.outputs.dev_exists == 'false'
+        run: |
+          git checkout -b dev
+          git push origin dev
+          echo "Created new dev branch"
 
       - name: Sync changes to dev branch
-        if: steps.check.outputs.needs_update == 'true'
+        if: steps.check_dev.outputs.dev_exists == 'true'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          # Switch to dev branch
+          git checkout dev
+          
+          # Reset dev branch to match main branch exactly
+          git reset --hard origin/main
+          
+          # Force push to update dev branch
+          git push --force-with-lease origin dev
+          
+          echo "Successfully synced dev branch with main"
 
-          # 使用 fast-forward merge 或 rebase 來避免不必要的 merge commits
-          if git merge origin/main --ff-only; then
-            echo "Fast-forward merge successful"
+      - name: Verify sync
+        run: |
+          git checkout dev
+          MAIN_COMMIT=$(git rev-parse origin/main)
+          DEV_COMMIT=$(git rev-parse HEAD)
+          
+          if [ "$MAIN_COMMIT" = "$DEV_COMMIT" ]; then
+            echo "✅ Dev branch is now in sync with main"
           else
-            echo "Fast-forward not possible, using rebase"
-            git rebase origin/main
+            echo "❌ Sync failed - commits don't match"
+            exit 1
           fi
-
-          git push origin dev
