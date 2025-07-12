@@ -1,7 +1,7 @@
 # This file is part of async-mc-launcher-core (https://github.com/JaydenChao101/async-mc-launcher-core)
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
-"This module contains some helper functions. It should not be used outside minecraft_launcher_lib"
+"""This module contains some helper functions. It should not be used outside minecraft_launcher_lib"""
 from typing import Literal, Any, NoReturn
 import subprocess
 import datetime

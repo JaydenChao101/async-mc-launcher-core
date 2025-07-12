@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch, MagicMock
 import tempfile
 import shutil
 from pathlib import Path
+import json
 
 # Add the project root to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -109,31 +110,69 @@ class TestInstall:
 class TestCommand:
     """Test cases for command module"""
 
-    def test_get_minecraft_command(self):
+    @pytest.fixture
+    def temp_minecraft_dir(self):
+        """Create temporary Minecraft directory for testing"""
+        temp_dir = tempfile.mkdtemp()
+        yield temp_dir
+        shutil.rmtree(temp_dir)
+
+    async def test_get_minecraft_command(self, temp_minecraft_dir):
         """Test generating Minecraft launch command"""
         if hasattr(command, "get_minecraft_command"):
+            # Create version directory structure
+            version_dir = os.path.join(temp_minecraft_dir, "versions", "1.20.4")
+            os.makedirs(version_dir, exist_ok=True)
+
             # Mock version info and options
             version_info = {
                 "id": "1.20.4",
+                "type": "release",
                 "mainClass": "net.minecraft.client.main.Main",
                 "libraries": [],
                 "minecraftArguments": "--username ${auth_player_name} --version ${version_name}",
+                "arguments": {
+                    "game": ["--username", "${auth_player_name}", "--version", "${version_name}"],
+                    "jvm": ["-Xmx2G", "-XX:+UnlockExperimentalVMOptions"]
+                },
+                "downloads": {
+                    "client": {
+                        "url": "https://example.com/client.jar",
+                        "sha1": "abc123",
+                        "size": 12345,
+                    }
+                },
+                "releaseTime": "2024-01-01T00:00:00+00:00",
+                "time": "2024-01-01T00:00:00+00:00"
             }
+
+            # Create version json file
+            version_file = os.path.join(version_dir, "1.20.4.json")
+            with open(version_file, 'w') as f:
+                json.dump(version_info, f)
 
             options = {
                 "username": "TestPlayer",
                 "uuid": "test-uuid-123",
-                "access_token": "test-token",
-                "gameDirectory": "/path/to/minecraft",
-                "javaExecutable": "java",
+                "token": "test-token",
+                "gameDirectory": temp_minecraft_dir,
+                "executablePath": "java",
             }
 
-            result = command.get_minecraft_command(version_info, options)
+            # Mock the executable path
+            with patch("launcher_core.runtime.get_executable_path") as mock_get_executable:
+                mock_get_executable.return_value = "java"
 
-            # Basic checks
-            assert isinstance(result, list)
-            assert "java" in result
-            assert "net.minecraft.client.main.Main" in result
+                result = await command.get_minecraft_command(
+                    version="1.20.4",
+                    minecraft_directory=temp_minecraft_dir,
+                    options=options
+                )
+
+                # Basic checks
+                assert isinstance(result, list)
+                assert any("java" in str(item) for item in result)
+                assert "net.minecraft.client.main.Main" in result
 
     def test_get_classpath(self):
         """Test generating classpath for Minecraft"""

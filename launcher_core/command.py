@@ -24,43 +24,43 @@ __all__ = ["get_minecraft_command"]
 
 
 async def get_libraries(data: ClientJson, path: str) -> str:
-        """
-        Returns the argument with all libs that come after -cp
-        """
-        classpath_seperator = get_classpath_separator()
-        libstr = ""
-        for i in data["libraries"]:
-            if "rules" in i and not parse_rule_list(i["rules"], {}):
-                continue
+    """
+    Returns the argument with all libs that come after -cp
+    """
+    classpath_seperator = get_classpath_separator()
+    libstr = ""
+    for i in data["libraries"]:
+        if "rules" in i and not parse_rule_list(i["rules"], {}):
+            continue
 
-            libstr += get_library_path(i["name"], path) + classpath_seperator
-            native = get_natives(i)
-            if native != "":
-                if "downloads" in i and "path" in i["downloads"]["classifiers"][native]:  # type: ignore
-                    libstr += (
-                        os.path.join(
-                            path,
-                            "libraries",
-                            i["downloads"]["classifiers"][native]["path"],  # type: ignore
-                        )
-                        + classpath_seperator
+        libstr += get_library_path(i["name"], path) + classpath_seperator
+        native = get_natives(i)
+        if native != "":
+            if "downloads" in i and "path" in i["downloads"]["classifiers"][native]:  # type: ignore
+                libstr += (
+                    os.path.join(
+                        path,
+                        "libraries",
+                        i["downloads"]["classifiers"][native]["path"],  # type: ignore
                     )
-                else:
-                    libstr += (
-                        get_library_path(i["name"] + "-" + native, path)
-                        + classpath_seperator
-                    )
+                    + classpath_seperator
+                )
+            else:
+                libstr += (
+                    get_library_path(i["name"] + "-" + native, path)
+                    + classpath_seperator
+                )
 
-        if "jar" in data:
-            libstr = libstr + os.path.join(
-                path, "versions", data["jar"], data["jar"] + ".jar"
-            )
-        else:
-            libstr = libstr + os.path.join(
-                path, "versions", data["id"], data["id"] + ".jar"
-            )
+    if "jar" in data:
+        libstr = libstr + os.path.join(
+            path, "versions", data["jar"], data["jar"] + ".jar"
+        )
+    else:
+        libstr = libstr + os.path.join(
+            path, "versions", data["id"], data["id"] + ".jar"
+        )
 
-        return libstr
+    return libstr
 
 
 async def replace_arguments(
@@ -276,7 +276,9 @@ async def get_minecraft_command(
     return command
 
 
-def _set_credential_options(options: MinecraftOptions, credential: AuthCredential | None) -> None:
+def _set_credential_options(
+    options: MinecraftOptions, credential: AuthCredential | None
+) -> None:
     """设置认证信息到选项中"""
     if credential:
         options["token"] = credential.access_token
@@ -296,7 +298,9 @@ async def _load_version_data(path: str, version: str) -> ClientJson:
     return data
 
 
-async def _add_java_executable(command: list[str], options: MinecraftOptions, data: ClientJson, path: str) -> None:
+async def _add_java_executable(
+    command: list[str], options: MinecraftOptions, data: ClientJson, path: str
+) -> None:
     """添加Java可执行文件路径"""
     if "executablePath" in options:
         command.append(options["executablePath"])
@@ -307,7 +311,13 @@ async def _add_java_executable(command: list[str], options: MinecraftOptions, da
         command.append(options.get("defaultExecutablePath", "java"))
 
 
-async def _add_jvm_arguments(command: list[str], options: MinecraftOptions, data: ClientJson, path: str, classpath: str) -> None:
+async def _add_jvm_arguments(
+    command: list[str],
+    options: MinecraftOptions,
+    data: ClientJson,
+    path: str,
+    classpath: str,
+) -> None:
     """添加JVM参数"""
     # 添加用户自定义的JVM参数
     if "jvmArguments" in options:
@@ -315,18 +325,20 @@ async def _add_jvm_arguments(command: list[str], options: MinecraftOptions, data
 
     # 添加版本特定的JVM参数
     if isinstance(data.get("arguments"), dict) and "jvm" in data["arguments"]:
-        jvm_args = await get_arguments(data["arguments"]["jvm"], data, path, options, classpath)
+        jvm_args = await get_arguments(
+            data["arguments"]["jvm"], data, path, options, classpath
+        )
         command.extend(jvm_args)
     else:
         # 旧版本的默认JVM参数
-        command.extend([
-            f"-Djava.library.path={options['nativesDirectory']}",
-            "-cp",
-            classpath
-        ])
+        command.extend(
+            [f"-Djava.library.path={options['nativesDirectory']}", "-cp", classpath]
+        )
 
 
-def _add_logging_config(command: list[str], options: MinecraftOptions, data: ClientJson, path: str) -> None:
+def _add_logging_config(
+    command: list[str], options: MinecraftOptions, data: ClientJson, path: str
+) -> None:
     """添加日志配置参数"""
     if not options.get("enableLoggingConfig", False):
         return
@@ -339,11 +351,19 @@ def _add_logging_config(command: list[str], options: MinecraftOptions, data: Cli
             "log_configs",
             logging_config["client"]["file"]["id"],
         )
-        log_argument = logging_config["client"]["argument"].replace("${path}", logger_file)
+        log_argument = logging_config["client"]["argument"].replace(
+            "${path}", logger_file
+        )
         command.append(log_argument)
 
 
-async def _add_game_arguments(command: list[str], data: ClientJson, path: str, options: MinecraftOptions, classpath: str) -> None:
+async def _add_game_arguments(
+    command: list[str],
+    data: ClientJson,
+    path: str,
+    options: MinecraftOptions,
+    classpath: str,
+) -> None:
     """添加游戏参数"""
     if "minecraftArguments" in data:
         # 旧版本格式
@@ -351,7 +371,9 @@ async def _add_game_arguments(command: list[str], data: ClientJson, path: str, o
         command.extend(game_args)
     else:
         # 新版本格式
-        game_args = await get_arguments(data["arguments"]["game"], data, path, options, classpath)
+        game_args = await get_arguments(
+            data["arguments"]["game"], data, path, options, classpath
+        )
         command.extend(game_args)
 
 
@@ -363,7 +385,9 @@ def _add_server_arguments(command: list[str], options: MinecraftOptions) -> None
             command.extend(["--port", options["port"]])
 
 
-def _add_multiplayer_chat_arguments(command: list[str], options: MinecraftOptions) -> None:
+def _add_multiplayer_chat_arguments(
+    command: list[str], options: MinecraftOptions
+) -> None:
     """添加多人游戏和聊天禁用参数"""
     if options.get("disableMultiplayer", False):
         command.append("--disableMultiplayer")
