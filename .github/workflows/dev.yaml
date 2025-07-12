@@ -49,11 +49,33 @@ jobs:
           # Switch to dev branch
           git checkout dev
           
-          # Reset dev branch to match main branch exactly
-          git reset --hard origin/main
+          # Check if dev is already up to date with main
+          MAIN_COMMIT=$(git rev-parse origin/main)
+          DEV_COMMIT=$(git rev-parse HEAD)
           
-          # Force push to update dev branch
-          git push --force-with-lease origin dev
+          if [ "$MAIN_COMMIT" = "$DEV_COMMIT" ]; then
+            echo "Dev branch is already up to date with main"
+            exit 0
+          fi
+          
+          # Try to fast-forward merge main into dev
+          echo "Attempting to fast-forward merge main into dev..."
+          if git merge --ff-only origin/main; then
+            echo "Successfully fast-forwarded dev branch to match main"
+          else
+            echo "Fast-forward not possible, performing regular merge..."
+            # If fast-forward fails, do a regular merge to incorporate main changes
+            if git merge origin/main -m "Sync dev branch with main"; then
+              echo "Successfully merged main into dev branch"
+            else
+              echo "❌ Merge conflicts detected. Manual intervention required."
+              echo "Please resolve conflicts manually and merge main into dev."
+              exit 1
+            fi
+          fi
+          
+          # Push changes using regular push (no force needed)
+          git push origin dev
           
           echo "Successfully synced dev branch with main"
 
@@ -64,8 +86,13 @@ jobs:
           DEV_COMMIT=$(git rev-parse HEAD)
           
           if [ "$MAIN_COMMIT" = "$DEV_COMMIT" ]; then
-            echo "✅ Dev branch is now in sync with main"
+            echo "✅ Dev branch is identical to main (fast-forward sync)"
           else
-            echo "❌ Sync failed - commits don't match"
-            exit 1
+            # Check if main is an ancestor of dev (meaning main changes are included)
+            if git merge-base --is-ancestor origin/main HEAD; then
+              echo "✅ Dev branch includes all changes from main (merge sync)"
+            else
+              echo "❌ Sync failed - main changes are not included in dev"
+              exit 1
+            fi
           fi
