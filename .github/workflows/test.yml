@@ -53,6 +53,9 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         pylint minecraft_launcher_lib/ --exit-zero --max-line-length=127
 
+    - name: Install pytest plugins
+      run: pip install pytest-md pytest-emoji
+
     - name: Run pytest
       uses: pavelzw/pytest-action@v2
       with:
