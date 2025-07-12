@@ -176,6 +176,155 @@ async def get_arguments(
     return arglist
 
 
+class MinecraftCommandBuilder:
+    """Minecraft命令構建器，負責組裝啟動命令的各个部分"""
+
+    def __init__(self, version: str, minecraft_directory: str, options: MinecraftOptions):
+        self.version = version
+        self.path = str(minecraft_directory)
+        self.options = copy.deepcopy(options)
+        self.data: ClientJson | None = None
+        self.classpath: str = ""
+        self.command: list[str] = []
+
+    async def validate_version(self) -> None:
+        """驗證版本是否存在"""
+        if not os.path.isdir(os.path.join(self.path, "versions", self.version)):
+            raise VersionNotFound(self.version)
+
+    def set_credential(self, credential: AuthCredential | None) -> None:
+        """設置認證信息"""
+        if credential:
+            self.options["token"] = credential.access_token
+            self.options["username"] = credential.username
+            self.options["uuid"] = credential.uuid
+
+    async def load_version_data(self) -> None:
+        """加載版本數據"""
+        json_path = os.path.join(self.path, "versions", self.version, self.version + ".json")
+        async with aiofiles.open(json_path, "r", encoding="utf-8") as f:
+            self.data = json.loads(await f.read())
+
+        if "inheritsFrom" in self.data:
+            self.data = await inherit_json(self.data, self.path)
+
+    def setup_natives_directory(self) -> None:
+        """設置natives目錄"""
+        if self.data:
+            self.options["nativesDirectory"] = self.options.get(
+                "nativesDirectory",
+                os.path.join(self.path, "versions", self.data["id"], "natives")
+            )
+
+    async def build_classpath(self) -> None:
+        """構建類路徑"""
+        if self.data:
+            self.classpath = await get_libraries(self.data, self.path)
+
+    async def add_java_executable(self) -> None:
+        """添加Java可執行文件路徑"""
+        if "executablePath" in self.options:
+            self.command.append(self.options["executablePath"])
+        elif self.data and "javaVersion" in self.data:
+            java_path = await get_executable_path(self.data["javaVersion"]["component"], self.path)
+            self.command.append(java_path or "java")
+        else:
+            self.command.append(self.options.get("defaultExecutablePath", "java"))
+
+    async def add_jvm_arguments(self) -> None:
+        """添加JVM參數"""
+        # 添加用戶自定義的JVM參數
+        if "jvmArguments" in self.options:
+            self.command.extend(self.options["jvmArguments"])
+
+        # 添加版本特定的JVM參數
+        if (self.data and
+            isinstance(self.data.get("arguments"), dict) and
+            "jvm" in self.data["arguments"]):
+            jvm_args = await get_arguments(
+                self.data["arguments"]["jvm"], self.data, self.path, self.options, self.classpath
+            )
+            self.command.extend(jvm_args)
+        else:
+            # 舊版本的默認JVM參數
+            self.command.extend([
+                f"-Djava.library.path={self.options['nativesDirectory']}",
+                "-cp",
+                self.classpath
+            ])
+
+    def add_logging_config(self) -> None:
+        """添加日誌配置參數"""
+        if not self.options.get("enableLoggingConfig", False) or not self.data:
+            return
+
+        logging_config = self.data.get("logging", {})
+        if logging_config and "client" in logging_config:
+            logger_file = os.path.join(
+                self.path,
+                "assets",
+                "log_configs",
+                logging_config["client"]["file"]["id"],
+            )
+            log_argument = logging_config["client"]["argument"].replace(
+                "${path}", logger_file
+            )
+            self.command.append(log_argument)
+
+    def add_main_class(self) -> None:
+        """添加主類"""
+        if self.data:
+            self.command.append(self.data["mainClass"])
+
+    async def add_game_arguments(self) -> None:
+        """添加遊戲參數"""
+        if not self.data:
+            return
+
+        if "minecraftArguments" in self.data:
+            # 舊版本格式
+            game_args = await get_arguments_string(self.data, self.path, self.options, self.classpath)
+            self.command.extend(game_args)
+        else:
+            # 新版本格式
+            game_args = await get_arguments(
+                self.data["arguments"]["game"], self.data, self.path, self.options, self.classpath
+            )
+            self.command.extend(game_args)
+
+    def add_server_arguments(self) -> None:
+        """添加服務器連接參數"""
+        if "server" in self.options:
+            self.command.extend(["--server", self.options["server"]])
+            if "port" in self.options:
+                self.command.extend(["--port", self.options["port"]])
+
+    def add_multiplayer_chat_arguments(self) -> None:
+        """添加多人遊戲和聊天禁用參數"""
+        if self.options.get("disableMultiplayer", False):
+            self.command.append("--disableMultiplayer")
+
+        if self.options.get("disableChat", False):
+            self.command.append("--disableChat")
+
+    async def build(self) -> list[str]:
+        """構建完整的Minecraft啟動命令"""
+        await self.validate_version()
+        await self.load_version_data()
+        self.setup_natives_directory()
+        await self.build_classpath()
+
+        await self.add_java_executable()
+        await self.add_jvm_arguments()
+        self.add_logging_config()
+        self.add_main_class()
+        await self.add_game_arguments()
+        self.add_server_arguments()
+        self.add_multiplayer_chat_arguments()
+
+        return self.command
+
+
 async def get_minecraft_command(
     version: str,
     minecraft_directory: str | os.PathLike,
@@ -226,171 +375,7 @@ async def get_minecraft_command(
     You can use the :doc:`microsoft_account` module to get the needed information.
     For more information about the options take a look at the :doc:`/tutorial/more_launch_options` tutorial.
     """
-    path = str(minecraft_directory)
+    builder = MinecraftCommandBuilder(version, minecraft_directory, options)
+    builder.set_credential(credential)
+    return await builder.build()
 
-    # 验证版本是否存在
-    if not os.path.isdir(os.path.join(path, "versions", version)):
-        raise VersionNotFound(version)
-
-    # 深拷贝选项以避免修改原始数据
-    options = copy.deepcopy(options)
-
-    # 设置认证信息
-    _set_credential_options(options, credential)
-
-    # 加载版本数据
-    data = await _load_version_data(path, version)
-
-    # 设置natives目录
-    options["nativesDirectory"] = options.get(
-        "nativesDirectory", os.path.join(path, "versions", data["id"], "natives")
-    )
-
-    # 获取类路径
-    classpath = await get_libraries(data, path)
-
-    # 构建命令
-    command: list[str] = []
-
-    # 添加Java可执行文件
-    await _add_java_executable(command, options, data, path)
-
-    # 添加JVM参数
-    await _add_jvm_arguments(command, options, data, path, classpath)
-
-    # 添加日志配置
-    _add_logging_config(command, options, data, path)
-
-    # 添加主类
-    command.append(data["mainClass"])
-
-    # 添加游戏参数
-    await _add_game_arguments(command, data, path, options, classpath)
-
-    # 添加服务器参数
-    _add_server_arguments(command, options)
-
-    # 添加多人游戏和聊天禁用参数
-    _add_multiplayer_chat_arguments(command, options)
-
-    return command
-
-
-def _set_credential_options(
-    options: MinecraftOptions, credential: AuthCredential | None
-) -> None:
-    """设置认证信息到选项中"""
-    if credential:
-        options["token"] = credential.access_token
-        options["username"] = credential.username
-        options["uuid"] = credential.uuid
-
-
-async def _load_version_data(path: str, version: str) -> ClientJson:
-    """加载版本数据"""
-    json_path = os.path.join(path, "versions", version, version + ".json")
-    async with aiofiles.open(json_path, "r", encoding="utf-8") as f:
-        data: ClientJson = json.loads(await f.read())
-
-    if "inheritsFrom" in data:
-        data = await inherit_json(data, path)
-
-    return data
-
-
-async def _add_java_executable(
-    command: list[str], options: MinecraftOptions, data: ClientJson, path: str
-) -> None:
-    """添加Java可执行文件路径"""
-    if "executablePath" in options:
-        command.append(options["executablePath"])
-    elif "javaVersion" in data:
-        java_path = await get_executable_path(data["javaVersion"]["component"], path)
-        command.append(java_path or "java")
-    else:
-        command.append(options.get("defaultExecutablePath", "java"))
-
-
-async def _add_jvm_arguments(
-    command: list[str],
-    options: MinecraftOptions,
-    data: ClientJson,
-    path: str,
-    classpath: str,
-) -> None:
-    """添加JVM参数"""
-    # 添加用户自定义的JVM参数
-    if "jvmArguments" in options:
-        command.extend(options["jvmArguments"])
-
-    # 添加版本特定的JVM参数
-    if isinstance(data.get("arguments"), dict) and "jvm" in data["arguments"]:
-        jvm_args = await get_arguments(
-            data["arguments"]["jvm"], data, path, options, classpath
-        )
-        command.extend(jvm_args)
-    else:
-        # 旧版本的默认JVM参数
-        command.extend(
-            [f"-Djava.library.path={options['nativesDirectory']}", "-cp", classpath]
-        )
-
-
-def _add_logging_config(
-    command: list[str], options: MinecraftOptions, data: ClientJson, path: str
-) -> None:
-    """添加日志配置参数"""
-    if not options.get("enableLoggingConfig", False):
-        return
-
-    logging_config = data.get("logging", {})
-    if logging_config and "client" in logging_config:
-        logger_file = os.path.join(
-            path,
-            "assets",
-            "log_configs",
-            logging_config["client"]["file"]["id"],
-        )
-        log_argument = logging_config["client"]["argument"].replace(
-            "${path}", logger_file
-        )
-        command.append(log_argument)
-
-
-async def _add_game_arguments(
-    command: list[str],
-    data: ClientJson,
-    path: str,
-    options: MinecraftOptions,
-    classpath: str,
-) -> None:
-    """添加游戏参数"""
-    if "minecraftArguments" in data:
-        # 旧版本格式
-        game_args = await get_arguments_string(data, path, options, classpath)
-        command.extend(game_args)
-    else:
-        # 新版本格式
-        game_args = await get_arguments(
-            data["arguments"]["game"], data, path, options, classpath
-        )
-        command.extend(game_args)
-
-
-def _add_server_arguments(command: list[str], options: MinecraftOptions) -> None:
-    """添加服务器连接参数"""
-    if "server" in options:
-        command.extend(["--server", options["server"]])
-        if "port" in options:
-            command.extend(["--port", options["port"]])
-
-
-def _add_multiplayer_chat_arguments(
-    command: list[str], options: MinecraftOptions
-) -> None:
-    """添加多人游戏和聊天禁用参数"""
-    if options.get("disableMultiplayer", False):
-        command.append("--disableMultiplayer")
-
-    if options.get("disableChat", False):
-        command.append("--disableChat")
