@@ -71,7 +71,7 @@ class TestMojang:
             result = await mojang.validate_access_token("test_access_token")
             assert result is True
 
-    def test_verify_mojang_jwt(self):
+    async def test_verify_mojang_jwt(self):
         """Test verifying Mojang JWT token"""
         if hasattr(mojang, "verify_mojang_jwt"):
             # Mock JWT token (this would normally be a real JWT)
@@ -79,7 +79,7 @@ class TestMojang:
 
             with patch("jwt.decode") as mock_decode:
                 mock_decode.return_value = {"sub": "1234567890", "name": "John Doe"}
-                result = mojang.verify_mojang_jwt(mock_jwt)
+                result = await mojang.verify_mojang_jwt(mock_jwt)
                 assert result is not None
 
     @patch("aiohttp.ClientSession")
@@ -150,7 +150,7 @@ class TestHelper:
                     "artifact": {"path": "com/mojang/logging/1.0.0/logging-1.0.0.jar"}
                 },
             }
-            result = _helper.get_library_path(library, "/minecraft")
+            result = _helper.get_library_path(library["name"], "/minecraft")
             assert result is not None
             assert "logging-1.0.0.jar" in result
 
