@@ -1,7 +1,7 @@
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 import tempfile
 import shutil
 from pathlib import Path
@@ -10,6 +10,18 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from launcher_core import forge, fabric, quilt, mrpack
+
+
+class AsyncContextManagerMock:
+    """Helper class to mock async context managers"""
+    def __init__(self, return_value):
+        self.return_value = return_value
+    
+    async def __aenter__(self):
+        return self.return_value
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
 
 
 class TestForge:
@@ -120,19 +132,24 @@ class TestFabric:
     async def test_install_fabric(self, mock_session):
         """Test installing Fabric"""
         mock_response = Mock()
-        mock_response.json = Mock(
+        mock_response.json = AsyncMock(
             return_value={
                 "libraries": [],
                 "mainClass": "net.fabricmc.loader.launch.knot.KnotClient",
             }
         )
-        mock_session.return_value.__aenter__.return_value.get.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        
+        # Set up proper async context manager mock
+        mock_get = Mock(return_value=AsyncContextManagerMock(mock_response))
+        mock_session_instance = Mock()
+        mock_session_instance.get = mock_get
+        mock_session.return_value.__aenter__.return_value = mock_session_instance
 
-        if hasattr(fabric, "install_fabric"):
-            result = await fabric.install_fabric("1.20.4", "0.14.24", "/temp/minecraft")
-            assert result is not None
+        # Mock the validation function that's causing issues
+        with patch("launcher_core.utils.is_version_valid", AsyncMock(return_value=True)):
+            if hasattr(fabric, "install_fabric"):
+                result = await fabric.install_fabric("1.20.4", "0.14.24", "/temp/minecraft")
+                assert result is None  # Function returns None on success
 
 
 class TestQuilt:
@@ -156,19 +173,24 @@ class TestQuilt:
     async def test_install_quilt(self, mock_session):
         """Test installing Quilt"""
         mock_response = Mock()
-        mock_response.json = Mock(
+        mock_response.json = AsyncMock(
             return_value={
                 "libraries": [],
                 "mainClass": "org.quiltmc.loader.launch.knot.KnotClient",
             }
         )
-        mock_session.return_value.__aenter__.return_value.get.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        
+        # Set up proper async context manager mock
+        mock_get = Mock(return_value=AsyncContextManagerMock(mock_response))
+        mock_session_instance = Mock()
+        mock_session_instance.get = mock_get
+        mock_session.return_value.__aenter__.return_value = mock_session_instance
 
-        if hasattr(quilt, "install_quilt"):
-            result = await quilt.install_quilt("1.20.4", "0.20.2", "/temp/minecraft")
-            assert result is not None
+        # Mock the validation function that's causing issues
+        with patch("launcher_core.utils.is_version_valid", AsyncMock(return_value=True)):
+            if hasattr(quilt, "install_quilt"):
+                result = await quilt.install_quilt("1.20.4", "0.20.2", "/temp/minecraft")
+                assert result is None  # Function returns None on success
 
 
 class TestMrpack:
@@ -220,18 +242,42 @@ class TestMrpack:
     async def test_install_mrpack(self, sample_mrpack_data):
         """Test installing mrpack"""
         if hasattr(mrpack, "install_mrpack"):
-            with patch("aiohttp.ClientSession") as mock_session:
-                mock_response = Mock()
-                mock_response.content.read = Mock(return_value=b"fake file content")
-                mock_response.status = 200
-                mock_session.return_value.__aenter__.return_value.get.return_value.__aenter__.return_value = (
-                    mock_response
-                )
+            # Create a temporary mrpack file
+            import tempfile
+            import zipfile
+            import json
+            with tempfile.NamedTemporaryFile(suffix=".mrpack", delete=False) as temp_file:
+                with zipfile.ZipFile(temp_file.name, 'w') as zf:
+                    mrpack_data = {
+                        "name": "test",
+                        "dependencies": {"minecraft": "1.20.4"},
+                        "files": []
+                    }
+                    zf.writestr("modrinth.index.json", json.dumps(mrpack_data))
+                
+                temp_path = temp_file.name
+            
+            try:
+                with patch("aiohttp.ClientSession") as mock_session:
+                    mock_response = Mock()
+                    mock_response.content.read = AsyncMock(return_value=b"fake file content")
+                    mock_response.status = 200
+                    
+                    # Set up proper async context manager mock
+                    mock_get = Mock(return_value=AsyncContextManagerMock(mock_response))
+                    mock_session_instance = Mock()
+                    mock_session_instance.get = mock_get
+                    mock_session.return_value.__aenter__.return_value = mock_session_instance
 
-                result = await mrpack.install_mrpack(
-                    sample_mrpack_data, "/temp/minecraft"
-                )
-                assert result is not None
+                    result = await mrpack.install_mrpack(
+                        temp_path, "/temp/minecraft"
+                    )
+                    assert result is None  # Function returns None on success
+            finally:
+                # Clean up
+                import os
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
 
 
 if __name__ == "__main__":

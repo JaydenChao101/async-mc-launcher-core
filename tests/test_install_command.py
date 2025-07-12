@@ -1,7 +1,7 @@
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 import tempfile
 import shutil
 from pathlib import Path
@@ -11,6 +11,18 @@ import json
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from launcher_core import install, command, java_utils
+
+
+class AsyncContextManagerMock:
+    """Helper class to mock async context managers"""
+    def __init__(self, return_value):
+        self.return_value = return_value
+    
+    async def __aenter__(self):
+        return self.return_value
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
 
 
 class TestInstall:
@@ -81,9 +93,25 @@ class TestInstall:
     async def test_install_minecraft_version(self, temp_minecraft_dir):
         """Test installing Minecraft version"""
         if hasattr(install, "install_minecraft_version"):
-            with patch("aiohttp.ClientSession") as mock_session:
-                mock_response = Mock()
-                mock_response.json = Mock(
+            with patch("aiohttp.ClientSession") as mock_session, \
+                 patch("launcher_core._helper.get_user_agent", return_value="test-agent"):
+                # Mock the version manifest response (first call)
+                mock_manifest_response = Mock()
+                mock_manifest_response.json = AsyncMock(
+                    return_value={
+                        "versions": [
+                            {
+                                "id": "1.20.4",
+                                "url": "https://example.com/1.20.4.json",
+                                "sha1": "abc123"
+                            }
+                        ]
+                    }
+                )
+                
+                # Mock the specific version info response (second call)
+                mock_version_response = Mock()
+                mock_version_response.json = AsyncMock(
                     return_value={
                         "id": "1.20.4",
                         "downloads": {
@@ -96,9 +124,15 @@ class TestInstall:
                         "libraries": [],
                     }
                 )
-                mock_session.return_value.__aenter__.return_value.get.return_value.__aenter__.return_value = (
-                    mock_response
-                )
+                
+                # Set up proper async context manager mock for both calls
+                mock_get = Mock(side_effect=[
+                    AsyncContextManagerMock(mock_manifest_response),
+                    AsyncContextManagerMock(mock_version_response)
+                ])
+                mock_session_instance = Mock()
+                mock_session_instance.get = mock_get
+                mock_session.return_value.__aenter__.return_value = mock_session_instance
 
                 # This is a mock test - in real scenarios, you'd test the actual installation
                 result = await install.install_minecraft_version(
