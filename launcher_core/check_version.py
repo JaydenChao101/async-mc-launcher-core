@@ -1,5 +1,5 @@
 from .logging_utils import logger
-from launcher_core import __version__
+from . import __version__
 
 
 async def check_version():
