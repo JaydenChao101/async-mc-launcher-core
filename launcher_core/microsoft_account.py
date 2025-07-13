@@ -264,7 +264,7 @@ class DeviceCodeLogin:
                             raise DeviceCodeExpiredError(
                                 "Device code expired or not authorized in time."
                             )
-                    except:
+                    except Exception:
                         # 如果無法解析錯誤，使用通用處理
                         await asyncio.sleep(current_interval)
                         elapsed += current_interval

@@ -12,5 +12,5 @@ async def check_version():
             content = await response.text()
             if f'__version__ = "{__version__}"' not in content:
                 logger.warning(
-                    f"Your version of async-mc-launcher-core is outdated. Please update to the latest version."
+                    "Your version of async-mc-launcher-core is outdated. Please update to the latest version."
                 )
