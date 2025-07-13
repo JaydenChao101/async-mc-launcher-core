@@ -1,0 +1,19 @@
+# Core library (installed separately)
+# async-mc-launcher-core
+
+# For GUI examples (tkinter usually included with Python)
+# tkinter  # Usually pre-installed
+
+# For configuration management
+python-dotenv>=1.0.0
+
+# For advanced examples with config files
+tomli>=2.0.1
+
+# For testing examples (optional)
+pytest>=8.4.1
+pytest-asyncio>=1.0.0
+
+# Note: Some examples may require additional system packages:
+# - tkinter: usually included with Python, may need python3-tk on some Linux distributions
+# - Java: required for launching Minecraft (not a Python package)
