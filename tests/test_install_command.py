@@ -127,6 +127,7 @@ class TestInstall:
 class TestCommand:
     """Test cases for command module"""
 
+
 @pytest.fixture
 def temp_minecraft_dir():
     """建立暫存的 Minecraft 目錄用於測試"""
