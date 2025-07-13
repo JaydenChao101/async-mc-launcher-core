@@ -8,6 +8,8 @@ This code is used to login to a Microsoft account and get the access token.
 import urllib.parse
 import asyncio
 import aiohttp
+from typing import Dict, Any
+from .http_client import HTTPClient
 from .microsoft_types import (
     AuthorizationTokenResponse,
     XBLResponse,
@@ -26,362 +28,271 @@ from ._types import AzureApplication
 from ._types import Credential as AuthCredential
 from .logging_utils import logger
 
-__AUTH_URL__ = "https://login.live.com/oauth20_authorize.srf"
-__TOKEN_URL__ = "https://login.live.com/oauth20_token.srf"
-__DEVICE_TOKEN_URL__ = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token"
-__SCOPE__ = "XboxLive.signin offline_access"
-__DEVICE_CODE_URL__ = (
-    "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode"
-)
+# API 端點常量
+AUTH_URL = "https://login.live.com/oauth20_authorize.srf"
+TOKEN_URL = "https://login.live.com/oauth20_token.srf"
+DEVICE_TOKEN_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token"
+DEVICE_CODE_URL = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode"
+XBL_AUTH_URL = "https://user.auth.xboxlive.com/user/authenticate"
+XSTS_AUTH_URL = "https://xsts.auth.xboxlive.com/xsts/authorize"
+MINECRAFT_AUTH_URL = "https://api.minecraftservices.com/authentication/login_with_xbox"
 
+SCOPE = "XboxLive.signin offline_access"
+
+# XSTS 錯誤代碼映射
+XSTS_ERROR_CODES = {
+    2148916227: AccountBanFromXbox,
+    2148916233: AccountNotHaveXbox,
+    2148916235: XboxLiveNotAvailable,
+    2148916236: AccountNeedAdultVerification,
+    2148916237: AccountNeedAdultVerification,
+}
 
 __all__ = [
     "Login",
-    "device_code_login",
+    "DeviceCodeLogin",
     "refresh_minecraft_token",
 ]
 
 
-class Login:
-    """
-    This class is used to login to a Microsoft account and get the access token.
-    It uses the Microsoft OAuth2.0 authentication flow to get the access token.
-    """
-
-    def __init__(
-        self,
-        azure_app: AzureApplication = AzureApplication(),
-    ):
-        self.client_id = azure_app.client_id
-        self.redirect_uri = azure_app.redirect_uri
-        self.client_secret = azure_app.client_secret
-
-    async def get_login_url(self) -> str:
-        """
-        Generate a login url.
-        :return: The url to the website on which the user logs in
-        """
-        parameters = {
-            "client_id": self.client_id,
-            "response_type": "code",
-            "redirect_uri": self.redirect_uri,
-            "response_mode": "query",
-            "scope": __SCOPE__,
-        }
-        url = (
-            urllib.parse.urlparse(__AUTH_URL__)
-            ._replace(query=urllib.parse.urlencode(parameters))
-            .geturl()
-        )
-        logger.info("Generated login URL for Microsoft account authentication: %s", url)
-
-        return url
-
-    @staticmethod
-    async def extract_code_from_url(url: str) -> str:
-        """
-        Extract the code from the redirect url.
-
-        :param url: The redirect url
-        :return: The code
-        """
-        parsed_url = urllib.parse.urlparse(url)
-        query_params = urllib.parse.parse_qs(parsed_url.query)
-        if "code" not in query_params:
-            raise ValueError("No code found in the URL")
-        return query_params["code"][0]
-
-    async def get_ms_token(
-        self,
-        code: str,
-    ) -> AuthorizationTokenResponse:
-        """
-        Get the Microsoft token using the code from the login url.
-
-        :param code: The code from the login url
-        :return: The Microsoft token
-        """
-        data = {
-            "client_id": self.client_id,
-            "code": code,
-            "grant_type": "authorization_code",
-            "redirect_uri": self.redirect_uri,
-            "scope": __SCOPE__,
-        }
-        if self.client_secret:
-            data["client_secret"] = self.client_secret
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                __TOKEN_URL__, data=urllib.parse.urlencode(data), headers=headers
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                logger.info("Microsoft token response: %s", data)
-                return data
+class XboxAuthenticator:
+    """Xbox認證處理器"""
 
     @staticmethod
     async def get_xbl_token(ms_access_token: str) -> XBLResponse:
-        """Get the Xbox Live token using the Microsoft access token."""
+        """獲取Xbox Live令牌"""
         payload = {
             "Properties": {
                 "AuthMethod": "RPS",
                 "SiteName": "user.auth.xboxlive.com",
                 "RpsTicket": f"d={ms_access_token}",
             },
-            "RelyingParty": "http://auth.xboxlive.com",  # 注意这里
+            "RelyingParty": "http://auth.xboxlive.com",
             "TokenType": "JWT",
         }
-        headers = {"Content-Type": "application/json"}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://user.auth.xboxlive.com/user/authenticate",
-                json=payload,
-                headers=headers,
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                logger.info("Xbox Token response: %s", data)
-                return data
+        data = await HTTPClient.post_json(XBL_AUTH_URL, payload)
+        logger.info("Xbox Token response: %s", data)
+        return data
 
     @staticmethod
     async def get_xsts_token(xbl_token: str) -> XSTSResponse:
-        """
-        Get the XSTS token using the Xbox Live token.
-
-        :param xbl_token: The Xbox Live token
-        :return: The XSTS token
-        """
+        """獲取XSTS令牌"""
         payload = {
             "Properties": {"SandboxId": "RETAIL", "UserTokens": [xbl_token]},
             "RelyingParty": "rp://api.minecraftservices.com/",
             "TokenType": "JWT",
         }
-        headers = {"Content-Type": "application/json"}
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                "https://xsts.auth.xboxlive.com/xsts/authorize",
+                XSTS_AUTH_URL,
                 json=payload,
-                headers=headers,
+                headers={"Content-Type": "application/json"},
             ) as resp:
-                status = resp.status
                 data = await resp.json()
 
-                if status == 401:
-                    error_code = data.get("XErr")
-                    # The Redirect parameter usually will not resolve or go anywhere in a browser, likely they're targeting Xbox consoles.
-                    # Noted XErr codes and their meanings:
-                    # 2148916227:
-                    # The account is banned from Xbox.
-                    # 2148916233:
-                    # The account doesn't have an Xbox account. Once they sign up for one (or login through minecraft.net to create one) then they can proceed with the login. This shouldn't happen with accounts that have purchased Minecraft with a Microsoft account, as they would've already gone through that Xbox signup process.
-                    # 2148916235:
-                    # The account is from a country where Xbox Live is not available/banned
-                    # 2148916236:
-                    # The account needs adult verification on Xbox page. (South Korea)
-                    # 2148916237:
-                    # The account needs adult verification on Xbox page. (South Korea)
-                    # 2148916238:
-                    # The account is a child (under 18) and cannot proceed unless the account is added to a Family by an adult. This only seems to occur when using a custom Microsoft Azure application. When using the Minecraft launchers client id, this doesn't trigger.
-                    error_codes = {
-                        "ban_from_Xbox": 2148916227,
-                        "didnt_have_xbox": 2148916233,
-                        "ban_contry": 2148916235,
-                        "need_adult_verification": 2148916236,
-                        "need_adult_verification_1": 2148916237,
-                    }
+                if resp.status == 401:
+                    XboxAuthenticator._handle_xsts_error(data)
 
-                    # raise Error
-                    if error_code == error_codes["ban_from_Xbox"]:
-                        raise AccountBanFromXbox()
-                    elif error_code == error_codes["didnt_have_xbox"]:
-                        raise AccountNotHaveXbox()
-                    elif error_code == error_codes["ban_contry"]:
-                        raise XboxLiveNotAvailable()
-                    elif (
-                        error_code == error_codes["need_adult_verification"]
-                        or error_code == error_codes["need_adult_verification_1"]
-                    ):
-                        raise AccountNeedAdultVerification()
-                    else:
-                        raise XErrNotFound(
-                            f"Loginning of the XSTS token error: {error_code}, full response: {data}"
-                        )
-
+                resp.raise_for_status()
                 logger.info("XSTS Token response: %s", data)
                 return data
+
+    @staticmethod
+    def _handle_xsts_error(data: Dict[str, Any]) -> None:
+        """處理XSTS認證錯誤"""
+        error_code = data.get("XErr")
+
+        if error_code in XSTS_ERROR_CODES:
+            raise XSTS_ERROR_CODES[error_code]()
+        else:
+            raise XErrNotFound(f"XSTS token error: {error_code}, full response: {data}")
 
     @staticmethod
     async def get_minecraft_access_token(
         xsts_token: str, uhs: str
     ) -> MinecraftAuthenticateResponse:
-        """
-        Get the Minecraft access token using the XSTS token and user hash.
-
-        :param xsts_token: The XSTS token
-        :param uhs: The user hash
-        :return: The Minecraft access token
-        """
+        """獲取Minecraft訪問令牌"""
         identity_token = f"XBL3.0 x={uhs};{xsts_token}"
         payload = {"identityToken": identity_token}
-        headers = {"Content-Type": "application/json"}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                "https://api.minecraftservices.com/authentication/login_with_xbox",
-                json=payload,
-                headers=headers,
-            ) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                logger.info("Minecraft access token response: %s", data)
-                required_keys = ["access_token", "expires_in"]
-                for key in required_keys:
-                    if key not in data:
-                        raise KeyError(
-                            f"Missing required key '{key}' in Minecraft access token response: {data}"
-                        )
-                return data
+        data = await HTTPClient.post_json(MINECRAFT_AUTH_URL, payload)
+        logger.info("Minecraft access token response: %s", data)
+
+        # 驗證必需的字段
+        required_keys = ["access_token", "expires_in"]
+        for key in required_keys:
+            if key not in data:
+                raise KeyError(f"Missing required key '{key}' in response: {data}")
+
+        return data
 
 
-class device_code_login:
-    """
-    This class is used to login to a Microsoft account using the device code flow.
-    It uses the Microsoft OAuth2.0 authentication flow to get the access token.
-    """
+class Login:
+    """Microsoft帳戶登入處理器"""
+
+    def __init__(self, azure_app: AzureApplication = AzureApplication()):
+        self.azure_app = azure_app
+
+    async def get_login_url(self) -> str:
+        """生成登入URL"""
+        parameters = {
+            "client_id": self.azure_app.client_id,
+            "response_type": "code",
+            "redirect_uri": self.azure_app.redirect_uri,
+            "response_mode": "query",
+            "scope": SCOPE,
+        }
+
+        url = (
+            urllib.parse.urlparse(AUTH_URL)
+            ._replace(query=urllib.parse.urlencode(parameters))
+            .geturl()
+        )
+        logger.info("Generated login URL: %s", url)
+        return url
+
+    @staticmethod
+    def extract_code_from_url(url: str) -> str:
+        """從重定向URL中提取授權代碼"""
+        parsed_url = urllib.parse.urlparse(url)
+        query_params = urllib.parse.parse_qs(parsed_url.query)
+
+        if "code" not in query_params:
+            raise ValueError("No code found in the URL")
+
+        return query_params["code"][0]
+
+    async def get_ms_token(self, code: str) -> AuthorizationTokenResponse:
+        """使用授權代碼獲取Microsoft令牌"""
+        data = {
+            "client_id": self.azure_app.client_id,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": self.azure_app.redirect_uri,
+            "scope": SCOPE,
+        }
+
+        if self.azure_app.client_secret:
+            data["client_secret"] = self.azure_app.client_secret
+
+        result = await HTTPClient.post_form(TOKEN_URL, data)
+        logger.info("Microsoft token response: %s", result)
+        return result
+
+    async def complete_login(self, code: str) -> Dict[str, Any]:
+        """完成完整的登入流程"""
+        # 獲取Microsoft令牌
+        ms_token = await self.get_ms_token(code)
+
+        # 獲取Xbox Live令牌
+        xbl_token = await XboxAuthenticator.get_xbl_token(ms_token["access_token"])
+
+        # 獲取XSTS令牌
+        xsts_token = await XboxAuthenticator.get_xsts_token(xbl_token["Token"])
+
+        # 獲取用戶哈希
+        uhs = xbl_token["DisplayClaims"]["xui"][0]["uhs"]
+
+        # 獲取Minecraft訪問令牌
+        minecraft_token = await XboxAuthenticator.get_minecraft_access_token(
+            xsts_token["Token"], uhs
+        )
+
+        return {
+            "access_token": minecraft_token["access_token"],
+            "refresh_token": ms_token["refresh_token"],
+            "expires_in": minecraft_token["expires_in"],
+            "username": "",  # 需要額外API調用獲取
+            "uuid": "",  # 需要額外API調用獲取
+        }
+
+
+class DeviceCodeLogin:
+    """設備代碼登入處理器"""
 
     def __init__(
-        self,
-        azure_app: AzureApplication = AzureApplication(),
-        language: str = "en",
+        self, azure_app: AzureApplication = AzureApplication(), language: str = "en"
     ):
-        self.client_id = azure_app.client_id
+        self.azure_app = azure_app
         self.language = language
 
-    async def get_device_code(self) -> dict:
-        """
-        Get the device code using the client id and redirect uri.
-
-        :return: The device code
-        """
+    async def get_device_code(self) -> Dict[str, Any]:
+        """獲取設備代碼"""
         data = {
-            "client_id": self.client_id,
-            "scope": __SCOPE__,
+            "client_id": self.azure_app.client_id,
+            "scope": SCOPE,
         }
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"{__DEVICE_CODE_URL__}?mkt={self.language}", data=data, headers=headers
-            ) as resp:
-                resp.raise_for_status()
-                return await resp.json()
+        url = f"{DEVICE_CODE_URL}?mkt={self.language}"
+        return await HTTPClient.post_form(url, data)
 
-    async def poll_device_code(self, device_code: str, interval: int, expires_in: int):
-        """
-        Poll the device code to get the access token.
-        :param device_code: The device code
-        :param interval: The interval to poll the device code
-        :param expires_in: The expires in time
-        :return: The ms_token
-        :raises DeviceCodeExpiredError: If the device code is expired or not authorized in time.
-        """
+    async def poll_device_code(
+        self, device_code: str, interval: int, expires_in: int
+    ) -> AuthorizationTokenResponse:
+        """輪詢設備代碼狀態"""
         data = {
             "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
-            "client_id": self.client_id,
+            "client_id": self.azure_app.client_id,
             "device_code": device_code,
         }
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
         elapsed = 0
-        max_interval = 60  # Set a maximum interval to prevent excessive delays
+        max_interval = 60
+        current_interval = interval
+
         while elapsed < expires_in:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    __DEVICE_TOKEN_URL__, data=data, headers=headers
-                ) as resp:
-                    result = await resp.json()
-                    if "access_token" in result:
-                        return result
-                    elif result.get("error") == "authorization_pending":
-                        await asyncio.sleep(interval)
-                        elapsed += interval
-                        interval = min(
-                            interval * 2, max_interval
-                        )  # Exponential backoff
-                    elif result.get("error") == "slow_down":
-                        interval = min(interval + 5, max_interval)
-                        await asyncio.sleep(interval)
-                        elapsed += interval
-                    else:
-                        raise DeviceCodeExpiredError(
-                            "Device code expired or not authorized in time."
-                        )
+            try:
+                result = await HTTPClient.post_form(DEVICE_TOKEN_URL, data)
+                if "access_token" in result:
+                    return result
+            except aiohttp.ClientResponseError as e:
+                if e.status == 400:
+                    # 由於 ClientResponseError 沒有 response 屬性，我們需要手動處理
+                    try:
+                        # 嘗試從錯誤消息中提取錯誤信息
+                        if "authorization_pending" in str(e):
+                            await asyncio.sleep(current_interval)
+                            elapsed += current_interval
+                            current_interval = min(current_interval * 2, max_interval)
+                        elif "slow_down" in str(e):
+                            current_interval = min(current_interval + 5, max_interval)
+                            await asyncio.sleep(current_interval)
+                            elapsed += current_interval
+                        else:
+                            raise DeviceCodeExpiredError(
+                                "Device code expired or not authorized in time."
+                            )
+                    except Exception:
+                        # 如果無法解析錯誤，使用通用處理
+                        await asyncio.sleep(current_interval)
+                        elapsed += current_interval
+                        current_interval = min(current_interval * 2, max_interval)
+                else:
+                    raise
+
+        raise DeviceCodeExpiredError("Device code expired.")
 
 
 async def refresh_minecraft_token(
-    Credential: AuthCredential,
+    credential: AuthCredential,
     azure_app: AzureApplication = AzureApplication(),
 ) -> AuthorizationTokenResponse:
-    """
-    Refresh the Minecraft token using the refresh token.
-
-    :param refresh_token: The refresh token
-    :param azure_app: A dictionary containing Azure application details with keys:
-                      - 'client_id': The client ID of the Azure application.
-                      - 'client_secret': The client secret of the Azure application (optional).
-    :return: The refreshed ms_token
-    :raises ValueError: If the refresh token is not provided.
-    """
-    refresh_token = Credential.refresh_token if Credential else None
-    if not refresh_token:
+    """刷新Minecraft令牌"""
+    if not credential or not credential.refresh_token:
         raise ValueError("Refresh token is required to refresh the Minecraft token.")
 
     data = {
         "client_id": azure_app.client_id,
-        "refresh_token": refresh_token,
+        "refresh_token": credential.refresh_token,
         "grant_type": "refresh_token",
-        "scope": __SCOPE__,
+        "scope": SCOPE,
     }
+
     if azure_app.client_secret:
         data["client_secret"] = azure_app.client_secret
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            __TOKEN_URL__, data=urllib.parse.urlencode(data), headers=headers
-        ) as resp:
-            resp.raise_for_status()
-            data = await resp.json()
-            logger.info("Refreshed Minecraft token response: %s", data)
-            return data
-
-
-# This example shows how to login to a Microsoft account and get the access token.
-# async def login_minecraft():
-#     import webbrowser
-#     webbrowser.open_new_tab(await get_login_url())
-#     url = input("Please open the URL in your browser and paste the redirect URL here: ")
-#     code = await extract_code_from_url(url)
-#     ms_token = await get_ms_token(code)
-#     xbl_token = await get_xbl_token(ms_token["access_token"])
-#     xsts_token = await get_xsts_token(xbl_token["Token"])
-#     uhs = xbl_token["DisplayClaims"]["xui"][0]["uhs"]
-#     minecraft_token = await get_minecraft_access_token(xsts_token["Token"], uhs)
-#     await have_minecraft(minecraft_token["access_token"])
-#     return {
-#         "access_token": minecraft_token["access_token"],
-#         "refresh_token": ms_token["refresh_token"],
-#         "expires_in": ms_token["expires_in"],
-#         "uhs": uhs,
-#         "xsts_token": xsts_token["Token"],
-#         "xbl_token": xbl_token["Token"]
-#     }
-#
-# if __name__ == "__main__":
-#     import asyncio
-#     loop = asyncio.get_event_loop()
-#     result = loop.run_until_complete(login_minecraft())
-#     print(result)
+    result = await HTTPClient.post_form(TOKEN_URL, data)
+    logger.info("Refreshed Minecraft token response: %s", result)
+    return result

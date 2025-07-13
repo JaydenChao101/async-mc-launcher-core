@@ -27,12 +27,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install uv 
+        python -m pip install uv
         uv pip install flake8 pylint --system
         # 從 pyproject.toml 安裝專案及其依賴項
         uv pip install -e . --system
         uv pip install ruff flake8 pylint --system
-    
+
     - name: Test with ruff
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -52,3 +52,19 @@ jobs:
         pylint minecraft_launcher_lib/ --exit-zero --max-line-length=127
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         pylint minecraft_launcher_lib/ --exit-zero --max-line-length=127
+
+    - name: Install pytest plugins
+      run: pip install pytest-md pytest-emoji
+
+    - name: Install dev dependencies
+      run: pip install -e .[dev]
+
+    - name: Run pytest
+      uses: pavelzw/pytest-action@v2
+      with:
+        verbose: true
+        emoji: true
+        job-summary: true
+        custom-arguments: '-q'
+        click-to-expand: true
+        report-title: 'Test Report'

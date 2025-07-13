@@ -70,7 +70,9 @@ async def get_latest_version() -> LatestMinecraftVersions:
         )
         data = json.loads(response["content"])
         latest = data["latest"]
-        logger.info(f"最新版本 - Release: {latest['release']}, Snapshot: {latest['snapshot']}")
+        logger.info(
+            f"最新版本 - Release: {latest['release']}, Snapshot: {latest['snapshot']}"
+        )
         return latest
     except Exception as e:
         logger.error(f"獲取最新版本失敗: {e}")
@@ -257,6 +259,7 @@ class VersionCache:
         else:
             # 直接從 __init__.py 導入 __version__
             from . import __version__
+
             cls._version_cache = __version__
             return cls._version_cache
 
@@ -415,6 +418,7 @@ def sync(coroutine: Coroutine[Any, Any, Any]) -> Any:
     if platform.system() != "Windows":
         try:
             import uvloop
+
             # 获取或创建事件循环
             try:
                 loop = asyncio.get_event_loop()

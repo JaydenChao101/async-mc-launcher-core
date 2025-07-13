@@ -10,22 +10,20 @@ news includes functions to retrieve news about Minecraft using the official API 
 # 標準庫導入
 import datetime
 
-# 第三方庫導入
-import aiohttp
-
 # 本地導入
 from ._types import MinecraftNews, JavaPatchNotes
 from ._helper import get_user_agent
+from .http_client import HTTPClient
 
 
 async def get_minecraft_news() -> MinecraftNews:
     "Returns general news about Minecraft"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            "https://launchercontent.mojang.com/news.json",
-            headers={"user-agent": get_user_agent()},
-        ) as response:
-            news = await response.json()
+    user_agent = await get_user_agent()
+    headers = {"user-agent": user_agent}
+    news = await HTTPClient.get_json(
+        "https://launchercontent.mojang.com/news.json",
+        headers=headers,
+    )
 
     for entry in news["entries"]:
         entry["date"] = datetime.date.fromisoformat(entry["date"])
@@ -35,9 +33,9 @@ async def get_minecraft_news() -> MinecraftNews:
 
 async def get_java_patch_notes() -> JavaPatchNotes:
     "Returns the patch notes for Minecraft Java Edition"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            "https://launchercontent.mojang.com/javaPatchNotes.json",
-            headers={"user-agent": get_user_agent()},
-        ) as response:
-            return await response.json()
+    user_agent = await get_user_agent()
+    headers = {"user-agent": user_agent}
+    return await HTTPClient.get_json(
+        "https://launchercontent.mojang.com/javaPatchNotes.json",
+        headers=headers,
+    )

@@ -33,15 +33,13 @@ dependencies = [
   "aiohttp>=3.11.18",
   "cryptography>=45.0.2",
   "pyjwt>=2.10.1",
-  "pytest>=8.4.1",
-  "requests-mock>=1.12.1",
   "tomli-w>=1.2.0",
 ]
 dynamic = ["version"]
 
 [project.urls]
-Issues = "https://github.com/JaydenChao101/asyncio-mc-launcher-lib/issues"
-Source = "https://github.com/JaydenChao101/asyncio-mc-launcher-lib"
+Issues = "https://github.com/JaydenChao101/async-mc-launcher-core/issues"
+Source = "https://github.com/JaydenChao101/async-mc-launcher-core"
 
 [tool.setuptools.dynamic]
 version = {attr = "launcher_core.__version__"}

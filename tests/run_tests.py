@@ -100,15 +100,68 @@ def run_performance_tests():
         print("✅ Performance tests passed!")
 
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "specific":
+def run_quick_tests():
+    """Run quick tests only (exclude slow tests)"""
+    print("\nRunning quick tests...")
+    result = pytest.main(["tests/", "-m", "not slow", "-v"])
+
+    if result != 0:
+        print("❌ Quick tests failed!")
+        return result
+
+    print("✅ Quick tests passed!")
+    return 0
+
+
+def main():
+    """Main entry point"""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Run minecraft-launcher-lib tests")
+    parser.add_argument(
+        "--mode",
+        choices=["all", "quick", "coverage", "specific", "performance"],
+        default="all",
+        help="Test mode to run",
+    )
+    parser.add_argument(
+        "--pattern", help="Test pattern to match (for specific mode)"
+    )
+
+    args = parser.parse_args()
+
+    print(f"🚀 Starting tests in {args.mode} mode...")
+    print("=" * 50)
+
+    try:
+        if args.mode == "all":
+            return run_tests()
+        elif args.mode == "quick":
+            return run_quick_tests()
+        elif args.mode == "coverage":
+            return pytest.main(
+                [
+                    "tests/",
+                    "--cov=launcher_core",
+                    "--cov-report=html:htmlcov",
+                    "--cov-report=term-missing",
+                    "--cov-report=xml:coverage.xml",
+                    "-v",
+                ]
+            )
+        elif args.mode == "specific":
             run_specific_tests()
-        elif sys.argv[1] == "performance":
+            return 0
+        elif args.mode == "performance":
             run_performance_tests()
-        else:
-            print("Usage: python run_tests.py [specific|performance]")
-            sys.exit(1)
-    else:
-        exit_code = run_tests()
-        sys.exit(exit_code)
+            return 0
+    except KeyboardInterrupt:
+        print("\n⚠️ Tests interrupted by user")
+        return 1
+    except Exception as e:
+        print(f"\n❌ Error running tests: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
