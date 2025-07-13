@@ -127,12 +127,12 @@ class TestInstall:
 class TestCommand:
     """Test cases for command module"""
 
-    @pytest.fixture
-    def temp_minecraft_dir(self):
-        """Create temporary Minecraft directory for testing"""
-        temp_dir = tempfile.mkdtemp()
-        yield temp_dir
-        shutil.rmtree(temp_dir)
+@ pytest.fixture
+def  temp_minecraft_dir（）：
+    """建立暫存的 Minecraft 目錄用於測試"""
+    temp_dir  =  tempfile.mkdtemp ( )
+    產量 temp_dir
+    關閉. rmtree（temp_dir）
 
     async def test_get_minecraft_command(self, temp_minecraft_dir):
         """Test generating Minecraft launch command"""
