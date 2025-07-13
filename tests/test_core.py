@@ -1,13 +1,11 @@
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
 
 # Add the project root to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from launcher_core import utils, exceptions, _types
+from launcher_core import exceptions, _types
 from launcher_core.utils import sync
 
 

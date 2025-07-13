@@ -1,10 +1,7 @@
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
-import tempfile
-import shutil
-from pathlib import Path
+from unittest.mock import Mock, patch, AsyncMock
 
 # Add the project root to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))

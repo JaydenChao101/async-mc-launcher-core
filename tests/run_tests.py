@@ -6,7 +6,6 @@ Run all tests with various configurations and generate coverage reports
 
 import pytest
 import sys
-import os
 from pathlib import Path
 
 # Add the project root to Python path
