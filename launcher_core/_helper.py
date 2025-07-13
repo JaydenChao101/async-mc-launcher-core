@@ -335,13 +335,8 @@ async def get_user_agent() -> str:
     if _USER_AGENT_CACHE is not None:
         return _USER_AGENT_CACHE
 
-    file_path = os.path.join(os.path.dirname(__file__), __version__)
-    if not os.path.isfile(file_path):
-        # Fallback to a default user agent if the version file is missing
-        _USER_AGENT_CACHE = "minecraft-launcher-lib/unknown-version"
-        return _USER_AGENT_CACHE
-    async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-        _USER_AGENT_CACHE = "minecraft-launcher-lib/" + (await f.read()).strip()
+    # Use the __version__ variable directly to construct the user agent
+    _USER_AGENT_CACHE = f"minecraft-launcher-lib/{__version__}"
     return _USER_AGENT_CACHE
 
 
