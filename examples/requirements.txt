@@ -1,0 +1,15 @@
+# Core library (installed separately)
+# async-mc-launcher-core
+
+# For GUI examples
+tkinter-tooltip>=2.2.0
+
+# For configuration management
+python-dotenv>=1.0.0
+
+# For advanced examples with config files
+tomli>=2.0.1
+
+# For testing examples (optional)
+pytest>=8.4.1
+pytest-asyncio>=1.0.0
