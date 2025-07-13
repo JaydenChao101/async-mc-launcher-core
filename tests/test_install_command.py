@@ -1,7 +1,7 @@
 import pytest
 import sys
 import os
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock
 import tempfile
 import shutil
 from pathlib import Path
@@ -17,10 +17,10 @@ class AsyncContextManagerMock:
     """Helper class to mock async context managers"""
     def __init__(self, return_value):
         self.return_value = return_value
-    
+
     async def __aenter__(self):
         return self.return_value
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
 
@@ -110,7 +110,7 @@ class TestInstall:
                             ]
                         }
                     )
-                    
+
                     # Set up proper async context manager mock
                     mock_get = Mock(return_value=AsyncContextManagerMock(mock_manifest_response))
                     mock_session_instance = Mock()
@@ -119,7 +119,7 @@ class TestInstall:
 
                     # This demonstrates the async context manager fix
                     await install.install_minecraft_version("1.20.4", temp_minecraft_dir)
-                    
+
                     # Verify the mock was called correctly
                     mock_do_install.assert_called_once()
 
@@ -128,11 +128,12 @@ class TestCommand:
     """Test cases for command module"""
 
 @ pytest.fixture
-def  temp_minecraft_dir（）：
+@pytest.fixture
+def temp_minecraft_dir():
     """建立暫存的 Minecraft 目錄用於測試"""
-    temp_dir  =  tempfile.mkdtemp ( )
-    產量 temp_dir
-    關閉. rmtree（temp_dir）
+    temp_dir = tempfile.mkdtemp()
+    yield temp_dir
+    shutil.rmtree(temp_dir)
 
     async def test_get_minecraft_command(self, temp_minecraft_dir):
         """Test generating Minecraft launch command"""
