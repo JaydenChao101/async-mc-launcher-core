@@ -19,6 +19,7 @@ from .exceptions import FileOutsideMinecraftDirectory, InvalidChecksum, VersionN
 from ._internal_types.shared_types import ClientJson, ClientJsonRule, ClientJsonLibrary
 from ._internal_types.helper_types import RequestsResponseCache, MavenMetadata
 from ._types import MinecraftOptions, CallbackDict
+from . import __version__
 
 
 if os.name == "nt":
@@ -334,7 +335,7 @@ async def get_user_agent() -> str:
     if _USER_AGENT_CACHE is not None:
         return _USER_AGENT_CACHE
 
-    file_path = os.path.join(os.path.dirname(__file__), "version.txt")
+    file_path = os.path.join(os.path.dirname(__file__), __version__)
     async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
         _USER_AGENT_CACHE = "minecraft-launcher-lib/" + (await f.read()).strip()
     return _USER_AGENT_CACHE

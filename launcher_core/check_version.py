@@ -1,4 +1,4 @@
-from logging_utils import logger
+from .logging_utils import logger
 from launcher_core import __version__
 
 

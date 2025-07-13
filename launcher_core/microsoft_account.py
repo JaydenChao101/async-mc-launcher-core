@@ -85,8 +85,11 @@ class XboxAuthenticator:
         }
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(XSTS_AUTH_URL, json=payload,
-                                  headers={"Content-Type": "application/json"}) as resp:
+            async with session.post(
+                XSTS_AUTH_URL,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            ) as resp:
                 data = await resp.json()
 
                 if resp.status == 401:
@@ -104,12 +107,12 @@ class XboxAuthenticator:
         if error_code in XSTS_ERROR_CODES:
             raise XSTS_ERROR_CODES[error_code]()
         else:
-            raise XErrNotFound(
-                f"XSTS token error: {error_code}, full response: {data}"
-            )
+            raise XErrNotFound(f"XSTS token error: {error_code}, full response: {data}")
 
     @staticmethod
-    async def get_minecraft_access_token(xsts_token: str, uhs: str) -> MinecraftAuthenticateResponse:
+    async def get_minecraft_access_token(
+        xsts_token: str, uhs: str
+    ) -> MinecraftAuthenticateResponse:
         """獲取Minecraft訪問令牌"""
         identity_token = f"XBL3.0 x={uhs};{xsts_token}"
         payload = {"identityToken": identity_token}
@@ -201,15 +204,17 @@ class Login:
             "access_token": minecraft_token["access_token"],
             "refresh_token": ms_token["refresh_token"],
             "expires_in": minecraft_token["expires_in"],
-            "username": "", # 需要額外API調用獲取
-            "uuid": "", # 需要額外API調用獲取
+            "username": "",  # 需要額外API調用獲取
+            "uuid": "",  # 需要額外API調用獲取
         }
 
 
 class DeviceCodeLogin:
     """設備代碼登入處理器"""
 
-    def __init__(self, azure_app: AzureApplication = AzureApplication(), language: str = "en"):
+    def __init__(
+        self, azure_app: AzureApplication = AzureApplication(), language: str = "en"
+    ):
         self.azure_app = azure_app
         self.language = language
 
@@ -223,7 +228,9 @@ class DeviceCodeLogin:
         url = f"{DEVICE_CODE_URL}?mkt={self.language}"
         return await HTTPClient.post_form(url, data)
 
-    async def poll_device_code(self, device_code: str, interval: int, expires_in: int) -> AuthorizationTokenResponse:
+    async def poll_device_code(
+        self, device_code: str, interval: int, expires_in: int
+    ) -> AuthorizationTokenResponse:
         """輪詢設備代碼狀態"""
         data = {
             "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
@@ -254,7 +261,9 @@ class DeviceCodeLogin:
                             await asyncio.sleep(current_interval)
                             elapsed += current_interval
                         else:
-                            raise DeviceCodeExpiredError("Device code expired or not authorized in time.")
+                            raise DeviceCodeExpiredError(
+                                "Device code expired or not authorized in time."
+                            )
                     except:
                         # 如果無法解析錯誤，使用通用處理
                         await asyncio.sleep(current_interval)

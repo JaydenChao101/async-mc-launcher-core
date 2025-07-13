@@ -41,97 +41,159 @@ async def install_libraries(
 
     async def download_library(
         i: ClientJsonLibrary,
+        session: aiohttp.ClientSession,
     ) -> None:
         """Download the single library."""
         # Check, if the rules allow this lib for the current system
         if "rules" in i and not parse_rule_list(i["rules"], {}):
             return
 
-        # Turn the name into a path
-        current_path = os.path.join(path, "libraries")
-        if "url" in i:
-            if i["url"].endswith("/"):
-                download_url = i["url"][:-1]
-            else:
-                download_url = i["url"]
-        else:
-            download_url = "https://libraries.minecraft.net"
-
+        # Parse library name
         try:
             lib_path, name, version = i["name"].split(":")[0:3]
         except ValueError:
             return
 
-        for lib_part in lib_path.split("."):
-            current_path = os.path.join(current_path, lib_part)
-            download_url = f"{download_url}/{lib_part}"
-
+        # Handle version with file extension
         try:
             version, fileend = version.split("@")
         except ValueError:
             fileend = "jar"
+
+        # Build paths and URLs
+        current_path = os.path.join(path, "libraries")
+        download_url = i.get("url", "https://libraries.minecraft.net").rstrip("/")
+
+        for lib_part in lib_path.split("."):
+            current_path = os.path.join(current_path, lib_part)
+            download_url = f"{download_url}/{lib_part}"
 
         jar_filename = f"{name}-{version}.{fileend}"
         download_url = f"{download_url}/{name}/{version}"
         current_path = os.path.join(current_path, name, version)
         native = get_natives(i)
 
-        # Check if there is a native file
-        if native != "":
-            jar_filename_native = f"{name}-{version}-{native}.jar"
-        jar_filename = f"{name}-{version}.{fileend}"
-        download_url = f"{download_url}/{jar_filename}"
+        # Handle downloads section if present
+        if "downloads" in i:
+            await _download_from_downloads_section(
+                i, path, current_path, native, name, version, callback, session
+            )
+        else:
+            await _download_legacy_library(
+                i,
+                download_url,
+                current_path,
+                jar_filename,
+                native,
+                name,
+                version,
+                id,
+                path,
+                callback,
+                session,
+            )
 
-        # Try to download the lib
-        try:
-            async with aiohttp.ClientSession() as session:
-                await download_file(
-                    download_url,
-                    os.path.join(current_path, jar_filename),
-                    callback=callback,
-                    session=session,
-                    minecraft_directory=path,
-                )
-        except Exception:
-            pass
+    async def _download_from_downloads_section(
+        i: ClientJsonLibrary,
+        path: str,
+        current_path: str,
+        native: str,
+        name: str,
+        version: str,
+        callback: CallbackDict,
+        session: aiohttp.ClientSession,
+    ) -> None:
+        """Handle downloads from the downloads section."""
+        downloads = i["downloads"]
 
-        if "downloads" not in i:
-            if "extract" in i and native != "":
-                jar_filename_native = f"{name}-{version}-{native}.jar"
-                await extract_natives_file(
-                    os.path.join(current_path, jar_filename_native),
-                    os.path.join(path, "versions", id, "natives"),
-                    i["extract"],
-                )
+        # Download artifact
         if (
-            "artifact" in i["downloads"]
-            and i["downloads"]["artifact"]["url"] != ""
-            and "path" in i["downloads"]["artifact"]
+            "artifact" in downloads
+            and downloads["artifact"]["url"] != ""
+            and "path" in downloads["artifact"]
         ):
-            async with aiohttp.ClientSession() as session:
-                await download_file(
-                    i["downloads"]["artifact"]["url"],
-                    os.path.join(path, "libraries", i["downloads"]["artifact"]["path"]),
-                    callback,
-                    sha1=i["downloads"]["artifact"]["sha1"],
-                    session=session,
-                    minecraft_directory=path,
-                )
-        if native != "":
-            async with aiohttp.ClientSession() as session:
-                await download_file(
-                    i["downloads"]["classifiers"][native]["url"],
-                    os.path.join(current_path, jar_filename_native),
-                    callback,
-                    sha1=i["downloads"]["classifiers"][native]["sha1"],
-                    session=session,
-                    minecraft_directory=path,
-                )
+            await download_file(
+                downloads["artifact"]["url"],
+                os.path.join(path, "libraries", downloads["artifact"]["path"]),
+                callback,
+                sha1=downloads["artifact"]["sha1"],
+                session=session,
+                minecraft_directory=path,
+            )
+
+        # Download and extract natives
+        if (
+            native != ""
+            and "classifiers" in downloads
+            and native in downloads["classifiers"]
+        ):
+            jar_filename_native = f"{name}-{version}-{native}.jar"
+            await download_file(
+                downloads["classifiers"][native]["url"],
+                os.path.join(current_path, jar_filename_native),
+                callback,
+                sha1=downloads["classifiers"][native]["sha1"],
+                session=session,
+                minecraft_directory=path,
+            )
             await extract_natives_file(
                 os.path.join(current_path, jar_filename_native),
                 os.path.join(path, "versions", id, "natives"),
                 i.get("extract", {"exclude": []}),
             )
+
+    async def _download_legacy_library(
+        i: ClientJsonLibrary,
+        download_url: str,
+        current_path: str,
+        jar_filename: str,
+        native: str,
+        name: str,
+        version: str,
+        id: str,
+        path: str,
+        callback: CallbackDict,
+        session: aiohttp.ClientSession,
+    ) -> None:
+        """Handle legacy library downloads."""
+        download_url = f"{download_url}/{jar_filename}"
+
+        # Try to download the lib
+        try:
+            await download_file(
+                download_url,
+                os.path.join(current_path, jar_filename),
+                callback=callback,
+                session=session,
+                minecraft_directory=path,
+            )
+        except Exception:
+            pass
+
+        # Handle native extraction for legacy libraries
+        if "extract" in i and native != "":
+            jar_filename_native = f"{name}-{version}-{native}.jar"
+            await extract_natives_file(
+                os.path.join(current_path, jar_filename_native),
+                os.path.join(path, "versions", id, "natives"),
+                i["extract"],
+            )
+
+    # Create tasks with proper concurrency control
+    semaphore = asyncio.Semaphore(max_workers or len(libraries))
+
+    async def limited_download(lib: ClientJsonLibrary) -> None:
+        async with semaphore:
+            async with aiohttp.ClientSession() as session:
+                await download_library(lib, session)
+
+    tasks = [asyncio.create_task(limited_download(lib)) for lib in libraries]
+
+    count = 0
+    for task in asyncio.as_completed(tasks):
+        await task
+        count += 1
+        callback.get("setProgress", empty)(count)
 
     count = 0
     tasks = []

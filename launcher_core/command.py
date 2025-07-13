@@ -179,7 +179,9 @@ async def get_arguments(
 class MinecraftCommandBuilder:
     """Minecraft命令構建器，負責組裝啟動命令的各个部分"""
 
-    def __init__(self, version: str, minecraft_directory: str, options: MinecraftOptions):
+    def __init__(
+        self, version: str, minecraft_directory: str, options: MinecraftOptions
+    ):
         self.version = version
         self.path = str(minecraft_directory)
         self.options = copy.deepcopy(options)
@@ -201,7 +203,9 @@ class MinecraftCommandBuilder:
 
     async def load_version_data(self) -> None:
         """加載版本數據"""
-        json_path = os.path.join(self.path, "versions", self.version, self.version + ".json")
+        json_path = os.path.join(
+            self.path, "versions", self.version, self.version + ".json"
+        )
         async with aiofiles.open(json_path, "r", encoding="utf-8") as f:
             self.data = json.loads(await f.read())
 
@@ -213,7 +217,7 @@ class MinecraftCommandBuilder:
         if self.data:
             self.options["nativesDirectory"] = self.options.get(
                 "nativesDirectory",
-                os.path.join(self.path, "versions", self.data["id"], "natives")
+                os.path.join(self.path, "versions", self.data["id"], "natives"),
             )
 
     async def build_classpath(self) -> None:
@@ -226,7 +230,9 @@ class MinecraftCommandBuilder:
         if "executablePath" in self.options:
             self.command.append(self.options["executablePath"])
         elif self.data and "javaVersion" in self.data:
-            java_path = await get_executable_path(self.data["javaVersion"]["component"], self.path)
+            java_path = await get_executable_path(
+                self.data["javaVersion"]["component"], self.path
+            )
             self.command.append(java_path or "java")
         else:
             self.command.append(self.options.get("defaultExecutablePath", "java"))
@@ -238,20 +244,28 @@ class MinecraftCommandBuilder:
             self.command.extend(self.options["jvmArguments"])
 
         # 添加版本特定的JVM參數
-        if (self.data and
-            isinstance(self.data.get("arguments"), dict) and
-            "jvm" in self.data["arguments"]):
+        if (
+            self.data
+            and isinstance(self.data.get("arguments"), dict)
+            and "jvm" in self.data["arguments"]
+        ):
             jvm_args = await get_arguments(
-                self.data["arguments"]["jvm"], self.data, self.path, self.options, self.classpath
+                self.data["arguments"]["jvm"],
+                self.data,
+                self.path,
+                self.options,
+                self.classpath,
             )
             self.command.extend(jvm_args)
         else:
             # 舊版本的默認JVM參數
-            self.command.extend([
-                f"-Djava.library.path={self.options['nativesDirectory']}",
-                "-cp",
-                self.classpath
-            ])
+            self.command.extend(
+                [
+                    f"-Djava.library.path={self.options['nativesDirectory']}",
+                    "-cp",
+                    self.classpath,
+                ]
+            )
 
     def add_logging_config(self) -> None:
         """添加日誌配置參數"""
@@ -283,12 +297,18 @@ class MinecraftCommandBuilder:
 
         if "minecraftArguments" in self.data:
             # 舊版本格式
-            game_args = await get_arguments_string(self.data, self.path, self.options, self.classpath)
+            game_args = await get_arguments_string(
+                self.data, self.path, self.options, self.classpath
+            )
             self.command.extend(game_args)
         else:
             # 新版本格式
             game_args = await get_arguments(
-                self.data["arguments"]["game"], self.data, self.path, self.options, self.classpath
+                self.data["arguments"]["game"],
+                self.data,
+                self.path,
+                self.options,
+                self.classpath,
             )
             self.command.extend(game_args)
 
@@ -378,4 +398,3 @@ async def get_minecraft_command(
     builder = MinecraftCommandBuilder(version, minecraft_directory, options)
     builder.set_credential(credential)
     return await builder.build()
-

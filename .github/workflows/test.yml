@@ -56,6 +56,9 @@ jobs:
     - name: Install pytest plugins
       run: pip install pytest-md pytest-emoji
 
+    - name: Install dev dependencies
+      run: pip install -e .[dev] --system
+
     - name: Run pytest
       uses: pavelzw/pytest-action@v2
       with:
