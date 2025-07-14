@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 from .logging_utils import logger
 from ._types import (
