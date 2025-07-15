@@ -8,6 +8,7 @@ SPDX-License-Identifier: BSD-2-Clause
 """
 
 from pydantic import BaseModel, Field, ConfigDict
+from pydantic.dataclasses import dataclass
 from typing import Optional, Literal, Callable, Union, NewType
 import datetime
 from uuid import UUID
@@ -15,13 +16,12 @@ from uuid import UUID
 # 重新定義 MinecraftUUID
 MinecraftUUID = NewType("MinecraftUUID", UUID)
 
+
 class MinecraftOptions(BaseModel):
     """The options for the Minecraft Launcher"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     username: Optional[str] = None
@@ -49,38 +49,35 @@ class MinecraftOptions(BaseModel):
     quickPlayRealms: str | None
     gameDir: str | None
 
+
 class CallbackDict(BaseModel):
     """Pydantic model for CallbackDict"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     setStatus: Optional[Callable[[str], None]] = None
     setProgress: Optional[Callable[[int], None]] = None
     setMax: Optional[Callable[[int], None]] = None
 
+
 class LatestMinecraftVersions(BaseModel):
     """The latest Minecraft versions"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     release: str
     snapshot: str
 
+
 class MinecraftVersionInfo(BaseModel):
     """The Minecraft version information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     id: str
@@ -88,25 +85,23 @@ class MinecraftVersionInfo(BaseModel):
     releaseTime: datetime.datetime
     complianceLevel: int
 
+
 class FabricMinecraftVersion(BaseModel):
     """The Minecraft version information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     version: str
     stable: bool
+
 
 class FabricLoader(BaseModel):
     """The Fabric loader information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     separator: str
@@ -114,26 +109,24 @@ class FabricLoader(BaseModel):
     maven: str
     version: str
     stable: bool
+
 
 class QuiltMinecraftVersion(BaseModel):
     """The Minecraft version information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     version: str
     stable: bool
 
+
 class QuiltLoader(BaseModel):
     """The Quilt loader information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     separator: str
@@ -141,13 +134,12 @@ class QuiltLoader(BaseModel):
     maven: str
     version: str
 
+
 class JavaInformation(BaseModel):
     """The Java information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     path: str
@@ -158,42 +150,39 @@ class JavaInformation(BaseModel):
     is64Bit: bool
     openjdk: bool
 
+
 class VanillaLauncherProfileResolution(BaseModel):
     """The resolution of the Vanilla Launcher profile"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     height: int
     width: int
 
+
 class VanillaLauncherProfile(BaseModel):
     """The Vanilla Launcher profile"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     name: Optional[str] = None
     version: str | None
-    versionType: Optional[Literal['latest-release', 'latest-snapshot', 'custom']] = None
+    versionType: Optional[Literal["latest-release", "latest-snapshot", "custom"]] = None
     gameDirectory: str | None
     javaExecutable: str | None
     javaArguments: list[str] | None
     customResolution: VanillaLauncherProfileResolution | None
 
+
 class MrpackInformation(BaseModel):
     """The MRPack information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     name: str
@@ -203,86 +192,79 @@ class MrpackInformation(BaseModel):
     minecraftVersion: str
     optionalFiles: list[str]
 
+
 class MrpackInstallOptions(BaseModel):
     """The MRPack install options"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     optionalFiles: Optional[list[str]] = None
     skipDependenciesInstall: Optional[bool] = None
 
+
 class JvmRuntimeInformation(BaseModel):
     """The Java runtime information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     name: str
     released: datetime.datetime
 
+
 class VersionRuntimeInformation(BaseModel):
     """The Minecraft version runtime information"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     name: str
     javaMajorVersion: int
 
+
 class _NewsEntryPlayPageImage(BaseModel):
     """The image for the play page"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     title: str
     url: str
 
+
 class _NewsEntryNewsPageImageDimensions(BaseModel):
     """The dimensions of the news page image"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     width: int
     height: int
 
+
 class _NewsEntryNewsPageImage(BaseModel):
     """The image for the news page"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     title: str
     url: str
     dimensions: _NewsEntryNewsPageImageDimensions
 
+
 class _NewsEntry(BaseModel):
     """Pydantic model for _NewsEntry"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     title: str
@@ -295,90 +277,83 @@ class _NewsEntry(BaseModel):
     newsType: list[str]
     id: str
 
+
 class MinecraftNews(BaseModel):
     """The Minecraft news"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     version: Literal[1]
     entries: list[_NewsEntry]
 
+
 class _JavaPatchNoteEntryImage(BaseModel):
     """Pydantic model for _JavaPatchNoteEntryImage"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     url: str
     title: str
 
+
 class _JavaPatchNoteEntry(BaseModel):
     """Pydantic model for _JavaPatchNoteEntry"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     title: str
-    type: Literal['release', 'snapshot']
+    type: Literal["release", "snapshot"]
     version: str
     image: _JavaPatchNoteEntryImage
     body: str
     contentPath: str
 
+
 class JavaPatchNotes(BaseModel):
     """The Java patch notes"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     version: Literal[1]
     entries: list[_JavaPatchNoteEntry]
 
+
 class SkinData(BaseModel):
     """The skin of the player"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     skin: str
     cape: str
 
+
 class MinecraftProfileProperty(BaseModel):
     """The property of the player"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     name: Optional[str] = None
     value: Optional[str] = None
     signature: Optional[str] = None
 
+
 class MinecraftProfileSkin(BaseModel):
     """The skin of the player"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     id: Optional[str] = None
@@ -387,13 +362,12 @@ class MinecraftProfileSkin(BaseModel):
     variant: Optional[str] = None
     alias: Optional[str] = None
 
+
 class MinecraftProfileCape(BaseModel):
     """The cape of the player"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     id: Optional[str] = None
@@ -401,13 +375,12 @@ class MinecraftProfileCape(BaseModel):
     url: Optional[str] = None
     alias: Optional[str] = None
 
+
 class MinecraftProfileResponse(BaseModel):
     """The response of the player"""
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        arbitrary_types_allowed=True
+        extra="forbid", validate_assignment=True, arbitrary_types_allowed=True
     )
 
     id: Optional[str] = None
@@ -415,3 +388,23 @@ class MinecraftProfileResponse(BaseModel):
     properties: Optional[list[MinecraftProfileProperty]] = None
     skins: Optional[list[MinecraftProfileSkin]] = None
     capes: Optional[list[MinecraftProfileCape]] = None
+
+
+@dataclass(frozen=True)
+class AzureApplication:
+    """The Azure Application ID and Secret"""
+
+    # The client ID of the Azure Application
+    client_id: str = "00000000402b5328"
+    client_secret: str = None
+    redirect_uri: str = "https://login.live.com/oauth20_desktop.srf"
+
+
+@dataclass(frozen=True)
+class Credential:
+    """The credential of the player"""
+
+    access_token: str = None
+    username: str = None
+    uuid: MinecraftUUID = None
+    refresh_token: str = None
