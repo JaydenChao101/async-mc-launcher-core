@@ -36,7 +36,7 @@ class LauncherConfig(BaseSettings):
         # 從 TOML 文件加載
         toml_file="config.toml",
         # 環境變量優先級高於文件
-        env_file_encoding="utf-8"
+        env_file_encoding="utf-8",
     )
 
     # 基本啟動器設置
@@ -44,7 +44,9 @@ class LauncherConfig(BaseSettings):
     launcher_version: str = Field(default="1.0.0", description="啟動器版本")
 
     # Minecraft 遊戲選項 - 使用現有的 Pydantic 模型
-    minecraft_options: Optional[MinecraftOptions] = Field(default=None, description="Minecraft 遊戲選項")
+    minecraft_options: Optional[MinecraftOptions] = Field(
+        default=None, description="Minecraft 遊戲選項"
+    )
 
     # 額外的啟動器特定配置
     config_directory: Optional[str] = Field(default=None, description="配置目錄")
@@ -55,7 +57,9 @@ class LauncherConfig(BaseSettings):
     remember_credentials: bool = Field(default=True, description="記住登入憑證")
 
     # 下載和安裝配置
-    concurrent_downloads: int = Field(default=4, description="並發下載數量", ge=1, le=16)
+    concurrent_downloads: int = Field(
+        default=4, description="並發下載數量", ge=1, le=16
+    )
     download_timeout: int = Field(default=300, description="下載超時時間（秒）", ge=30)
     verify_downloads: bool = Field(default=True, description="驗證下載文件")
 
@@ -70,7 +74,9 @@ class LauncherConfig(BaseSettings):
     proxy_password: Optional[str] = Field(default=None, description="代理密碼")
 
     # Java 設置
-    java_executable: Optional[str] = Field(default=None, description="Java 可執行文件路徑")
+    java_executable: Optional[str] = Field(
+        default=None, description="Java 可執行文件路徑"
+    )
     jvm_arguments: list[str] = Field(default_factory=list, description="JVM 參數")
 
     # 帳戶設置
@@ -97,9 +103,15 @@ class LauncherConfig(BaseSettings):
 
     # 快速遊戲設置
     quick_play_path: Optional[str] = Field(default=None, description="快速遊戲路徑")
-    quick_play_singleplayer: Optional[str] = Field(default=None, description="快速單人遊戲")
-    quick_play_multiplayer: Optional[str] = Field(default=None, description="快速多人遊戲")
-    quick_play_realms: Optional[str] = Field(default=None, description="快速 Realms 遊戲")
+    quick_play_singleplayer: Optional[str] = Field(
+        default=None, description="快速單人遊戲"
+    )
+    quick_play_multiplayer: Optional[str] = Field(
+        default=None, description="快速多人遊戲"
+    )
+    quick_play_realms: Optional[str] = Field(
+        default=None, description="快速 Realms 遊戲"
+    )
 
 
 class ConfigManager:
@@ -122,7 +134,9 @@ class ConfigManager:
         if self._config is None or reload:
             if self.config_path.exists():
                 # 從 TOML 文件加載
-                async with aiofiles.open(self.config_path, mode="r", encoding="utf-8") as f:
+                async with aiofiles.open(
+                    self.config_path, mode="r", encoding="utf-8"
+                ) as f:
                     toml_content = await f.read()
                     toml_data = tomllib.loads(toml_content)
 
@@ -188,7 +202,9 @@ class ConfigManager:
 
 
 # 便利函數
-async def create_default_config(config_path: Union[str, os.PathLike] = "config.toml") -> LauncherConfig:
+async def create_default_config(
+    config_path: Union[str, os.PathLike] = "config.toml",
+) -> LauncherConfig:
     """
     創建默認配置文件
 
@@ -229,7 +245,7 @@ async def example_usage():
         username="player123",
         version="1.20.1",
         resolution_width=1920,
-        resolution_height=1080
+        resolution_height=1080,
     )
 
     # 保存配置
@@ -242,4 +258,5 @@ async def example_usage():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(example_usage())

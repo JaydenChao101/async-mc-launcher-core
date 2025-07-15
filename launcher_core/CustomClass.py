@@ -1,9 +1,15 @@
 from . import Credential as AuthCredential
 from .exceptions import NeedAccountInfo, AccountNotOwnMinecraft
 from .mojang import have_minecraft
-from .pydantic_models import MinecraftOptions, LoginCredentials, LauncherSettings, ServerInfo, ModInfo
+from .pydantic_models import (
+    MinecraftOptions,
+    LoginCredentials,
+    LauncherSettings,
+    ServerInfo,
+    ModInfo,
+)
 from pydantic import BaseModel, Field, ConfigDict, validator
-from typing import Optional, List, Dict, Any, Union
+from typing import Optional, List, Dict
 from pathlib import Path
 import datetime
 
@@ -58,9 +64,7 @@ class LauncherConfigModel(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="allow",
-        validate_assignment=True,
-        str_strip_whitespace=True
+        extra="allow", validate_assignment=True, str_strip_whitespace=True
     )
 
     # 基本配置
@@ -69,30 +73,50 @@ class LauncherConfigModel(BaseModel):
     launcher_uuid: Optional[str] = Field(default=None, description="啟動器唯一標識")
 
     # 目錄配置
-    minecraft_directory: Optional[str] = Field(default=None, description="Minecraft 安裝目錄")
+    minecraft_directory: Optional[str] = Field(
+        default=None, description="Minecraft 安裝目錄"
+    )
     config_directory: Optional[str] = Field(default=None, description="配置文件目錄")
     cache_directory: Optional[str] = Field(default=None, description="緩存目錄")
     logs_directory: Optional[str] = Field(default=None, description="日誌目錄")
 
     # 帳戶配置
-    current_account: Optional[LoginCredentials] = Field(default=None, description="當前使用的帳戶")
-    saved_accounts: List[LoginCredentials] = Field(default_factory=list, description="已保存的帳戶列表")
+    current_account: Optional[LoginCredentials] = Field(
+        default=None, description="當前使用的帳戶"
+    )
+    saved_accounts: List[LoginCredentials] = Field(
+        default_factory=list, description="已保存的帳戶列表"
+    )
     auto_login: bool = Field(default=True, description="自動登入")
     remember_account: bool = Field(default=True, description="記住帳戶")
 
     # 啟動器設定
-    launcher_settings: LauncherSettings = Field(default_factory=LauncherSettings, description="啟動器設定")
+    launcher_settings: LauncherSettings = Field(
+        default_factory=LauncherSettings, description="啟動器設定"
+    )
 
     # 遊戲配置
-    default_minecraft_options: MinecraftOptions = Field(default_factory=MinecraftOptions, description="默認 Minecraft 選項")
+    default_minecraft_options: MinecraftOptions = Field(
+        default_factory=MinecraftOptions, description="默認 Minecraft 選項"
+    )
 
     # 伺服器配置
-    saved_servers: List[ServerInfo] = Field(default_factory=list, description="已保存的伺服器列表")
+    saved_servers: List[ServerInfo] = Field(
+        default_factory=list, description="已保存的伺服器列表"
+    )
 
     # 模組配置
-    installed_mods: List[ModInfo] = Field(default_factory=list, description="已安裝的模組列表")
+    installed_mods: List[ModInfo] = Field(
+        default_factory=list, description="已安裝的模組列表"
+    )
 
-    @validator('minecraft_directory', 'config_directory', 'cache_directory', 'logs_directory', pre=True)
+    @validator(
+        "minecraft_directory",
+        "config_directory",
+        "cache_directory",
+        "logs_directory",
+        pre=True,
+    )
     def validate_directories(cls, v):
         """驗證目錄路徑"""
         if v is not None:
@@ -107,34 +131,46 @@ class GameProfileConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True,
-        str_strip_whitespace=True
+        extra="forbid", validate_assignment=True, str_strip_whitespace=True
     )
 
     # 基本信息
     profile_id: str = Field(..., description="設定檔 ID")
     profile_name: str = Field(..., description="設定檔名稱")
-    created_time: datetime.datetime = Field(default_factory=datetime.datetime.now, description="創建時間")
-    last_used: Optional[datetime.datetime] = Field(default=None, description="最後使用時間")
+    created_time: datetime.datetime = Field(
+        default_factory=datetime.datetime.now, description="創建時間"
+    )
+    last_used: Optional[datetime.datetime] = Field(
+        default=None, description="最後使用時間"
+    )
 
     # 版本信息
     minecraft_version: str = Field(..., description="Minecraft 版本")
-    loader_type: Optional[str] = Field(default=None, description="模組加載器類型 (forge/fabric/quilt)")
+    loader_type: Optional[str] = Field(
+        default=None, description="模組加載器類型 (forge/fabric/quilt)"
+    )
     loader_version: Optional[str] = Field(default=None, description="模組加載器版本")
 
     # 遊戲配置
-    minecraft_options: MinecraftOptions = Field(default_factory=MinecraftOptions, description="Minecraft 選項")
+    minecraft_options: MinecraftOptions = Field(
+        default_factory=MinecraftOptions, description="Minecraft 選項"
+    )
 
     # Java 配置
-    java_executable: Optional[str] = Field(default=None, description="Java 可執行文件路徑")
+    java_executable: Optional[str] = Field(
+        default=None, description="Java 可執行文件路徑"
+    )
     java_arguments: List[str] = Field(default_factory=list, description="Java 參數")
 
     # 模組配置
-    enabled_mods: List[str] = Field(default_factory=list, description="啟用的模組 ID 列表")
+    enabled_mods: List[str] = Field(
+        default_factory=list, description="啟用的模組 ID 列表"
+    )
 
     # 資源包配置
-    enabled_resource_packs: List[str] = Field(default_factory=list, description="啟用的資源包列表")
+    enabled_resource_packs: List[str] = Field(
+        default_factory=list, description="啟用的資源包列表"
+    )
 
     # 其他設定
     icon_path: Optional[str] = Field(default=None, description="設定檔圖標路徑")
@@ -146,13 +182,12 @@ class DownloadConfig(BaseModel):
     下載配置模型
     """
 
-    model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True
-    )
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     # 下載設定
-    max_concurrent_downloads: int = Field(default=4, description="最大並發下載數", ge=1, le=16)
+    max_concurrent_downloads: int = Field(
+        default=4, description="最大並發下載數", ge=1, le=16
+    )
     download_timeout: int = Field(default=300, description="下載超時時間（秒）", ge=30)
     retry_attempts: int = Field(default=3, description="重試次數", ge=0, le=10)
 
@@ -163,7 +198,9 @@ class DownloadConfig(BaseModel):
     # 代理設定
     use_proxy: bool = Field(default=False, description="使用代理")
     proxy_host: Optional[str] = Field(default=None, description="代理主機")
-    proxy_port: Optional[int] = Field(default=None, description="代理端口", ge=1, le=65535)
+    proxy_port: Optional[int] = Field(
+        default=None, description="代理端口", ge=1, le=65535
+    )
     proxy_username: Optional[str] = Field(default=None, description="代理用戶名")
     proxy_password: Optional[str] = Field(default=None, description="代理密碼")
 
@@ -177,10 +214,7 @@ class UIConfig(BaseModel):
     用戶界面配置模型
     """
 
-    model_config = ConfigDict(
-        extra="forbid",
-        validate_assignment=True
-    )
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     # 窗口設定
     window_width: int = Field(default=1200, description="窗口寬度", ge=800)
@@ -199,7 +233,9 @@ class UIConfig(BaseModel):
     show_news: bool = Field(default=True, description="顯示新聞")
     show_release_notes: bool = Field(default=True, description="顯示版本說明")
     show_advanced_options: bool = Field(default=False, description="顯示高級選項")
-    auto_close_launcher: bool = Field(default=False, description="遊戲啟動後自動關閉啟動器")
+    auto_close_launcher: bool = Field(
+        default=False, description="遊戲啟動後自動關閉啟動器"
+    )
 
     # 語言設定
     language: str = Field(default="zh-TW", description="界面語言")
@@ -222,23 +258,30 @@ class CompleteLauncherConfig(BaseModel):
     整合所有配置組件
     """
 
-    model_config = ConfigDict(
-        extra="allow",
-        validate_assignment=True
-    )
+    model_config = ConfigDict(extra="allow", validate_assignment=True)
 
     # 主要配置組件
-    launcher_config: LauncherConfigModel = Field(default_factory=LauncherConfigModel, description="啟動器主配置")
-    download_config: DownloadConfig = Field(default_factory=DownloadConfig, description="下載配置")
+    launcher_config: LauncherConfigModel = Field(
+        default_factory=LauncherConfigModel, description="啟動器主配置"
+    )
+    download_config: DownloadConfig = Field(
+        default_factory=DownloadConfig, description="下載配置"
+    )
     ui_config: UIConfig = Field(default_factory=UIConfig, description="UI 配置")
 
     # 設定檔列表
-    game_profiles: Dict[str, GameProfileConfig] = Field(default_factory=dict, description="遊戲設定檔字典")
-    active_profile_id: Optional[str] = Field(default=None, description="當前活躍的設定檔 ID")
+    game_profiles: Dict[str, GameProfileConfig] = Field(
+        default_factory=dict, description="遊戲設定檔字典"
+    )
+    active_profile_id: Optional[str] = Field(
+        default=None, description="當前活躍的設定檔 ID"
+    )
 
     # 配置元數據
     config_version: str = Field(default="1.0.0", description="配置文件版本")
-    last_modified: datetime.datetime = Field(default_factory=datetime.datetime.now, description="最後修改時間")
+    last_modified: datetime.datetime = Field(
+        default_factory=datetime.datetime.now, description="最後修改時間"
+    )
 
     def get_active_profile(self) -> Optional[GameProfileConfig]:
         """獲取當前活躍的設定檔"""
@@ -282,7 +325,7 @@ class MinecraftLauncher:
             self.config.launcher_config.minecraft_directory,
             self.config.launcher_config.config_directory,
             self.config.launcher_config.cache_directory,
-            self.config.launcher_config.logs_directory
+            self.config.launcher_config.logs_directory,
         ]:
             if directory:
                 Path(directory).mkdir(parents=True, exist_ok=True)
@@ -303,7 +346,7 @@ class MinecraftLauncher:
         # 驗證帳戶
         auth_credential = AuthCredential(
             access_token=credentials.access_token,
-            refresh_token=credentials.refresh_token
+            refresh_token=credentials.refresh_token,
         )
 
         if await self.account_manager.Checker(auth_credential):
@@ -322,5 +365,5 @@ __all__ = [
     "UIConfig",
     "BasicLauncher",
     "CompleteLauncherConfig",
-    "MinecraftLauncher"
+    "MinecraftLauncher",
 ]

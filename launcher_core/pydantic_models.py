@@ -24,7 +24,7 @@ class MinecraftOptions(BaseModel):
         extra="forbid",
         validate_assignment=True,
         arbitrary_types_allowed=True,
-        str_strip_whitespace=True
+        str_strip_whitespace=True,
     )
 
     username: Optional[str] = Field(None, description="玩家用戶名")
@@ -144,8 +144,8 @@ class VanillaLauncherProfile(BaseModel):
 
     name: Optional[str] = Field(None, description="設定檔名稱")
     version: Optional[str] = Field(None, description="Minecraft 版本")
-    versionType: Optional[Literal["latest-release", "latest-snapshot", "custom"]] = Field(
-        None, description="版本類型"
+    versionType: Optional[Literal["latest-release", "latest-snapshot", "custom"]] = (
+        Field(None, description="版本類型")
     )
     gameDirectory: Optional[str] = Field(None, description="遊戲目錄")
     javaExecutable: Optional[str] = Field(None, description="Java 可執行文件")
@@ -221,9 +221,11 @@ class LaunchProfile(BaseModel):
     jvm_arguments: List[str] = Field(default_factory=list, description="JVM 參數")
     game_arguments: List[str] = Field(default_factory=list, description="遊戲參數")
     credentials: Optional[LoginCredentials] = Field(None, description="登入憑證")
-    minecraft_options: Optional[MinecraftOptions] = Field(None, description="Minecraft 選項")
+    minecraft_options: Optional[MinecraftOptions] = Field(
+        None, description="Minecraft 選項"
+    )
 
-    @validator('game_directory', pre=True)
+    @validator("game_directory", pre=True)
     def validate_game_directory(cls, v):
         """驗證遊戲目錄"""
         if v is not None:
@@ -298,5 +300,5 @@ __all__ = [
     "ModInfo",
     "ServerInfo",
     "LauncherSettings",
-    "MinecraftUUID"
+    "MinecraftUUID",
 ]

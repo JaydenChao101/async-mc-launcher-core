@@ -33,7 +33,7 @@ from .pydantic_models import (
     VanillaLauncherProfile,
     VanillaLauncherProfileResolution,
     MrpackInformation,
-    MinecraftUUID
+    MinecraftUUID,
 )
 
 from . import (
@@ -103,4 +103,5 @@ __all__ = [
     "MinecraftUUID",
     "__version__",
     "check_version",
+    "verify_mojang_jwt",
 ]
