@@ -390,7 +390,7 @@ class MinecraftProfileResponse(BaseModel):
     capes: Optional[list[MinecraftProfileCape]] = None
 
 
-@dataclass(frozen=True)
+@dataclass
 class AzureApplication:
     """The Azure Application ID and Secret"""
 
@@ -400,7 +400,7 @@ class AzureApplication:
     redirect_uri: str = "https://login.live.com/oauth20_desktop.srf"
 
 
-@dataclass(frozen=True)
+@dataclass
 class Credential:
     """The credential of the player"""
 
