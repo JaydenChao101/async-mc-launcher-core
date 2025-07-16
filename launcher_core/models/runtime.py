@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause
 """
 
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 
 
 class JvmRuntimeInformation(BaseModel):
