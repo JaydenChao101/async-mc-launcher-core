@@ -65,9 +65,7 @@ jobs:
       run: |
         pytest tests/ -v --tb=short --cov=launcher_core --cov-report=xml --cov-report=term-missing
 
-    - name: Upload coverage to Codecov (optional)
-      if: matrix.python-version == '3.12'  # 只在一個版本上傳覆蓋率
-      uses: codecov/codecov-action@v3
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
       with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
