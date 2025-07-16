@@ -12,7 +12,7 @@ from ._helper import (
     empty,
 )
 from .exceptions import VersionNotFound, UnsupportedVersion, ExternalProgramError
-from ._types import FabricMinecraftVersion, FabricLoader, CallbackDict
+from .models import FabricMinecraftVersion, FabricLoader, CallbackDict
 from .install import install_minecraft_version
 from .utils import is_version_valid
 

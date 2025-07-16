@@ -1,7 +1,7 @@
 from . import Credential as AuthCredential
 from .exceptions import NeedAccountInfo, AccountNotOwnMinecraft
 from .mojang import have_minecraft
-from .pydantic_models import (
+from .models import (
     MinecraftOptions,
     Credential,
     LauncherSettings,

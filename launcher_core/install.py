@@ -21,7 +21,7 @@ from .natives import extract_natives_file, get_natives
 from ._internal_types.install_types import AssetsJson
 from .runtime import install_jvm_runtime
 from .exceptions import VersionNotFound
-from ._types import CallbackDict
+from .models import CallbackDict
 
 __all__ = ["install_minecraft_version"]
 

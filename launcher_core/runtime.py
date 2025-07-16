@@ -27,7 +27,7 @@ from ._internal_types.runtime_types import (
     PlatformManifestJson,
     _PlatformManifestJsonFile,
 )
-from ._types import CallbackDict, JvmRuntimeInformation, VersionRuntimeInformation
+from .models import CallbackDict, JvmRuntimeInformation, VersionRuntimeInformation
 from .exceptions import VersionNotFound, PlatformNotSupported
 
 

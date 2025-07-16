@@ -15,7 +15,7 @@ from tomli_w import dumps
 import aiofiles
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from ..pydantic_models import MinecraftOptions
+from ..models import MinecraftOptions
 
 
 class LauncherConfig(BaseSettings):

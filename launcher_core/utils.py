@@ -14,7 +14,7 @@ from typing import Coroutine, Any
 import asyncio
 import aiofiles
 from .logging_utils import logger
-from ._types import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
+from .models import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
 from ._internal_types.shared_types import ClientJson, VersionListManifestJson
 from ._helper import get_requests_response_cache, assert_func
 

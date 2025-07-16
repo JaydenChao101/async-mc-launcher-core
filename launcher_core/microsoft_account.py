@@ -24,8 +24,8 @@ from .exceptions import (
     XErrNotFound,
     DeviceCodeExpiredError,
 )
-from ._types import AzureApplication
-from ._types import Credential as AuthCredential
+from .models import AzureApplication
+from .models import Credential as AuthCredential
 from .logging_utils import logger
 
 # API 端點常量

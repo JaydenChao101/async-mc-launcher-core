@@ -1,5 +1,5 @@
 from pydantic.dataclasses import dataclass
-from typing import Callable, NewType, Optional, Union
+from typing import NewType
 from uuid import UUID
 
 # 重新定義 MinecraftUUID

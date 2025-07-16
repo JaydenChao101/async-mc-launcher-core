@@ -28,7 +28,7 @@ from ._helper import (
 from .install import install_minecraft_version, install_libraries
 from ._internal_types.forge_types import ForgeInstallProfile
 from .exceptions import VersionNotFound
-from ._types import CallbackDict
+from .models import CallbackDict
 import asyncio
 import aiofiles
 import tempfile

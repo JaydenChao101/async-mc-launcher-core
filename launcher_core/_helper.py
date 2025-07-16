@@ -18,7 +18,7 @@ import aiofiles
 from .exceptions import FileOutsideMinecraftDirectory, InvalidChecksum, VersionNotFound
 from ._internal_types.shared_types import ClientJson, ClientJsonRule, ClientJsonLibrary
 from ._internal_types.helper_types import RequestsResponseCache, MavenMetadata
-from ._types import MinecraftOptions, CallbackDict
+from .models import MinecraftOptions, CallbackDict
 from . import __version__
 
 

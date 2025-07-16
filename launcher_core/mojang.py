@@ -13,8 +13,8 @@ import aiohttp
 import aiofiles
 import jwt
 from cryptography.hazmat.primitives import serialization
-from ._types import SkinData, MinecraftProfileResponse
-from ._types import Credential as AuthCredential
+from .models import SkinData, MinecraftProfileResponse
+from .models import Credential as AuthCredential
 from .exceptions import AccountNotOwnMinecraft, NeedAccountInfo
 
 

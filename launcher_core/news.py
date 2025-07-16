@@ -11,7 +11,7 @@ news includes functions to retrieve news about Minecraft using the official API 
 import datetime
 
 # 本地導入
-from ._types import MinecraftNews, JavaPatchNotes
+from .models import MinecraftNews, JavaPatchNotes
 from ._helper import get_user_agent
 from .http_client import HTTPClient
 
