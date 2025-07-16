@@ -54,6 +54,7 @@ dev = [
     "coverage>=7.9.2",
     "datamodel-code-generator>=0.31.2",
     "mypy>=1.17.0",
+    "nuitka>=2.7.12",
     "pylint>=3.3.7",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
