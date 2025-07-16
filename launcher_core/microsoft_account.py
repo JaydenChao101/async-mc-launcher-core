@@ -181,7 +181,7 @@ class Login:
         logger.info("Microsoft token response: %s", result)
         return result
 
-    async def complete_login(self, code: str) -> Dict[str, Any]:
+    async def complete_login(self, code: str) -> AuthCredential:
         """完成完整的登入流程"""
         # 獲取Microsoft令牌
         ms_token = await self.get_ms_token(code)
@@ -200,13 +200,11 @@ class Login:
             xsts_token["Token"], uhs
         )
 
-        return {
-            "access_token": minecraft_token["access_token"],
-            "refresh_token": ms_token["refresh_token"],
-            "expires_in": minecraft_token["expires_in"],
-            "username": "",  # 需要額外API調用獲取
-            "uuid": "",  # 需要額外API調用獲取
-        }
+        return AuthCredential(
+            access_token=minecraft_token["access_token"],
+            refresh_token=ms_token["refresh_token"],
+            expires_in=minecraft_token["expires_in"],
+        )
 
 
 class DeviceCodeLogin:
