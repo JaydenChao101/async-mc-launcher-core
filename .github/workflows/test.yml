@@ -36,6 +36,13 @@ jobs:
         uv pip install -e . --system
         # 直接安裝開發依賴（避免語法問題）
         uv pip install ruff pytest pytest-cov pytest-asyncio pytest-mock --system
+        # 為 Python 3.10 額外安裝 tomli（如果需要）
+        if python -c "import sys; exit(0 if sys.version_info >= (3, 11) else 1)" 2>/dev/null; then
+          echo "Python 3.11+ detected, using built-in tomllib"
+        else
+          echo "Python 3.10 detected, installing tomli"
+          uv pip install tomli --system
+        fi
 
     - name: Lint with ruff
       run: |

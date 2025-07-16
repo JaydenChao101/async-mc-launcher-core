@@ -7,10 +7,18 @@ Enhanced with automatic environment variable support and type validation.
 # SPDX-FileCopyrightText: Copyright (c) 2019-2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 
+# 標準庫導入
 import os
+import sys
 from pathlib import Path
 from typing import Optional, Union
-import tomllib
+
+# 兼容 Python 3.10 的 tomllib 導入
+try:
+    import tomllib  # Python 3.11+
+except ImportError:
+    import tomli as tomllib  # Python 3.10 fallback
+
 from tomli_w import dumps
 import aiofiles
 from pydantic import Field

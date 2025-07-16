@@ -36,6 +36,7 @@ dependencies = [
   "pydantic>=2.11.7",
   "pydantic-settings>=2.7.0",
   "pyjwt>=2.10.1",
+  "tomli>=1.2.0; python_version<'3.11'",
   "tomli-w>=1.2.0",
 ]
 dynamic = ["version"]
