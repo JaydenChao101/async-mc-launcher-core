@@ -11,7 +11,7 @@ from uuid import uuid4
 # 從 pydantic_models 導入所有模型
 from launcher_core.pydantic_models import (
     MinecraftOptions,
-    LoginCredentials,
+    Credential,
     LaunchProfile,
     ServerInfo,
     ModInfo,
@@ -53,11 +53,11 @@ def create_minecraft_options_example():
     return minecraft_opts
 
 
-def create_login_credentials_example():
+def create_login_Credential_example():
     """創建登入憑證示例"""
-    print("\n=== LoginCredentials 使用示例 ===")
+    print("\n=== Credential 使用示例 ===")
 
-    credentials = LoginCredentials(
+    Credential = Credential(
         access_token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
         refresh_token="refresh_token_example",
         username="TestPlayer",
@@ -66,12 +66,12 @@ def create_login_credentials_example():
         token_type="Bearer"
     )
 
-    print(f"用戶名: {credentials.username}")
-    print(f"UUID: {credentials.uuid}")
-    print(f"令牌類型: {credentials.token_type}")
-    print(f"過期時間: {credentials.expires_in} 秒")
+    print(f"用戶名: {Credential.username}")
+    print(f"UUID: {Credential.uuid}")
+    print(f"令牌類型: {Credential.token_type}")
+    print(f"過期時間: {Credential.expires_in} 秒")
 
-    return credentials
+    return Credential
 
 
 def create_launch_profile_example():
@@ -86,7 +86,7 @@ def create_launch_profile_example():
     )
 
     # 創建登入憑證
-    credentials = LoginCredentials(
+    Credential = Credential(
         access_token="access_token_example",
         username="ProfileUser",
         uuid=str(uuid4())
@@ -100,14 +100,14 @@ def create_launch_profile_example():
         java_executable="/usr/bin/java",
         jvm_arguments=["-Xmx8G", "-Xms4G", "-XX:+UseG1GC"],
         game_arguments=["--demo"],
-        credentials=credentials,
+        Credential=Credential,
         minecraft_options=minecraft_opts
     )
 
     print(f"設定檔名稱: {profile.name}")
     print(f"Minecraft 版本: {profile.version}")
     print(f"Java 路徑: {profile.java_executable}")
-    print(f"用戶名: {profile.credentials.username}")
+    print(f"用戶名: {profile.Credential.username}")
     print(f"遊戲目錄: {profile.minecraft_options.gameDirectory}")
 
     return profile
@@ -349,7 +349,7 @@ def main():
 
     # 創建各種模型示例
     minecraft_opts = create_minecraft_options_example()
-    credentials = create_login_credentials_example()
+    Credential = create_login_Credential_example()
     profile = create_launch_profile_example()
     servers = create_server_info_example()
     mods = create_mod_info_example()

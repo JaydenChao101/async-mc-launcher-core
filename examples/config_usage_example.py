@@ -56,7 +56,7 @@ async def minecraft_options_usage():
     config = await config_manager.update_config(
         minecraft_options=minecraft_opts,
         auto_refresh_token=True,
-        remember_credentials=True
+        remember_Credential=True
     )
 
     print(f"Minecraft 用戶名: {config.minecraft_options.username}")
@@ -104,7 +104,7 @@ async def advanced_config_management():
         "download_timeout": 600,
         "verify_downloads": True,
         "auto_refresh_token": True,
-        "remember_credentials": True,
+        "remember_Credential": True,
         "log_level": "INFO",
         "proxy_host": "proxy.example.com",
         "proxy_port": 8080

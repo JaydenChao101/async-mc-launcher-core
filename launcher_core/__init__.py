@@ -5,7 +5,7 @@
 __version__ = "0.3.1"
 
 from .logging_utils import logger
-from ._types import (
+from .pydantic_models import (
     Credential,
     AzureApplication,
 )
@@ -13,28 +13,7 @@ from .check_version import check_version
 from .config.load_launcher_config import ConfigManager, LauncherConfig
 
 # 導入 Pydantic 模型
-from .pydantic_models import (
-    MinecraftOptions,
-    LoginCredentials,
-    LaunchProfile,
-    ServerInfo,
-    ModInfo,
-    LauncherSettings,
-    JavaInformation,
-    DownloadInfo,
-    LibraryInfo,
-    AssetInfo,
-    LatestMinecraftVersions,
-    MinecraftVersionInfo,
-    FabricMinecraftVersion,
-    FabricLoader,
-    QuiltMinecraftVersion,
-    QuiltLoader,
-    VanillaLauncherProfile,
-    VanillaLauncherProfileResolution,
-    MrpackInformation,
-    MinecraftUUID,
-)
+from .pydantic_models import *
 
 from . import (
     command,
@@ -49,7 +28,6 @@ from . import (
     runtime,
     mrpack,
     exceptions,
-    _types,
     microsoft_types,
     config,
     pydantic_models,
@@ -82,7 +60,7 @@ __all__ = [
     "LauncherConfig",
     # Pydantic 模型
     "MinecraftOptions",
-    "LoginCredentials",
+    "Credential",
     "LaunchProfile",
     "ServerInfo",
     "ModInfo",

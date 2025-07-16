@@ -54,7 +54,7 @@ class LauncherConfig(BaseSettings):
 
     # 認證相關配置
     auto_refresh_token: bool = Field(default=True, description="自動刷新令牌")
-    remember_credentials: bool = Field(default=True, description="記住登入憑證")
+    remember_Credential: bool = Field(default=True, description="記住登入憑證")
 
     # 下載和安裝配置
     concurrent_downloads: int = Field(
