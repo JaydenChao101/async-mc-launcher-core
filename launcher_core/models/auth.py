@@ -23,4 +23,5 @@ class Credential:
     access_token: str = None
     username: str = None
     uuid: MinecraftUUID = None
+    expires_in: int = None
     refresh_token: str = None
