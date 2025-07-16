@@ -34,8 +34,8 @@ jobs:
       run: |
         # 安裝專案及其依賴項
         uv pip install -e . --system
-        # 安裝開發依賴
-        uv pip install -e .[dev] --system
+        # 直接安裝開發依賴（避免語法問題）
+        uv pip install ruff pytest pytest-cov pytest-asyncio pytest-mock --system
 
     - name: Lint with ruff
       run: |
