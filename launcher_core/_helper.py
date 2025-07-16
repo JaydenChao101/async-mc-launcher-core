@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 """This module contains some helper functions. It should not be used outside minecraft_launcher_lib"""
+
 from typing import Literal, Any, NoReturn
 import subprocess
 import datetime
@@ -18,7 +19,7 @@ import aiofiles
 from .exceptions import FileOutsideMinecraftDirectory, InvalidChecksum, VersionNotFound
 from ._internal_types.shared_types import ClientJson, ClientJsonRule, ClientJsonLibrary
 from ._internal_types.helper_types import RequestsResponseCache, MavenMetadata
-from ._types import MinecraftOptions, CallbackDict
+from .models import MinecraftOptions, CallbackDict
 from . import __version__
 
 
@@ -424,8 +425,12 @@ async def parse_maven_metadata(url: str) -> MavenMetadata:
     # The structure of the metadata file is simple. So you don't need a XML parser. It can be parsed using RegEx.
     text = r["text"]
     return {
-        "release": re.search("(?<=<release>).*?(?=</release>)", text, re.MULTILINE).group(),  # type: ignore
-        "latest": re.search("(?<=<latest>).*?(?=</latest>)", text, re.MULTILINE).group(),  # type: ignore
+        "release": re.search(
+            "(?<=<release>).*?(?=</release>)", text, re.MULTILINE
+        ).group(),  # type: ignore
+        "latest": re.search(
+            "(?<=<latest>).*?(?=</latest>)", text, re.MULTILINE
+        ).group(),  # type: ignore
         "versions": re.findall("(?<=<version>).*?(?=</version>)", text, re.MULTILINE),
     }
 

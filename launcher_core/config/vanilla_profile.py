@@ -23,7 +23,7 @@ from launcher_core._internal_types.vanilla_launcher_types import (
     VanillaLauncherProfilesJson,
     VanillaLauncherProfilesJsonProfile,
 )
-from launcher_core._types import VanillaLauncherProfile, MinecraftOptions
+from launcher_core.models.minecraft import VanillaLauncherProfile, MinecraftOptions
 from launcher_core.exceptions import InvalidVanillaLauncherProfile
 from launcher_core.utils import get_latest_version
 

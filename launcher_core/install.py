@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "install allows you to install minecraft."
+
 import shutil
 import json
 import os
@@ -21,7 +22,7 @@ from .natives import extract_natives_file, get_natives
 from ._internal_types.install_types import AssetsJson
 from .runtime import install_jvm_runtime
 from .exceptions import VersionNotFound
-from ._types import CallbackDict
+from .models import CallbackDict
 
 __all__ = ["install_minecraft_version"]
 

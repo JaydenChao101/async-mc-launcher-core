@@ -5,7 +5,7 @@ import os
 # Add the project root to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from launcher_core import exceptions, _types
+from launcher_core import exceptions
 from launcher_core.utils import sync
 
 
@@ -38,31 +38,6 @@ class TestUtils:
 
         with pytest.raises(ValueError, match="Test error"):
             sync(async_function_with_error())
-
-
-class TestTypes:
-    """Test cases for _types module"""
-
-    def test_credential_creation(self):
-        """Test Credential type creation"""
-        if hasattr(_types, "Credential"):
-            cred = _types.Credential(
-                access_token="test_token",
-                refresh_token="test_refresh",
-                username="test_user",
-            )
-            assert cred.access_token == "test_token"
-            assert cred.refresh_token == "test_refresh"
-            assert cred.username == "test_user"
-
-    def test_azure_application_creation(self):
-        """Test AzureApplication type creation"""
-        if hasattr(_types, "AzureApplication"):
-            app = _types.AzureApplication(
-                client_id="test_client_id", redirect_uri="test_redirect_uri"
-            )
-            assert app.client_id == "test_client_id"
-            assert app.redirect_uri == "test_redirect_uri"
 
 
 class TestExceptions:

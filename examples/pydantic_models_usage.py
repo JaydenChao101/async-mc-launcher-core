@@ -1,6 +1,6 @@
 """
 Pydantic 模型使用示例
-展示如何在其他代碼中使用 launcher_core.pydantic_models
+展示如何在其他代碼中使用 launcher_core.models
 """
 
 import asyncio
@@ -8,10 +8,10 @@ from pathlib import Path
 from datetime import datetime
 from uuid import uuid4
 
-# 從 pydantic_models 導入所有模型
-from launcher_core.pydantic_models import (
+# 從 models 包導入所有模型
+from launcher_core.models import (
     MinecraftOptions,
-    LoginCredentials,
+    Credential,
     LaunchProfile,
     ServerInfo,
     ModInfo,
@@ -20,7 +20,7 @@ from launcher_core.pydantic_models import (
     DownloadInfo,
     LibraryInfo,
     LatestMinecraftVersions,
-    MinecraftVersionInfo
+    MinecraftVersionInfo,
 )
 
 
@@ -38,7 +38,7 @@ def create_minecraft_options_example():
         launcherVersion="2.0.0",
         customResolution=True,
         resolutionWidth=1920,
-        resolutionHeight=1080
+        resolutionHeight=1080,
     )
 
     print(f"用戶名: {minecraft_opts.username}")
@@ -53,25 +53,25 @@ def create_minecraft_options_example():
     return minecraft_opts
 
 
-def create_login_credentials_example():
+def create_login_credential_example():
     """創建登入憑證示例"""
-    print("\n=== LoginCredentials 使用示例 ===")
+    print("\n=== Credential 使用示例 ===")
 
-    credentials = LoginCredentials(
+    user_credential = Credential(
         access_token="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
         refresh_token="refresh_token_example",
         username="TestPlayer",
         uuid=str(uuid4()),
         expires_in=3600,
-        token_type="Bearer"
+        token_type="Bearer",
     )
 
-    print(f"用戶名: {credentials.username}")
-    print(f"UUID: {credentials.uuid}")
-    print(f"令牌類型: {credentials.token_type}")
-    print(f"過期時間: {credentials.expires_in} 秒")
+    print(f"用戶名: {user_credential.username}")
+    print(f"UUID: {user_credential.uuid}")
+    print(f"令牌類型: {user_credential.token_type}")
+    print(f"過期時間: {user_credential.expires_in} 秒")
 
-    return credentials
+    return user_credential
 
 
 def create_launch_profile_example():
@@ -82,14 +82,12 @@ def create_launch_profile_example():
     minecraft_opts = MinecraftOptions(
         username="ProfileUser",
         gameDirectory=str(Path.home() / "Games" / "Minecraft"),
-        jvmArguments=["-Xmx8G", "-Xms4G"]
+        jvmArguments=["-Xmx8G", "-Xms4G"],
     )
 
     # 創建登入憑證
-    credentials = LoginCredentials(
-        access_token="access_token_example",
-        username="ProfileUser",
-        uuid=str(uuid4())
+    user_credential = Credential(
+        access_token="access_token_example", username="ProfileUser", uuid=str(uuid4())
     )
 
     # 創建完整的啟動設定檔
@@ -100,14 +98,14 @@ def create_launch_profile_example():
         java_executable="/usr/bin/java",
         jvm_arguments=["-Xmx8G", "-Xms4G", "-XX:+UseG1GC"],
         game_arguments=["--demo"],
-        credentials=credentials,
-        minecraft_options=minecraft_opts
+        credential=user_credential,
+        minecraft_options=minecraft_opts,
     )
 
     print(f"設定檔名稱: {profile.name}")
     print(f"Minecraft 版本: {profile.version}")
     print(f"Java 路徑: {profile.java_executable}")
-    print(f"用戶名: {profile.credentials.username}")
+    print(f"用戶名: {profile.credential.username}")
     print(f"遊戲目錄: {profile.minecraft_options.gameDirectory}")
 
     return profile
@@ -124,7 +122,7 @@ def create_server_info_example():
             port=25565,
             version="1.8-1.20",
             description="The largest Minecraft server",
-            auto_connect=False
+            auto_connect=False,
         ),
         ServerInfo(
             name="我的私人伺服器",
@@ -132,8 +130,8 @@ def create_server_info_example():
             port=25566,
             version="1.20.1",
             description="朋友們的私人伺服器",
-            auto_connect=True
-        )
+            auto_connect=True,
+        ),
     ]
 
     for server in servers:
@@ -158,7 +156,7 @@ def create_mod_info_example():
             description="Minecraft 優化模組",
             author="sp614x",
             enabled=True,
-            dependencies=[]
+            dependencies=[],
         ),
         ModInfo(
             id="jei",
@@ -167,7 +165,7 @@ def create_mod_info_example():
             description="物品查看模組",
             author="mezz",
             enabled=True,
-            dependencies=["forge"]
+            dependencies=["forge"],
         ),
         ModInfo(
             id="journeymap",
@@ -176,8 +174,8 @@ def create_mod_info_example():
             description="小地圖模組",
             author="techbrew",
             enabled=False,
-            dependencies=["forge"]
-        )
+            dependencies=["forge"],
+        ),
     ]
 
     enabled_mods = [mod for mod in mods if mod.enabled]
@@ -203,7 +201,7 @@ def create_launcher_settings_example():
         keep_launcher_open=False,
         show_snapshots=True,
         concurrent_downloads=8,
-        memory_allocation=8192
+        memory_allocation=8192,
     )
 
     print(f"主題: {settings.theme}")
@@ -232,14 +230,14 @@ def create_download_info_example():
             url="https://launcher.mojang.com/v1/objects/abc123/client.jar",
             sha1="abc123def456",
             size=15728640,
-            path="versions/1.20.1/1.20.1.jar"
+            path="versions/1.20.1/1.20.1.jar",
         ),
         DownloadInfo(
             url="https://libraries.minecraft.net/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1.jar",
             sha1="def456ghi789",
             size=704512,
-            path="libraries/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1.jar"
-        )
+            path="libraries/org/lwjgl/lwjgl/3.3.1/lwjgl-3.3.1.jar",
+        ),
     ]
 
     total_size = sum(dl.size for dl in downloads if dl.size)
@@ -267,7 +265,7 @@ def create_java_information_example():
             javaPath="/usr/lib/jvm/java-8-openjdk/bin/java",
             javawPath=None,
             is64Bit=True,
-            openjdk=True
+            openjdk=True,
         ),
         JavaInformation(
             path="/usr/lib/jvm/java-17-openjdk",
@@ -276,8 +274,8 @@ def create_java_information_example():
             javaPath="/usr/lib/jvm/java-17-openjdk/bin/java",
             javawPath=None,
             is64Bit=True,
-            openjdk=True
-        )
+            openjdk=True,
+        ),
     ]
 
     # 選擇最適合的 Java 版本
@@ -339,7 +337,7 @@ class LauncherApplication:
             "settings": self.settings.model_dump(),
             "profiles": [p.model_dump() for p in self.profiles],
             "servers": [s.model_dump() for s in self.servers],
-            "mods": [m.model_dump() for m in self.mods]
+            "mods": [m.model_dump() for m in self.mods],
         }
 
 
@@ -349,7 +347,7 @@ def main():
 
     # 創建各種模型示例
     minecraft_opts = create_minecraft_options_example()
-    credentials = create_login_credentials_example()
+    user_credential = create_login_credential_example()
     profile = create_launch_profile_example()
     servers = create_server_info_example()
     mods = create_mod_info_example()

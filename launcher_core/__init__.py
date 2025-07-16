@@ -5,36 +5,11 @@
 __version__ = "0.3.1"
 
 from .logging_utils import logger
-from ._types import (
-    Credential,
-    AzureApplication,
-)
 from .check_version import check_version
 from .config.load_launcher_config import ConfigManager, LauncherConfig
 
 # 導入 Pydantic 模型
-from .pydantic_models import (
-    MinecraftOptions,
-    LoginCredentials,
-    LaunchProfile,
-    ServerInfo,
-    ModInfo,
-    LauncherSettings,
-    JavaInformation,
-    DownloadInfo,
-    LibraryInfo,
-    AssetInfo,
-    LatestMinecraftVersions,
-    MinecraftVersionInfo,
-    FabricMinecraftVersion,
-    FabricLoader,
-    QuiltMinecraftVersion,
-    QuiltLoader,
-    VanillaLauncherProfile,
-    VanillaLauncherProfileResolution,
-    MrpackInformation,
-    MinecraftUUID,
-)
+from .models.auth import MinecraftUUID, Credential, AzureApplication
 
 from . import (
     command,
@@ -49,10 +24,8 @@ from . import (
     runtime,
     mrpack,
     exceptions,
-    _types,
     microsoft_types,
     config,
-    pydantic_models,
 )
 from .utils import sync
 from .mojang import verify_mojang_jwt
@@ -70,36 +43,15 @@ __all__ = [
     "runtime",
     "mrpack",
     "exceptions",
-    "_types",
+    "models",
     "microsoft_types",
     "config",
-    "pydantic_models",
     "logger",
     "sync",
     "Credential",
     "AzureApplication",
     "ConfigManager",
     "LauncherConfig",
-    # Pydantic 模型
-    "MinecraftOptions",
-    "LoginCredentials",
-    "LaunchProfile",
-    "ServerInfo",
-    "ModInfo",
-    "LauncherSettings",
-    "JavaInformation",
-    "DownloadInfo",
-    "LibraryInfo",
-    "AssetInfo",
-    "LatestMinecraftVersions",
-    "MinecraftVersionInfo",
-    "FabricMinecraftVersion",
-    "FabricLoader",
-    "QuiltMinecraftVersion",
-    "QuiltLoader",
-    "VanillaLauncherProfile",
-    "VanillaLauncherProfileResolution",
-    "MrpackInformation",
     "MinecraftUUID",
     "__version__",
     "check_version",

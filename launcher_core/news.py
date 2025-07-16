@@ -7,16 +7,17 @@ news includes functions to retrieve news about Minecraft using the official API 
 .. warning::
     The format of the data returned by this API may change at any time
 """
+
 # 標準庫導入
 import datetime
 
 # 本地導入
-from ._types import MinecraftNews, JavaPatchNotes
+from .models import MinecraftNews, JavaPatchNotes
 from ._helper import get_user_agent
 from .http_client import HTTPClient
 
 
-async def get_minecraft_news() -> MinecraftNews:
+async def get_minecraft_news(category: str = None) -> MinecraftNews:
     "Returns general news about Minecraft"
     user_agent = await get_user_agent()
     headers = {"user-agent": user_agent}
@@ -25,8 +26,18 @@ async def get_minecraft_news() -> MinecraftNews:
         headers=headers,
     )
 
+    # 安全地處理日期，只處理有 date 字段的條目
     for entry in news["entries"]:
-        entry["date"] = datetime.date.fromisoformat(entry["date"])
+        if "date" in entry:
+            entry["date"] = datetime.date.fromisoformat(entry["date"])
+
+    # 如果指定了類別，進行過濾
+    if category:
+        filtered_entries = [
+            entry for entry in news["entries"] if entry.get("category") == category
+        ]
+        news["entries"] = filtered_entries
+        news["article_count"] = len(filtered_entries)
 
     return news
 

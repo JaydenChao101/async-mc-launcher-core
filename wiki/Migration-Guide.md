@@ -93,16 +93,16 @@ def microsoft_login():
     login = launcher.microsoft_account.Login()
     login_url = login.get_login_url()
     print(f"請開啟: {login_url}")
-    
+
     code_url = input("請輸入重定向 URL: ")
     code = login.extract_code_from_url(code_url)
-    
+
     auth_response = login.get_ms_token(code)
     xbl_token = login.get_xbl_token(auth_response["access_token"])
     xsts_token = login.get_xsts_token(xbl_token["Token"])
     uhs = xbl_token["DisplayClaims"]["xui"][0]["uhs"]
     mc_token = login.get_minecraft_access_token(xsts_token["Token"], uhs)
-    
+
     return mc_token["access_token"]
 
 # 使用
@@ -118,19 +118,19 @@ async def microsoft_login():
     # 新版的 Microsoft 登入 (異步)
     azure_app = microsoft_account.AzureApplication()
     login = microsoft_account.Login(azure_app=azure_app)
-    
+
     login_url = await login.get_login_url()
     print(f"請開啟: {login_url}")
-    
+
     code_url = input("請輸入重定向 URL: ")
     code = await microsoft_account.Login.extract_code_from_url(code_url)
-    
+
     auth_response = await login.get_ms_token(code)
     xbl_token = await microsoft_account.Login.get_xbl_token(auth_response["access_token"])
     xsts_token = await microsoft_account.Login.get_xsts_token(xbl_token["Token"])
     uhs = xbl_token["DisplayClaims"]["xui"][0]["uhs"]
     mc_token = await microsoft_account.Login.get_minecraft_access_token(xsts_token["Token"], uhs)
-    
+
     return mc_token["access_token"]
 
 # 使用（簡化版本）
@@ -156,13 +156,13 @@ def install_minecraft(version, minecraft_dir):
     # 原版安裝 (同步)
     def progress_callback(status):
         print(f"狀態: {status}")
-    
+
     callback = {
         "setStatus": progress_callback,
         "setProgress": lambda x: print(f"進度: {x}%"),
         "setMax": lambda x: None
     }
-    
+
     launcher.install.install_minecraft_version(
         version, minecraft_dir, callback=callback
     )
@@ -181,13 +181,13 @@ async def install_minecraft(version, minecraft_dir):
     # 新版安裝 (異步)
     def progress_callback(status):
         print(f"狀態: {status}")
-    
+
     callback = {
         "setStatus": progress_callback,
         "setProgress": lambda x: print(f"進度: {x}%"),
         "setMax": lambda x: None
     }
-    
+
     await install.install_minecraft_version(
         version, minecraft_dir, callback=callback
     )
@@ -213,7 +213,7 @@ def generate_launch_command():
         "gameDirectory": "./minecraft",
         "jvmArguments": ["-Xmx2048M"]
     }
-    
+
     cmd = launcher.command.get_minecraft_command(
         "1.21.1", "./minecraft", options
     )
@@ -235,13 +235,13 @@ async def generate_launch_command():
         username="Player",
         uuid="player-uuid"
     )
-    
+
     options = _types.MinecraftOptions(
         game_directory="./minecraft",
         memory=2048,
         jvm_args=["-Xmx2048M"]
     )
-    
+
     cmd = await command.get_minecraft_command(
         "1.21.1", "./minecraft", options, Credential=credential
     )
@@ -264,21 +264,21 @@ from typing import List, Tuple
 
 class CodeMigrator:
     """代碼自動遷移工具"""
-    
+
     def __init__(self):
         self.conversions = [
             # Import 語句轉換
             (r'import minecraft_launcher_lib', 'import launcher_core'),
             (r'from minecraft_launcher_lib', 'from launcher_core'),
             (r'minecraft_launcher_lib\.', 'launcher_core.'),
-            
+
             # 函數呼叫轉換（添加 await）
             (r'utils\.get_version_list\(\)', 'await utils.get_version_list()'),
             (r'install\.install_minecraft_version\(', 'await install.install_minecraft_version('),
             (r'command\.get_minecraft_command\(', 'await command.get_minecraft_command('),
             (r'fabric\.install_fabric\(', 'await fabric.install_fabric('),
             (r'forge\.install_forge_version\(', 'await forge.install_forge_version('),
-            
+
             # Microsoft 認證轉換
             (r'login\.get_login_url\(\)', 'await login.get_login_url()'),
             (r'login\.get_ms_token\(', 'await login.get_ms_token('),
@@ -286,27 +286,27 @@ class CodeMigrator:
             (r'Login\.get_xsts_token\(', 'await Login.get_xsts_token('),
             (r'Login\.get_minecraft_access_token\(', 'await Login.get_minecraft_access_token('),
         ]
-    
+
     def migrate_file(self, file_path: str) -> Tuple[str, List[str]]:
         """遷移單個文件"""
         path = Path(file_path)
-        
+
         if not path.exists() or path.suffix != '.py':
             return None, ["文件不存在或不是 Python 文件"]
-        
+
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 original_content = f.read()
-            
+
             modified_content = original_content
             changes = []
-            
+
             # 應用轉換規則
             for pattern, replacement in self.conversions:
                 if re.search(pattern, modified_content):
                     modified_content = re.sub(pattern, replacement, modified_content)
                     changes.append(f"應用轉換: {pattern} -> {replacement}")
-            
+
             # 檢查是否需要添加 asyncio import
             if 'await ' in modified_content and 'import asyncio' not in modified_content:
                 lines = modified_content.split('\n')
@@ -314,16 +314,16 @@ class CodeMigrator:
                 for i, line in enumerate(lines):
                     if line.strip().startswith('import ') or line.strip().startswith('from '):
                         import_index = i + 1
-                
+
                 lines.insert(import_index, 'import asyncio')
                 modified_content = '\n'.join(lines)
                 changes.append("添加 asyncio import")
-            
+
             # 檢查主函數是否需要轉換為異步
             if 'def main(' in modified_content and 'await ' in modified_content:
                 modified_content = modified_content.replace('def main(', 'async def main(')
                 changes.append("將 main 函數轉換為異步")
-                
+
                 # 添加 asyncio.run 如果需要
                 if 'if __name__ == "__main__":' in modified_content:
                     modified_content = re.sub(
@@ -332,25 +332,25 @@ class CodeMigrator:
                         modified_content
                     )
                     changes.append("添加 asyncio.run 呼叫")
-            
+
             return modified_content, changes
-            
+
         except Exception as e:
             return None, [f"遷移失敗: {e}"]
-    
+
     def migrate_directory(self, directory_path: str, backup: bool = True) -> dict:
         """遷移整個目錄"""
         dir_path = Path(directory_path)
-        
+
         if not dir_path.exists():
             return {"error": "目錄不存在"}
-        
+
         results = {
             "migrated_files": [],
             "skipped_files": [],
             "errors": []
         }
-        
+
         # 創建備份目錄
         if backup:
             backup_dir = dir_path.parent / f"{dir_path.name}_backup"
@@ -359,31 +359,31 @@ class CodeMigrator:
                 shutil.rmtree(backup_dir)
             shutil.copytree(dir_path, backup_dir)
             print(f"✅ 創建備份: {backup_dir}")
-        
+
         # 遷移所有 Python 文件
         for py_file in dir_path.rglob("*.py"):
             try:
                 modified_content, changes = self.migrate_file(str(py_file))
-                
+
                 if modified_content and changes:
                     with open(py_file, 'w', encoding='utf-8') as f:
                         f.write(modified_content)
-                    
+
                     results["migrated_files"].append({
                         "file": str(py_file),
                         "changes": changes
                     })
                 else:
                     results["skipped_files"].append(str(py_file))
-                    
+
             except Exception as e:
                 results["errors"].append({
                     "file": str(py_file),
                     "error": str(e)
                 })
-        
+
         return results
-    
+
     def generate_migration_report(self, results: dict) -> str:
         """生成遷移報告"""
         report_lines = [
@@ -395,7 +395,7 @@ class CodeMigrator:
             f"錯誤文件: {len(results['errors'])}",
             ""
         ]
-        
+
         if results["migrated_files"]:
             report_lines.append("已遷移的文件:")
             for file_info in results["migrated_files"]:
@@ -403,40 +403,40 @@ class CodeMigrator:
                 for change in file_info["changes"]:
                     report_lines.append(f"    - {change}")
                 report_lines.append("")
-        
+
         if results["errors"]:
             report_lines.append("錯誤:")
             for error_info in results["errors"]:
                 report_lines.append(f"  ❌ {error_info['file']}: {error_info['error']}")
-        
+
         return "\n".join(report_lines)
 
 # 使用範例
 async def migrate_project_example():
     """遷移專案示例"""
     migrator = CodeMigrator()
-    
+
     # 遷移單個文件
     print("🔄 遷移單個文件...")
     modified_content, changes = migrator.migrate_file("old_launcher.py")
-    
+
     if modified_content:
         print("✅ 文件遷移成功")
         for change in changes:
             print(f"  - {change}")
-        
+
         # 保存遷移後的文件
         with open("new_launcher.py", "w", encoding="utf-8") as f:
             f.write(modified_content)
-    
+
     # 遷移整個目錄
     print("\n🔄 遷移整個專案...")
     results = migrator.migrate_directory("./old_project", backup=True)
-    
+
     # 生成報告
     report = migrator.generate_migration_report(results)
     print(report)
-    
+
     # 保存報告
     with open("migration_report.txt", "w", encoding="utf-8") as f:
         f.write(report)
@@ -455,22 +455,22 @@ from launcher_core.config.load_launcher_config import save_config
 
 class ConfigMigrator:
     """配置文件遷移工具"""
-    
+
     async def migrate_launcher_profiles(self, minecraft_dir: str):
         """遷移 Vanilla 啟動器設定檔"""
         from launcher_core.config import vanilla_profile
-        
+
         try:
             # 讀取 Vanilla 設定檔
             profiles = await vanilla_profile.load_profiles(minecraft_dir)
-            
+
             if not profiles:
                 print("❌ 找不到 Vanilla 啟動器設定檔")
                 return
-            
+
             # 轉換為新格式
             migrated_profiles = {}
-            
+
             for profile_id, profile_data in profiles.items():
                 migrated_profile = {
                     "name": profile_data.get("name", profile_id),
@@ -486,12 +486,12 @@ class ConfigMigrator:
                         "port": 25565
                     }
                 }
-                
+
                 # 解析 JVM 參數
                 java_args = profile_data.get("javaArgs", "")
                 if java_args:
                     migrated_profile["jvm_args_override"] = java_args.split()
-                
+
                 # 檢測模組載入器
                 version = profile_data.get("lastVersionId", "")
                 if "fabric" in version.lower():
@@ -500,9 +500,9 @@ class ConfigMigrator:
                     migrated_profile["modloader"] = "forge"
                 elif "quilt" in version.lower():
                     migrated_profile["modloader"] = "quilt"
-                
+
                 migrated_profiles[profile_id] = migrated_profile
-            
+
             # 創建新的配置文件
             new_config = {
                 "launcher": {
@@ -518,18 +518,18 @@ class ConfigMigrator:
                 },
                 "profiles": migrated_profiles
             }
-            
+
             # 保存新配置
             await save_config("migrated_config.toml", new_config)
             print(f"✅ 成功遷移 {len(migrated_profiles)} 個設定檔")
             print("📄 配置已保存到: migrated_config.toml")
-            
+
             return new_config
-            
+
         except Exception as e:
             print(f"❌ 設定檔遷移失敗: {e}")
             raise
-    
+
     async def create_default_config(self, minecraft_dir: str = "./minecraft"):
         """創建預設配置文件"""
         default_config = {
@@ -579,19 +579,19 @@ class ConfigMigrator:
                 "log_file": "launcher.log"
             }
         }
-        
+
         await save_config("launcher_config.toml", default_config)
         print("✅ 預設配置文件已創建: launcher_config.toml")
-        
+
         return default_config
 
 # 使用範例
 async def config_migration_example():
     config_migrator = ConfigMigrator()
-    
+
     # 遷移現有設定檔
     await config_migrator.migrate_launcher_profiles("./minecraft")
-    
+
     # 或創建預設配置
     await config_migrator.create_default_config()
 
@@ -637,25 +637,25 @@ from launcher_core import install
 
 async def performance_comparison():
     """效能比較示例"""
-    
+
     # 並行安裝多個版本（新版優勢）
     versions = ["1.21.1", "1.20.1", "1.19.4"]
     minecraft_dir = "./minecraft"
-    
+
     print("🚀 並行安裝多個版本...")
     start_time = time.time()
-    
+
     # 並行執行多個安裝任務
     tasks = []
     for version in versions:
         task = install.install_minecraft_version(version, minecraft_dir)
         tasks.append(task)
-    
+
     await asyncio.gather(*tasks)
-    
+
     end_time = time.time()
     print(f"✅ 並行安裝完成，耗時: {end_time - start_time:.2f} 秒")
-    
+
     # 這在原版中需要依序執行，會花費更多時間
 
 if __name__ == "__main__":
@@ -676,21 +676,21 @@ from launcher_core.exceptions import (
 async def robust_authentication():
     """健全的認證系統示例"""
     max_retries = 3
-    
+
     for attempt in range(max_retries):
         try:
             result = await microsoft_account.device_code_login()
             print("✅ 認證成功")
             return result
-            
+
         except AccountBanFromXbox:
             print("❌ Xbox 帳號被封禁")
             break
-            
+
         except AccountNeedAdultVerification:
             print("❌ 需要成人驗證")
             break
-            
+
         except DeviceCodeExpiredError:
             print(f"⚠️ 設備代碼過期 (嘗試 {attempt + 1}/{max_retries})")
             if attempt < max_retries - 1:
@@ -699,7 +699,7 @@ async def robust_authentication():
             else:
                 print("❌ 所有嘗試都失敗")
                 break
-                
+
         except Exception as e:
             print(f"❌ 未知錯誤: {e}")
             if attempt < max_retries - 1:
@@ -707,7 +707,7 @@ async def robust_authentication():
                 continue
             else:
                 raise
-    
+
     return None
 
 if __name__ == "__main__":
@@ -789,42 +789,42 @@ async def migration_helper():
     """遷移助手工具"""
     print("🔧 async-mc-launcher-core 遷移助手")
     print("=" * 50)
-    
+
     print("1. 程式碼遷移")
     print("2. 配置遷移")
     print("3. 檢查遷移狀態")
     print("4. 生成遷移報告")
     print("5. 測試新版功能")
-    
+
     choice = input("\n請選擇操作 (1-5): ").strip()
-    
+
     if choice == "1":
         migrator = CodeMigrator()
         directory = input("請輸入專案目錄: ").strip()
         results = migrator.migrate_directory(directory)
         report = migrator.generate_migration_report(results)
         print(report)
-    
+
     elif choice == "2":
         config_migrator = ConfigMigrator()
         minecraft_dir = input("請輸入 Minecraft 目錄: ").strip()
         await config_migrator.migrate_launcher_profiles(minecraft_dir)
-    
+
     elif choice == "3":
         # 運行診斷工具
         from .Troubleshooting import DiagnosticTool
         tool = DiagnosticTool()
         await tool.run_full_diagnosis()
-    
+
     elif choice == "4":
         print("📋 生成詳細的遷移報告...")
         # 生成遷移報告邏輯
-    
+
     elif choice == "5":
         print("🧪 測試新版功能...")
         # 測試新功能
         await test_new_features()
-    
+
     else:
         print("❌ 無效選擇")
 
@@ -835,15 +835,15 @@ async def test_new_features():
         from launcher_core import utils
         versions = await utils.get_version_list()
         print(f"✅ 版本列表獲取成功: {len(versions)} 個版本")
-        
+
         # 測試設備代碼登入
         from launcher_core import microsoft_account
         print("🔐 測試 Microsoft 認證 (將開始設備代碼流程)...")
         # result = await microsoft_account.device_code_login()
         # print("✅ 認證測試成功")
-        
+
         print("✅ 所有新功能測試通過")
-        
+
     except Exception as e:
         print(f"❌ 功能測試失敗: {e}")
 

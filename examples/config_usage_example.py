@@ -9,7 +9,7 @@ from pathlib import Path
 
 # 從配置模組導入必要的類
 from launcher_core.config.load_launcher_config import ConfigManager, LauncherConfig
-from launcher_core.pydantic_models import MinecraftOptions
+from launcher_core.models import MinecraftOptions
 
 
 async def basic_config_usage():
@@ -29,9 +29,7 @@ async def basic_config_usage():
 
     # 4. 更新配置
     await config_manager.update_config(
-        launcher_name="我的自定義啟動器",
-        concurrent_downloads=8,
-        log_level="DEBUG"
+        launcher_name="我的自定義啟動器", concurrent_downloads=8, log_level="DEBUG"
     )
 
     print("✅ 配置已更新")
@@ -49,14 +47,14 @@ async def minecraft_options_usage():
         gameDirectory=str(Path.home() / ".minecraft"),
         jvmArguments=["-Xmx4G", "-Xms2G", "-XX:+UseG1GC"],
         launcherName="MyLauncher",
-        launcherVersion="1.0.0"
+        launcherVersion="1.0.0",
     )
 
     # 更新配置以包含 Minecraft 選項
     config = await config_manager.update_config(
         minecraft_options=minecraft_opts,
         auto_refresh_token=True,
-        remember_credentials=True
+        remember_Credential=True,
     )
 
     print(f"Minecraft 用戶名: {config.minecraft_options.username}")
@@ -82,8 +80,12 @@ async def environment_variable_example():
     print(f"從環境變量加載的日誌級別: {config.log_level}")
 
     # 清理環境變量
-    for key in ["MC_LAUNCHER_LAUNCHER_NAME", "MC_LAUNCHER_CONCURRENT_DOWNLOADS",
-                "MC_LAUNCHER_LOG_LEVEL", "MC_LAUNCHER_MINECRAFT_OPTIONS__USERNAME"]:
+    for key in [
+        "MC_LAUNCHER_LAUNCHER_NAME",
+        "MC_LAUNCHER_CONCURRENT_DOWNLOADS",
+        "MC_LAUNCHER_LOG_LEVEL",
+        "MC_LAUNCHER_MINECRAFT_OPTIONS__USERNAME",
+    ]:
         os.environ.pop(key, None)
 
 
@@ -104,10 +106,10 @@ async def advanced_config_management():
         "download_timeout": 600,
         "verify_downloads": True,
         "auto_refresh_token": True,
-        "remember_credentials": True,
+        "remember_Credential": True,
         "log_level": "INFO",
         "proxy_host": "proxy.example.com",
-        "proxy_port": 8080
+        "proxy_port": 8080,
     }
 
     config = await config_manager.update_config(**updates)
@@ -121,7 +123,7 @@ async def advanced_config_management():
             "-Xms4G",
             "-XX:+UseG1GC",
             "-XX:+UnlockExperimentalVMOptions",
-            "-XX:G1NewSizePercent=20"
+            "-XX:G1NewSizePercent=20",
         ],
         launcherName=config.launcher_name,
         launcherVersion=config.launcher_version,
@@ -129,7 +131,7 @@ async def advanced_config_management():
         resolutionWidth=1920,
         resolutionHeight=1080,
         server="mc.example.com",
-        port="25565"
+        port="25565",
     )
 
     # 4. 更新 Minecraft 選項
@@ -171,7 +173,9 @@ class LauncherApplication:
         if self.config.cache_directory:
             Path(self.config.cache_directory).mkdir(parents=True, exist_ok=True)
 
-        print(f"✅ {self.config.launcher_name} v{self.config.launcher_version} 初始化完成")
+        print(
+            f"✅ {self.config.launcher_name} v{self.config.launcher_version} 初始化完成"
+        )
         print(f"   配置目錄: {self.config.config_directory}")
         print(f"   緩存目錄: {self.config.cache_directory}")
 
@@ -180,9 +184,13 @@ class LauncherApplication:
         minecraft_opts = MinecraftOptions(
             username=username,
             gameDirectory=game_dir,
-            jvmArguments=self.config.minecraft_options.jvmArguments if self.config.minecraft_options else ["-Xmx4G"],
+            jvmArguments=(
+                self.config.minecraft_options.jvmArguments
+                if self.config.minecraft_options
+                else ["-Xmx4G"]
+            ),
             launcherName=self.config.launcher_name,
-            launcherVersion=self.config.launcher_version
+            launcherVersion=self.config.launcher_version,
         )
 
         await self.config_manager.update_config(minecraft_options=minecraft_opts)
@@ -213,13 +221,12 @@ async def application_example():
         config_directory=str(Path.home() / ".my_launcher"),
         cache_directory=str(Path.home() / ".my_launcher" / "cache"),
         concurrent_downloads=4,
-        auto_refresh_token=True
+        auto_refresh_token=True,
     )
 
     # 更新 Minecraft 設定檔
     await app.update_minecraft_profile(
-        username="PlayerOne",
-        game_dir=str(Path.home() / ".minecraft")
+        username="PlayerOne", game_dir=str(Path.home() / ".minecraft")
     )
 
     # 獲取啟動選項

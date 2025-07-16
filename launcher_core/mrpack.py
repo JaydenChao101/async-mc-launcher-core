@@ -12,7 +12,7 @@ import os
 import aiohttp
 import aiofiles
 from ._helper import download_file, empty, check_path_inside_minecraft_directory
-from ._types import MrpackInformation, MrpackInstallOptions, CallbackDict
+from .models import MrpackInformation, MrpackInstallOptions, CallbackDict
 from ._internal_types.mrpack_types import MrpackIndex, MrpackFile
 from .install import install_minecraft_version
 from .forge import install_forge_version

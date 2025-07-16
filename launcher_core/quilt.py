@@ -7,6 +7,7 @@ quilt contains functions for dealing with the `Quilt modloader <https://quiltmc.
 You may have noticed, that the Functions are the same as in the :doc:`fabric` module.
 That's because Quilt is a Fork of Fabric. This module behaves exactly the same as the fabric module.
 """
+
 import asyncio
 import tempfile
 import os
@@ -19,7 +20,7 @@ from ._helper import (
     SUBPROCESS_STARTUP_INFO,
 )
 from .exceptions import VersionNotFound, UnsupportedVersion, ExternalProgramError
-from ._types import QuiltMinecraftVersion, QuiltLoader, CallbackDict
+from .models import QuiltMinecraftVersion, QuiltLoader, CallbackDict
 from .install import install_minecraft_version
 from .utils import is_version_valid
 

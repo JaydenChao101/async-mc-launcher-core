@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 """utils contains a few functions for helping you that doesn't fit in any other category"""
+
 from datetime import datetime
 import platform
 import pathlib
@@ -14,7 +15,7 @@ from typing import Coroutine, Any
 import asyncio
 import aiofiles
 from .logging_utils import logger
-from ._types import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
+from .models import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
 from ._internal_types.shared_types import ClientJson, VersionListManifestJson
 from ._helper import get_requests_response_cache, assert_func
 

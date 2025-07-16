@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 """command contains the function for creating the minecraft command"""
+
 import json
 import copy
 import os
@@ -16,8 +17,8 @@ from ._internal_types.shared_types import ClientJson, ClientJsonArgumentRule
 from .runtime import get_executable_path
 from .exceptions import VersionNotFound
 from .utils import get_library_version
-from ._types import MinecraftOptions
-from ._types import Credential as AuthCredential
+from .models import MinecraftOptions
+from .models import Credential as AuthCredential
 from .natives import get_natives
 
 __all__ = ["get_minecraft_command"]

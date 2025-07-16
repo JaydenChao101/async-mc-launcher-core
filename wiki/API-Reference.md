@@ -11,7 +11,7 @@ async-mc-launcher-core 包含以下主要模組：
 - **[install](#install)** - Minecraft 版本和資源安裝
 - **[utils](#utils)** - 實用工具函數
 - **[forge](#forge)** - Minecraft Forge 支援
-- **[fabric](#fabric)** - Fabric 模組載入器支援  
+- **[fabric](#fabric)** - Fabric 模組載入器支援
 - **[quilt](#quilt)** - Quilt 模組載入器支援
 - **[mojang](#mojang)** - Mojang API 互動
 - **[java_utils](#java_utils)** - Java 環境管理
@@ -190,7 +190,7 @@ options = _types.MinecraftOptions(
 
 cmd = await command.get_minecraft_command(
     "1.21.1",
-    "./minecraft", 
+    "./minecraft",
     options,
     Credential=credential
 )
@@ -217,7 +217,7 @@ async def install_minecraft_version(
 
 **參數：**
 - `version`: 要安裝的版本 ID
-- `minecraft_directory`: Minecraft 安裝目錄  
+- `minecraft_directory`: Minecraft 安裝目錄
 - `callback`: 進度回調函數（可選）
 - `max_workers`: 最大並發下載數（可選）
 
@@ -241,7 +241,7 @@ await install.install_minecraft_version(
 #### `is_version_installed()`
 ```python
 def is_version_installed(
-    version: str, 
+    version: str,
     minecraft_directory: str | os.PathLike
 ) -> bool
 ```
@@ -585,37 +585,37 @@ from launcher_core.setting import setup_logger
 
 async def complete_launcher_example():
     """完整的 Minecraft 啟動器流程"""
-    
+
     # 1. 設置日誌
     logger = setup_logger(enable_console=True)
-    
+
     # 2. Microsoft 帳號登入
     login_data = await microsoft_account.device_code_login()
     access_token = login_data['minecraft_access_token']
-    
+
     # 3. 獲取玩家資訊
     profile = await mojang.get_minecraft_profile(access_token)
-    
+
     # 4. 創建認證資訊
     credential = _types.Credential(
         access_token=access_token,
         username=profile['name'],
         uuid=profile['id']
     )
-    
+
     # 5. 安裝 Minecraft 版本
     version = "1.21.1"
     minecraft_dir = "./minecraft"
-    
+
     await install.install_minecraft_version(version, minecraft_dir)
-    
+
     # 6. 配置啟動選項
     options = _types.MinecraftOptions(
         game_directory=minecraft_dir,
         memory=2048,
         jvm_args=["-Xmx2048M", "-Xms1024M"]
     )
-    
+
     # 7. 生成啟動指令
     cmd = await command.get_minecraft_command(
         version,
@@ -623,11 +623,11 @@ async def complete_launcher_example():
         options,
         Credential=credential
     )
-    
+
     # 8. 啟動 Minecraft
     import subprocess
     process = subprocess.Popen(cmd)
-    
+
     logger.info("Minecraft 已成功啟動！")
     return process
 

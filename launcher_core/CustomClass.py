@@ -1,9 +1,9 @@
 from . import Credential as AuthCredential
 from .exceptions import NeedAccountInfo, AccountNotOwnMinecraft
 from .mojang import have_minecraft
-from .pydantic_models import (
+from .models import (
     MinecraftOptions,
-    LoginCredentials,
+    Credential,
     LauncherSettings,
     ServerInfo,
     ModInfo,
@@ -14,12 +14,12 @@ from pathlib import Path
 import datetime
 
 
-class MultipleCredentials(BaseModel):
+class MultipleCredential(BaseModel):
     """
     用於存儲多個帳戶憑證
     """
 
-    AuthCredentials: list[AuthCredential]
+    AuthCredential: list[AuthCredential]
 
 
 class AccountManager:
@@ -44,14 +44,14 @@ class AccountManager:
         return True
 
     @staticmethod
-    async def MultipleChecker(MultipleCredentials: MultipleCredentials) -> bool:
+    async def MultipleChecker(MultipleCredential: MultipleCredential) -> bool:
         """
         檢查多個帳戶憑證是否有效
         """
-        if not MultipleCredentials.AuthCredentials:
+        if not MultipleCredential.AuthCredential:
             raise NeedAccountInfo("沒有提供任何帳戶憑證")
 
-        for credential in MultipleCredentials.AuthCredentials:
+        for credential in MultipleCredential.AuthCredential:
             if not await AccountManager.Checker(credential):
                 return False
         return True
@@ -81,10 +81,10 @@ class LauncherConfigModel(BaseModel):
     logs_directory: Optional[str] = Field(default=None, description="日誌目錄")
 
     # 帳戶配置
-    current_account: Optional[LoginCredentials] = Field(
+    current_account: Optional[Credential] = Field(
         default=None, description="當前使用的帳戶"
     )
-    saved_accounts: List[LoginCredentials] = Field(
+    saved_accounts: List[Credential] = Field(
         default_factory=list, description="已保存的帳戶列表"
     )
     auto_login: bool = Field(default=True, description="自動登入")
@@ -341,23 +341,23 @@ class MinecraftLauncher:
                 setattr(self.config, key, value)
         self.config.last_modified = datetime.datetime.now()
 
-    async def add_account(self, credentials: LoginCredentials) -> None:
+    async def add_account(self, Credential: Credential) -> None:
         """添加帳戶"""
         # 驗證帳戶
         auth_credential = AuthCredential(
-            access_token=credentials.access_token,
-            refresh_token=credentials.refresh_token,
+            access_token=Credential.access_token,
+            refresh_token=Credential.refresh_token,
         )
 
         if await self.account_manager.Checker(auth_credential):
-            self.config.launcher_config.saved_accounts.append(credentials)
+            self.config.launcher_config.saved_accounts.append(Credential)
             if not self.config.launcher_config.current_account:
-                self.config.launcher_config.current_account = credentials
+                self.config.launcher_config.current_account = Credential
 
 
 # 導出所有配置模型
 __all__ = [
-    "MultipleCredentials",
+    "MultipleCredential",
     "AccountManager",
     "LauncherConfigModel",
     "GameProfileConfig",
