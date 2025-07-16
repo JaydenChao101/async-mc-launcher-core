@@ -117,12 +117,11 @@ class SimpleLauncher:
         """
         # Generate a fake UUID for offline mode
         import uuid
+
         fake_uuid = str(uuid.uuid4())
 
         return _types.Credential(
-            access_token="offline",
-            username=username,
-            uuid=fake_uuid
+            access_token="offline", username=username, uuid=fake_uuid
         )
 
     async def launch_minecraft(
@@ -130,7 +129,7 @@ class SimpleLauncher:
         version: str,
         username: str = "Player",
         memory: int = 2048,
-        additional_jvm_args: Optional[list[str]] = None
+        additional_jvm_args: Optional[list[str]] = None,
     ) -> bool:
         """
         Launch Minecraft with the specified configuration.
@@ -172,10 +171,7 @@ class SimpleLauncher:
 
             # Generate the Minecraft command
             minecraft_command = await command.get_minecraft_command(
-                version,
-                str(self.minecraft_dir),
-                options,
-                Credential=Credential
+                version, str(self.minecraft_dir), options, Credential=Credential
             )
 
             self.logger.info("Launch command generated successfully!")
@@ -183,13 +179,13 @@ class SimpleLauncher:
 
             # Optionally launch the game
             response = input("Launch Minecraft now? (y/N): ").strip().lower()
-            if response == 'y':
+            if response == "y":
                 self.logger.info("Launching Minecraft...")
                 process = subprocess.Popen(
                     minecraft_command,
                     cwd=str(self.minecraft_dir),
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
+                    stderr=subprocess.PIPE,
                 )
                 self.logger.info(f"Minecraft launched with PID: {process.pid}")
                 self.logger.info("Game is running. Check the game window.")
@@ -206,7 +202,9 @@ async def main():
     print("=== Simple Minecraft Launcher Example ===\n")
 
     # Configuration
-    minecraft_dir = input("Enter Minecraft directory path (or press Enter for default): ").strip()
+    minecraft_dir = input(
+        "Enter Minecraft directory path (or press Enter for default): "
+    ).strip()
     if not minecraft_dir:
         minecraft_dir = os.path.join(os.path.expanduser("~"), ".minecraft")
 
@@ -225,12 +223,16 @@ async def main():
 
     # Show some recent versions
     print("\nRecent Minecraft versions:")
-    recent_versions = [v for v in versions[:10] if not any(x in v for x in ['snapshot', 'pre', 'rc'])]
+    recent_versions = [
+        v for v in versions[:10] if not any(x in v for x in ["snapshot", "pre", "rc"])
+    ]
     for i, version in enumerate(recent_versions[:5], 1):
         print(f"{i}. {version}")
 
     # Let user select version
-    version_choice = input("\nEnter version number (1-5) or type a specific version: ").strip()
+    version_choice = input(
+        "\nEnter version number (1-5) or type a specific version: "
+    ).strip()
 
     if version_choice.isdigit() and 1 <= int(version_choice) <= 5:
         version = recent_versions[int(version_choice) - 1]
@@ -245,7 +247,9 @@ async def main():
         username = "Player"
 
     # Get memory allocation
-    memory_input = input("Enter memory allocation in MB (or press Enter for 2048): ").strip()
+    memory_input = input(
+        "Enter memory allocation in MB (or press Enter for 2048): "
+    ).strip()
     try:
         memory = int(memory_input) if memory_input else 2048
     except ValueError:
@@ -258,7 +262,7 @@ async def main():
     print(f"  Directory: {minecraft_dir}")
 
     # Launch Minecraft
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     success = await launcher.launch_minecraft(version, username, memory)
 
     if success:

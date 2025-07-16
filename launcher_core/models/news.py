@@ -35,6 +35,8 @@ class JavaPatchNotes(BaseModel):
     title: str = Field(..., description="更新標題")
     content: str = Field(..., description="更新內容")
     release_date: datetime.datetime = Field(..., description="發布日期")
-    patch_type: str = Field(..., description="更新類型")  # release, snapshot, pre-release
+    patch_type: str = Field(
+        ..., description="更新類型"
+    )  # release, snapshot, pre-release
     changes: List[str] = Field(default_factory=list, description="變更列表")
     fixes: List[str] = Field(default_factory=list, description="修復列表")

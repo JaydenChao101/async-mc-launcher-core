@@ -51,7 +51,9 @@ class VersionManager:
         """Get the complete version manifest from Mojang."""
         try:
             manifest = await install.get_version_list()
-            self.logger.info(f"Fetched manifest with {len(manifest['versions'])} versions")
+            self.logger.info(
+                f"Fetched manifest with {len(manifest['versions'])} versions"
+            )
             return manifest
         except Exception as e:
             self.logger.error(f"Failed to fetch version manifest: {e}")
@@ -61,7 +63,7 @@ class VersionManager:
         self,
         versions: List[Dict],
         version_type: Optional[str] = None,
-        limit: Optional[int] = None
+        limit: Optional[int] = None,
     ) -> List[Dict]:
         """
         Filter versions by type and limit results.
@@ -93,7 +95,7 @@ class VersionManager:
         # Parse and format release time
         try:
             if release_time:
-                dt = datetime.fromisoformat(release_time.replace('Z', '+00:00'))
+                dt = datetime.fromisoformat(release_time.replace("Z", "+00:00"))
                 formatted_time = dt.strftime("%Y-%m-%d")
             else:
                 formatted_time = "Unknown"
@@ -105,16 +107,14 @@ class VersionManager:
             "release": "🟢",
             "snapshot": "🟡",
             "old_beta": "🔵",
-            "old_alpha": "🟣"
+            "old_alpha": "🟣",
         }
         indicator = type_indicators.get(version_type, "⚪")
 
         return f"{indicator} {version_id:<15} [{version_type:<8}] ({formatted_time})"
 
     async def list_available_versions(
-        self,
-        version_type: Optional[str] = None,
-        limit: int = 20
+        self, version_type: Optional[str] = None, limit: int = 20
     ) -> List[Dict]:
         """
         List available Minecraft versions.
@@ -135,7 +135,9 @@ class VersionManager:
         print(f"\n📋 Available Minecraft Versions:")
         if version_type:
             print(f"   Filtered by type: {version_type}")
-        print(f"   Showing {len(filtered_versions)} of {len(versions)} total versions\n")
+        print(
+            f"   Showing {len(filtered_versions)} of {len(versions)} total versions\n"
+        )
 
         for version in filtered_versions:
             print(f"   {self.format_version_info(version)}")
@@ -187,7 +189,7 @@ class VersionManager:
         # Format release time
         try:
             if release_time:
-                dt = datetime.fromisoformat(release_time.replace('Z', '+00:00'))
+                dt = datetime.fromisoformat(release_time.replace("Z", "+00:00"))
                 formatted_time = dt.strftime("%Y-%m-%d %H:%M:%S UTC")
             else:
                 formatted_time = "Unknown"
@@ -213,7 +215,9 @@ class VersionManager:
         # Show assets info
         if "assetIndex" in details:
             assets = details["assetIndex"]
-            print(f"   Assets: {assets.get('id', 'Unknown')} ({assets.get('totalSize', 0)} bytes)")
+            print(
+                f"   Assets: {assets.get('id', 'Unknown')} ({assets.get('totalSize', 0)} bytes)"
+            )
 
     async def install_version(self, version_id: str) -> bool:
         """
@@ -290,6 +294,7 @@ class VersionManager:
 
         try:
             import shutil
+
             shutil.rmtree(version_path)
             self.logger.info(f"✅ Successfully uninstalled {version_id}")
             return True
@@ -303,7 +308,9 @@ async def interactive_version_manager():
     print("=== Minecraft Version Manager ===\n")
 
     # Get Minecraft directory
-    minecraft_dir = input("Enter Minecraft directory (or press Enter for default): ").strip()
+    minecraft_dir = input(
+        "Enter Minecraft directory (or press Enter for default): "
+    ).strip()
     if not minecraft_dir:
         minecraft_dir = os.path.join(os.path.expanduser("~"), ".minecraft")
 
@@ -313,7 +320,7 @@ async def interactive_version_manager():
     vm = VersionManager(minecraft_dir)
 
     while True:
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Version Manager Options:")
         print("1. List available versions")
         print("2. List installed versions")
@@ -326,8 +333,15 @@ async def interactive_version_manager():
 
         if choice == "1":
             # List available versions
-            type_filter = input("Filter by type (release/snapshot/old_beta/old_alpha) or press Enter for all: ").strip()
-            if type_filter and type_filter not in ["release", "snapshot", "old_beta", "old_alpha"]:
+            type_filter = input(
+                "Filter by type (release/snapshot/old_beta/old_alpha) or press Enter for all: "
+            ).strip()
+            if type_filter and type_filter not in [
+                "release",
+                "snapshot",
+                "old_beta",
+                "old_alpha",
+            ]:
                 type_filter = None
 
             limit_input = input("Maximum versions to show (default 20): ").strip()
@@ -386,8 +400,10 @@ async def interactive_version_manager():
                 version_id = choice_input
 
             if version_id in installed:
-                confirm = input(f"Really uninstall {version_id}? (y/N): ").strip().lower()
-                if confirm == 'y':
+                confirm = (
+                    input(f"Really uninstall {version_id}? (y/N): ").strip().lower()
+                )
+                if confirm == "y":
                     vm.uninstall_version(version_id)
             else:
                 print("Invalid version selection")

@@ -7,6 +7,7 @@ news includes functions to retrieve news about Minecraft using the official API 
 .. warning::
     The format of the data returned by this API may change at any time
 """
+
 # 標準庫導入
 import datetime
 
@@ -32,7 +33,9 @@ async def get_minecraft_news(category: str = None) -> MinecraftNews:
 
     # 如果指定了類別，進行過濾
     if category:
-        filtered_entries = [entry for entry in news["entries"] if entry.get("category") == category]
+        filtered_entries = [
+            entry for entry in news["entries"] if entry.get("category") == category
+        ]
         news["entries"] = filtered_entries
         news["article_count"] = len(filtered_entries)
 

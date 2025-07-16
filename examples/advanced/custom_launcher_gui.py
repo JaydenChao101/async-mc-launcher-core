@@ -36,7 +36,15 @@ from pathlib import Path
 from tkinter import ttk, messagebox, filedialog
 from typing import Dict, List, Optional, Callable
 
-from launcher_core import install, command, _types, microsoft_account, forge, fabric, quilt
+from launcher_core import (
+    install,
+    command,
+    _types,
+    microsoft_account,
+    forge,
+    fabric,
+    quilt,
+)
 from launcher_core.setting import setup_logger
 from launcher_core.exceptions import VersionNotFound
 
@@ -51,6 +59,7 @@ class AsyncTkinterHelper:
 
     def start_async_loop(self):
         """Start the async event loop in a separate thread."""
+
         def run_loop():
             self.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self.loop)
@@ -61,6 +70,7 @@ class AsyncTkinterHelper:
 
     def run_async(self, coro, callback: Optional[Callable] = None):
         """Run an async coroutine and optionally call callback with result."""
+
         def done_callback(future):
             try:
                 result = future.result()
@@ -86,10 +96,17 @@ class AsyncTkinterHelper:
 class MinecraftProfile:
     """Represents a Minecraft launch profile."""
 
-    def __init__(self, name: str, minecraft_version: str, mod_loader: str = "vanilla",
-                 mod_loader_version: str = "", memory: int = 2048,
-                 jvm_args: List[str] = None, auth_type: str = "offline",
-                 username: str = "Player"):
+    def __init__(
+        self,
+        name: str,
+        minecraft_version: str,
+        mod_loader: str = "vanilla",
+        mod_loader_version: str = "",
+        memory: int = 2048,
+        jvm_args: List[str] = None,
+        auth_type: str = "offline",
+        username: str = "Player",
+    ):
         self.name = name
         self.minecraft_version = minecraft_version
         self.mod_loader = mod_loader  # vanilla, forge, fabric, quilt
@@ -109,7 +126,7 @@ class MinecraftProfile:
             "memory": self.memory,
             "jvm_args": self.jvm_args,
             "auth_type": self.auth_type,
-            "username": self.username
+            "username": self.username,
         }
 
     @classmethod
@@ -123,7 +140,7 @@ class MinecraftProfile:
             memory=data.get("memory", 2048),
             jvm_args=data.get("jvm_args", []),
             auth_type=data.get("auth_type", "offline"),
-            username=data.get("username", "Player")
+            username=data.get("username", "Player"),
         )
 
 
@@ -164,12 +181,12 @@ class CustomMinecraftLauncher:
         default_config = {
             "minecraft_directory": os.path.join(os.path.expanduser("~"), ".minecraft"),
             "java_executable": "",
-            "last_profile": ""
+            "last_profile": "",
         }
 
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file, "r") as f:
                     config = json.load(f)
                 return {**default_config, **config}
             except Exception as e:
@@ -180,7 +197,7 @@ class CustomMinecraftLauncher:
     def save_config(self):
         """Save launcher configuration."""
         try:
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(self.config, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save config: {e}")
@@ -189,10 +206,12 @@ class CustomMinecraftLauncher:
         """Load saved profiles."""
         if self.profiles_file.exists():
             try:
-                with open(self.profiles_file, 'r') as f:
+                with open(self.profiles_file, "r") as f:
                     data = json.load(f)
-                return {name: MinecraftProfile.from_dict(profile_data)
-                       for name, profile_data in data.items()}
+                return {
+                    name: MinecraftProfile.from_dict(profile_data)
+                    for name, profile_data in data.items()
+                }
             except Exception as e:
                 self.logger.warning(f"Failed to load profiles: {e}")
 
@@ -204,7 +223,7 @@ class CustomMinecraftLauncher:
         """Save profiles to file."""
         try:
             data = {name: profile.to_dict() for name, profile in self.profiles.items()}
-            with open(self.profiles_file, 'w') as f:
+            with open(self.profiles_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save profiles: {e}")
@@ -239,11 +258,15 @@ class CustomMinecraftLauncher:
         ttk.Label(profile_frame, text="Current Profile:").pack(side=tk.LEFT, padx=5)
 
         self.profile_var = tk.StringVar()
-        self.profile_combo = ttk.Combobox(profile_frame, textvariable=self.profile_var, state="readonly")
+        self.profile_combo = ttk.Combobox(
+            profile_frame, textvariable=self.profile_var, state="readonly"
+        )
         self.profile_combo.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
-        self.profile_combo.bind('<<ComboboxSelected>>', self.on_profile_selected)
+        self.profile_combo.bind("<<ComboboxSelected>>", self.on_profile_selected)
 
-        ttk.Button(profile_frame, text="Refresh", command=self.refresh_profiles).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(profile_frame, text="Refresh", command=self.refresh_profiles).pack(
+            side=tk.RIGHT, padx=5
+        )
 
         # Launch section
         launch_frame = ttk.LabelFrame(self.launcher_frame, text="Launch")
@@ -254,7 +277,9 @@ class CustomMinecraftLauncher:
         info_frame.pack(fill=tk.X, padx=5, pady=5)
 
         self.info_text = tk.Text(info_frame, height=8, state=tk.DISABLED)
-        scrollbar = ttk.Scrollbar(info_frame, orient=tk.VERTICAL, command=self.info_text.yview)
+        scrollbar = ttk.Scrollbar(
+            info_frame, orient=tk.VERTICAL, command=self.info_text.yview
+        )
         self.info_text.configure(yscrollcommand=scrollbar.set)
 
         self.info_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -264,14 +289,20 @@ class CustomMinecraftLauncher:
         controls_frame = ttk.Frame(launch_frame)
         controls_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        self.launch_button = ttk.Button(controls_frame, text="Launch Minecraft",
-                                       command=self.launch_minecraft, state=tk.DISABLED)
+        self.launch_button = ttk.Button(
+            controls_frame,
+            text="Launch Minecraft",
+            command=self.launch_minecraft,
+            state=tk.DISABLED,
+        )
         self.launch_button.pack(side=tk.LEFT, padx=5)
 
         self.progress_var = tk.StringVar(value="Ready")
-        ttk.Label(controls_frame, textvariable=self.progress_var).pack(side=tk.LEFT, padx=10)
+        ttk.Label(controls_frame, textvariable=self.progress_var).pack(
+            side=tk.LEFT, padx=10
+        )
 
-        self.progress_bar = ttk.Progressbar(controls_frame, mode='determinate')
+        self.progress_bar = ttk.Progressbar(controls_frame, mode="determinate")
         self.progress_bar.pack(side=tk.RIGHT, padx=5, fill=tk.X, expand=True)
 
     def create_profiles_tab(self):
@@ -292,16 +323,24 @@ class CustomMinecraftLauncher:
         self.profiles_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         profiles_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.profiles_listbox.bind('<<ListboxSelect>>', self.on_profile_listbox_select)
+        self.profiles_listbox.bind("<<ListboxSelect>>", self.on_profile_listbox_select)
 
         # Profile buttons
         buttons_frame = ttk.Frame(list_frame)
         buttons_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        ttk.Button(buttons_frame, text="New Profile", command=self.new_profile).pack(side=tk.LEFT, padx=2)
-        ttk.Button(buttons_frame, text="Edit Profile", command=self.edit_profile).pack(side=tk.LEFT, padx=2)
-        ttk.Button(buttons_frame, text="Delete Profile", command=self.delete_profile).pack(side=tk.LEFT, padx=2)
-        ttk.Button(buttons_frame, text="Duplicate Profile", command=self.duplicate_profile).pack(side=tk.LEFT, padx=2)
+        ttk.Button(buttons_frame, text="New Profile", command=self.new_profile).pack(
+            side=tk.LEFT, padx=2
+        )
+        ttk.Button(buttons_frame, text="Edit Profile", command=self.edit_profile).pack(
+            side=tk.LEFT, padx=2
+        )
+        ttk.Button(
+            buttons_frame, text="Delete Profile", command=self.delete_profile
+        ).pack(side=tk.LEFT, padx=2)
+        ttk.Button(
+            buttons_frame, text="Duplicate Profile", command=self.duplicate_profile
+        ).pack(side=tk.LEFT, padx=2)
 
     def create_settings_tab(self):
         """Create the settings interface."""
@@ -313,7 +352,9 @@ class CustomMinecraftLauncher:
         dir_entry = ttk.Entry(dir_frame, textvariable=self.dir_var)
         dir_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
 
-        ttk.Button(dir_frame, text="Browse", command=self.browse_minecraft_dir).pack(side=tk.RIGHT, padx=5, pady=5)
+        ttk.Button(dir_frame, text="Browse", command=self.browse_minecraft_dir).pack(
+            side=tk.RIGHT, padx=5, pady=5
+        )
 
         # Java executable
         java_frame = ttk.LabelFrame(self.settings_frame, text="Java Executable")
@@ -323,10 +364,14 @@ class CustomMinecraftLauncher:
         java_entry = ttk.Entry(java_frame, textvariable=self.java_var)
         java_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5, pady=5)
 
-        ttk.Button(java_frame, text="Browse", command=self.browse_java_executable).pack(side=tk.RIGHT, padx=5, pady=5)
+        ttk.Button(java_frame, text="Browse", command=self.browse_java_executable).pack(
+            side=tk.RIGHT, padx=5, pady=5
+        )
 
         # Save settings button
-        ttk.Button(self.settings_frame, text="Save Settings", command=self.save_settings).pack(pady=10)
+        ttk.Button(
+            self.settings_frame, text="Save Settings", command=self.save_settings
+        ).pack(pady=10)
 
     def load_initial_data(self):
         """Load initial data asynchronously."""
@@ -352,7 +397,7 @@ class CustomMinecraftLauncher:
         """Refresh the profiles display."""
         # Update combo box
         profile_names = list(self.profiles.keys())
-        self.profile_combo['values'] = profile_names
+        self.profile_combo["values"] = profile_names
 
         # Update listbox
         self.profiles_listbox.delete(0, tk.END)
@@ -410,7 +455,9 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
 
     def new_profile(self):
         """Create a new profile."""
-        ProfileDialog(self.root, self.available_versions, callback=self.on_profile_created)
+        ProfileDialog(
+            self.root, self.available_versions, callback=self.on_profile_created
+        )
 
     def edit_profile(self):
         """Edit the selected profile."""
@@ -418,8 +465,12 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
         if selection:
             profile_name = self.profiles_listbox.get(selection[0])
             profile = self.profiles[profile_name]
-            ProfileDialog(self.root, self.available_versions, profile=profile,
-                         callback=self.on_profile_edited)
+            ProfileDialog(
+                self.root,
+                self.available_versions,
+                profile=profile,
+                callback=self.on_profile_edited,
+            )
 
     def delete_profile(self):
         """Delete the selected profile."""
@@ -427,12 +478,16 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
         if selection:
             profile_name = self.profiles_listbox.get(selection[0])
             if len(self.profiles) > 1:  # Keep at least one profile
-                if messagebox.askyesno("Delete Profile", f"Delete profile '{profile_name}'?"):
+                if messagebox.askyesno(
+                    "Delete Profile", f"Delete profile '{profile_name}'?"
+                ):
                     del self.profiles[profile_name]
                     self.save_profiles()
                     self.refresh_profiles()
             else:
-                messagebox.showwarning("Cannot Delete", "Cannot delete the last profile")
+                messagebox.showwarning(
+                    "Cannot Delete", "Cannot delete the last profile"
+                )
 
     def duplicate_profile(self):
         """Duplicate the selected profile."""
@@ -449,9 +504,14 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
                 counter += 1
 
             copy_profile = MinecraftProfile(
-                copy_name, original.minecraft_version, original.mod_loader,
-                original.mod_loader_version, original.memory, original.jvm_args.copy(),
-                original.auth_type, original.username
+                copy_name,
+                original.minecraft_version,
+                original.mod_loader,
+                original.mod_loader_version,
+                original.memory,
+                original.jvm_args.copy(),
+                original.auth_type,
+                original.username,
             )
 
             self.profiles[copy_name] = copy_profile
@@ -479,8 +539,10 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
     def browse_java_executable(self):
         """Browse for Java executable."""
         executable = filedialog.askopenfilename(
-            initialdir=os.path.dirname(self.java_var.get()) if self.java_var.get() else "",
-            filetypes=[("Executable files", "*.exe" if os.name == 'nt' else "*")]
+            initialdir=(
+                os.path.dirname(self.java_var.get()) if self.java_var.get() else ""
+            ),
+            filetypes=[("Executable files", "*.exe" if os.name == "nt" else "*")],
         )
         if executable:
             self.java_var.set(executable)
@@ -500,13 +562,10 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
 
         self.launch_button.config(state=tk.DISABLED)
         self.progress_var.set("Preparing launch...")
-        self.progress_bar.config(mode='indeterminate')
+        self.progress_bar.config(mode="indeterminate")
         self.progress_bar.start()
 
-        self.async_helper.run_async(
-            self.perform_launch(),
-            self.on_launch_complete
-        )
+        self.async_helper.run_async(self.perform_launch(), self.on_launch_complete)
 
     async def perform_launch(self) -> bool:
         """Perform the actual launch process."""
@@ -516,11 +575,10 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
 
             # Create offline Credential (would need Microsoft auth for real launcher)
             import uuid
+
             fake_uuid = str(uuid.uuid4())
             Credential = _types.Credential(
-                access_token="offline",
-                username=profile.username,
-                uuid=fake_uuid
+                access_token="offline", username=profile.username, uuid=fake_uuid
             )
 
             # Determine version to launch
@@ -552,19 +610,17 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
 
             # Generate launch command
             minecraft_command = await command.get_minecraft_command(
-                version_to_launch,
-                minecraft_dir,
-                options,
-                Credential=Credential
+                version_to_launch, minecraft_dir, options, Credential=Credential
             )
 
             # Launch the game
             import subprocess
+
             process = subprocess.Popen(
                 minecraft_command,
                 cwd=minecraft_dir,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
 
             self.logger.info(f"Minecraft launched with PID: {process.pid}")
@@ -577,15 +633,20 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
     def on_launch_complete(self, success: bool):
         """Handle launch completion."""
         self.progress_bar.stop()
-        self.progress_bar.config(mode='determinate')
+        self.progress_bar.config(mode="determinate")
         self.launch_button.config(state=tk.NORMAL)
 
         if success:
             self.progress_var.set("Launch successful!")
-            messagebox.showinfo("Launch Successful", "Minecraft has been launched successfully!")
+            messagebox.showinfo(
+                "Launch Successful", "Minecraft has been launched successfully!"
+            )
         else:
             self.progress_var.set("Launch failed")
-            messagebox.showerror("Launch Failed", "Failed to launch Minecraft. Check the logs for details.")
+            messagebox.showerror(
+                "Launch Failed",
+                "Failed to launch Minecraft. Check the logs for details.",
+            )
 
     def on_closing(self):
         """Handle window closing."""
@@ -602,9 +663,13 @@ JVM Arguments: {' '.join(self.current_profile.jvm_args) or 'Default'}"""
 class ProfileDialog:
     """Dialog for creating/editing profiles."""
 
-    def __init__(self, parent, available_versions: List[str],
-                 profile: Optional[MinecraftProfile] = None,
-                 callback: Optional[Callable] = None):
+    def __init__(
+        self,
+        parent,
+        available_versions: List[str],
+        profile: Optional[MinecraftProfile] = None,
+        callback: Optional[Callable] = None,
+    ):
         self.parent = parent
         self.available_versions = available_versions
         self.callback = callback
@@ -643,51 +708,75 @@ class ProfileDialog:
         """Create dialog widgets."""
         # Profile name
         ttk.Label(self.dialog, text="Profile Name:").pack(anchor=tk.W, padx=10, pady=5)
-        ttk.Entry(self.dialog, textvariable=self.name_var).pack(fill=tk.X, padx=10, pady=5)
+        ttk.Entry(self.dialog, textvariable=self.name_var).pack(
+            fill=tk.X, padx=10, pady=5
+        )
 
         # Minecraft version
-        ttk.Label(self.dialog, text="Minecraft Version:").pack(anchor=tk.W, padx=10, pady=5)
+        ttk.Label(self.dialog, text="Minecraft Version:").pack(
+            anchor=tk.W, padx=10, pady=5
+        )
         version_combo = ttk.Combobox(self.dialog, textvariable=self.version_var)
-        version_combo['values'] = self.available_versions
+        version_combo["values"] = self.available_versions
         version_combo.pack(fill=tk.X, padx=10, pady=5)
 
         # Mod loader
         ttk.Label(self.dialog, text="Mod Loader:").pack(anchor=tk.W, padx=10, pady=5)
-        loader_combo = ttk.Combobox(self.dialog, textvariable=self.loader_var, state="readonly")
-        loader_combo['values'] = ["vanilla", "forge", "fabric", "quilt"]
+        loader_combo = ttk.Combobox(
+            self.dialog, textvariable=self.loader_var, state="readonly"
+        )
+        loader_combo["values"] = ["vanilla", "forge", "fabric", "quilt"]
         loader_combo.pack(fill=tk.X, padx=10, pady=5)
 
         # Mod loader version
-        ttk.Label(self.dialog, text="Mod Loader Version (optional):").pack(anchor=tk.W, padx=10, pady=5)
-        ttk.Entry(self.dialog, textvariable=self.loader_version_var).pack(fill=tk.X, padx=10, pady=5)
+        ttk.Label(self.dialog, text="Mod Loader Version (optional):").pack(
+            anchor=tk.W, padx=10, pady=5
+        )
+        ttk.Entry(self.dialog, textvariable=self.loader_version_var).pack(
+            fill=tk.X, padx=10, pady=5
+        )
 
         # Memory
         ttk.Label(self.dialog, text="Memory (MB):").pack(anchor=tk.W, padx=10, pady=5)
         memory_frame = ttk.Frame(self.dialog)
         memory_frame.pack(fill=tk.X, padx=10, pady=5)
-        ttk.Entry(memory_frame, textvariable=self.memory_var).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        ttk.Entry(memory_frame, textvariable=self.memory_var).pack(
+            side=tk.LEFT, fill=tk.X, expand=True
+        )
         ttk.Label(memory_frame, text="MB").pack(side=tk.RIGHT)
 
         # Authentication type
-        ttk.Label(self.dialog, text="Authentication:").pack(anchor=tk.W, padx=10, pady=5)
-        auth_combo = ttk.Combobox(self.dialog, textvariable=self.auth_var, state="readonly")
-        auth_combo['values'] = ["offline", "microsoft"]
+        ttk.Label(self.dialog, text="Authentication:").pack(
+            anchor=tk.W, padx=10, pady=5
+        )
+        auth_combo = ttk.Combobox(
+            self.dialog, textvariable=self.auth_var, state="readonly"
+        )
+        auth_combo["values"] = ["offline", "microsoft"]
         auth_combo.pack(fill=tk.X, padx=10, pady=5)
 
         # Username
         ttk.Label(self.dialog, text="Username:").pack(anchor=tk.W, padx=10, pady=5)
-        ttk.Entry(self.dialog, textvariable=self.username_var).pack(fill=tk.X, padx=10, pady=5)
+        ttk.Entry(self.dialog, textvariable=self.username_var).pack(
+            fill=tk.X, padx=10, pady=5
+        )
 
         # JVM arguments
         ttk.Label(self.dialog, text="JVM Arguments:").pack(anchor=tk.W, padx=10, pady=5)
-        ttk.Entry(self.dialog, textvariable=self.jvm_args_var).pack(fill=tk.X, padx=10, pady=5)
+        ttk.Entry(self.dialog, textvariable=self.jvm_args_var).pack(
+            fill=tk.X, padx=10, pady=5
+        )
 
         # Buttons
         button_frame = ttk.Frame(self.dialog)
         button_frame.pack(fill=tk.X, padx=10, pady=10)
 
-        ttk.Button(button_frame, text="Save", command=self.save_profile).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(side=tk.RIGHT)
+        ttk.Button(button_frame, text="Save", command=self.save_profile).pack(
+            side=tk.RIGHT, padx=5
+        )
+        ttk.Button(button_frame, text="Cancel", command=self.dialog.destroy).pack(
+            side=tk.RIGHT
+        )
 
     def save_profile(self):
         """Save the profile."""
@@ -701,7 +790,9 @@ class ProfileDialog:
             return
 
         # Create profile
-        jvm_args = self.jvm_args_var.get().split() if self.jvm_args_var.get().strip() else []
+        jvm_args = (
+            self.jvm_args_var.get().split() if self.jvm_args_var.get().strip() else []
+        )
 
         profile = MinecraftProfile(
             name=self.name_var.get().strip(),
@@ -711,7 +802,7 @@ class ProfileDialog:
             memory=self.memory_var.get(),
             jvm_args=jvm_args,
             auth_type=self.auth_var.get(),
-            username=self.username_var.get().strip()
+            username=self.username_var.get().strip(),
         )
 
         if self.callback:

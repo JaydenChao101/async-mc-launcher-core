@@ -15,6 +15,7 @@
 
 forge contains functions for dealing with the Forge modloader
 """
+
 from ._helper import (
     download_file,
     get_library_path,

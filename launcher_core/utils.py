@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 """utils contains a few functions for helping you that doesn't fit in any other category"""
+
 from datetime import datetime
 import platform
 import pathlib

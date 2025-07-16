@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "fabric contains functions for dealing with the `Fabric modloader <https://fabricmc.net/>`_."
+
 import asyncio
 import tempfile
 import os

@@ -215,10 +215,12 @@ class TestNatives:
                 extract_path = "/temp/natives"
 
                 # 模擬版本 JSON 文件存在和讀取
-                with patch("os.path.isfile", return_value=True), \
-                     patch("aiofiles.open") as mock_open, \
-                     patch("os.path.exists", return_value=True), \
-                     patch("os.makedirs"):
+                with (
+                    patch("os.path.isfile", return_value=True),
+                    patch("aiofiles.open") as mock_open,
+                    patch("os.path.exists", return_value=True),
+                    patch("os.makedirs"),
+                ):
 
                     # 修復異步 mock：創建一個異步函數返回字符串
                     async def mock_read():
@@ -228,7 +230,9 @@ class TestNatives:
                     mock_file.read = mock_read  # 使用異步函數
                     mock_open.return_value.__aenter__.return_value = mock_file
 
-                    result = await natives.extract_natives(version_id, minecraft_path, extract_path)
+                    result = await natives.extract_natives(
+                        version_id, minecraft_path, extract_path
+                    )
                     # extract_natives 函數返回 None，所以檢查它沒有拋出異常就算成功
 
     def test_get_platform_classifier(self):

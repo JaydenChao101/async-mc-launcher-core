@@ -35,7 +35,9 @@ from launcher_core.exceptions import VersionNotFound
 class OfflineLauncher:
     """Minecraft launcher for offline mode play."""
 
-    def __init__(self, minecraft_dir: str, profiles_file: str = "offline_profiles.json"):
+    def __init__(
+        self, minecraft_dir: str, profiles_file: str = "offline_profiles.json"
+    ):
         """
         Initialize the offline launcher.
 
@@ -57,7 +59,7 @@ class OfflineLauncher:
         """Load offline profiles from file."""
         if self.profiles_file.exists():
             try:
-                with open(self.profiles_file, 'r') as f:
+                with open(self.profiles_file, "r") as f:
                     return json.load(f)
             except Exception as e:
                 self.logger.warning(f"Failed to load profiles: {e}")
@@ -66,12 +68,14 @@ class OfflineLauncher:
     def save_profiles(self) -> None:
         """Save profiles to file."""
         try:
-            with open(self.profiles_file, 'w') as f:
+            with open(self.profiles_file, "w") as f:
                 json.dump(self.profiles, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save profiles: {e}")
 
-    def create_offline_profile(self, username: str, custom_uuid: Optional[str] = None) -> Dict:
+    def create_offline_profile(
+        self, username: str, custom_uuid: Optional[str] = None
+    ) -> Dict:
         """
         Create an offline profile.
 
@@ -84,7 +88,9 @@ class OfflineLauncher:
         """
         if not custom_uuid:
             # Generate deterministic UUID from username for consistency
-            namespace = uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')  # DNS namespace
+            namespace = uuid.UUID(
+                "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+            )  # DNS namespace
             custom_uuid = str(uuid.uuid5(namespace, username.lower()))
 
         profile = {
@@ -92,7 +98,7 @@ class OfflineLauncher:
             "uuid": custom_uuid,
             "access_token": "offline",
             "created_at": asyncio.get_event_loop().time(),
-            "type": "offline"
+            "type": "offline",
         }
 
         self.profiles[username] = profile
@@ -137,7 +143,7 @@ class OfflineLauncher:
         return _types.Credential(
             access_token=profile["access_token"],
             username=profile["username"],
-            uuid=profile["uuid"]
+            uuid=profile["uuid"],
         )
 
     async def get_installed_versions(self) -> List[str]:
@@ -174,7 +180,7 @@ class OfflineLauncher:
         print(f"\n⚠️  Version {version} is not installed locally.")
         download = input("Download it now? (Y/n): ").strip().lower()
 
-        if download == 'n':
+        if download == "n":
             return False
 
         try:
@@ -216,7 +222,7 @@ class OfflineLauncher:
         memory: int = 2048,
         demo_mode: bool = False,
         custom_resolution: Optional[tuple[int, int]] = None,
-        additional_jvm_args: Optional[List[str]] = None
+        additional_jvm_args: Optional[List[str]] = None,
     ) -> bool:
         """
         Launch Minecraft in offline mode.
@@ -270,10 +276,7 @@ class OfflineLauncher:
 
             # Generate the launch command
             minecraft_command = await command.get_minecraft_command(
-                version,
-                str(self.minecraft_dir),
-                options,
-                Credential=Credential
+                version, str(self.minecraft_dir), options, Credential=Credential
             )
 
             self.logger.info("✅ Launch command generated successfully!")
@@ -288,15 +291,16 @@ class OfflineLauncher:
 
             # Ask user if they want to launch
             launch_choice = input("\nLaunch now? (Y/n): ").strip().lower()
-            if launch_choice != 'n':
+            if launch_choice != "n":
                 print("🚀 Launching Minecraft...")
 
                 import subprocess
+
                 process = subprocess.Popen(
                     minecraft_command,
                     cwd=str(self.minecraft_dir),
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
+                    stderr=subprocess.PIPE,
                 )
 
                 print(f"✅ Minecraft launched with PID: {process.pid}")
@@ -340,7 +344,9 @@ async def interactive_offline_launcher():
     display_offline_limitations()
 
     # Get Minecraft directory
-    minecraft_dir = input("\nEnter Minecraft directory (or press Enter for default): ").strip()
+    minecraft_dir = input(
+        "\nEnter Minecraft directory (or press Enter for default): "
+    ).strip()
     if not minecraft_dir:
         minecraft_dir = os.path.join(os.path.expanduser("~"), ".minecraft")
 
@@ -350,7 +356,7 @@ async def interactive_offline_launcher():
     launcher = OfflineLauncher(minecraft_dir)
 
     while True:
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Offline Launcher Options:")
         print("1. Launch Minecraft")
         print("2. Manage profiles")
@@ -415,7 +421,9 @@ async def interactive_offline_launcher():
                 if profile_choice == "1":
                     username = input("Enter username: ").strip()
                     if username:
-                        custom_uuid = input("Enter custom UUID (or press Enter for auto): ").strip()
+                        custom_uuid = input(
+                            "Enter custom UUID (or press Enter for auto): "
+                        ).strip()
                         if not custom_uuid:
                             custom_uuid = None
                         launcher.create_offline_profile(username, custom_uuid)
@@ -469,13 +477,13 @@ async def interactive_offline_launcher():
             except ValueError:
                 memory = 2048
 
-            demo = input("Demo mode? (y/N): ").strip().lower() == 'y'
+            demo = input("Demo mode? (y/N): ").strip().lower() == "y"
 
             resolution_input = input("Custom resolution WxH (or press Enter): ").strip()
             custom_resolution = None
-            if resolution_input and 'x' in resolution_input:
+            if resolution_input and "x" in resolution_input:
                 try:
-                    w, h = resolution_input.split('x')
+                    w, h = resolution_input.split("x")
                     custom_resolution = (int(w), int(h))
                 except ValueError:
                     print("⚠️  Invalid resolution format")
@@ -485,8 +493,7 @@ async def interactive_offline_launcher():
 
             # Launch with advanced options
             success = await launcher.launch_offline(
-                username, version, memory, demo,
-                custom_resolution, additional_jvm_args
+                username, version, memory, demo, custom_resolution, additional_jvm_args
             )
 
             if not success:

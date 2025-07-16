@@ -49,7 +49,9 @@ class ForgeLauncher:
         self.minecraft_dir.mkdir(parents=True, exist_ok=True)
         (self.minecraft_dir / "mods").mkdir(exist_ok=True)
 
-    async def list_available_forge_versions(self, minecraft_version: Optional[str] = None) -> List[str]:
+    async def list_available_forge_versions(
+        self, minecraft_version: Optional[str] = None
+    ) -> List[str]:
         """
         List available Forge versions.
 
@@ -66,7 +68,9 @@ class ForgeLauncher:
             if minecraft_version:
                 # Filter versions for specific Minecraft version
                 filtered_versions = [v for v in all_versions if minecraft_version in v]
-                self.logger.info(f"Found {len(filtered_versions)} Forge versions for Minecraft {minecraft_version}")
+                self.logger.info(
+                    f"Found {len(filtered_versions)} Forge versions for Minecraft {minecraft_version}"
+                )
                 return filtered_versions
 
             self.logger.info(f"Found {len(all_versions)} total Forge versions")
@@ -76,7 +80,9 @@ class ForgeLauncher:
             self.logger.error(f"Failed to fetch Forge versions: {e}")
             return []
 
-    async def find_recommended_forge_version(self, minecraft_version: str) -> Optional[str]:
+    async def find_recommended_forge_version(
+        self, minecraft_version: str
+    ) -> Optional[str]:
         """
         Find the recommended Forge version for a Minecraft version.
 
@@ -89,9 +95,13 @@ class ForgeLauncher:
         try:
             forge_version = await forge.find_forge_version(minecraft_version)
             if forge_version:
-                self.logger.info(f"Recommended Forge version for {minecraft_version}: {forge_version}")
+                self.logger.info(
+                    f"Recommended Forge version for {minecraft_version}: {forge_version}"
+                )
             else:
-                self.logger.warning(f"No Forge version found for Minecraft {minecraft_version}")
+                self.logger.warning(
+                    f"No Forge version found for Minecraft {minecraft_version}"
+                )
             return forge_version
         except Exception as e:
             self.logger.error(f"Failed to find Forge version: {e}")
@@ -198,12 +208,11 @@ class ForgeLauncher:
     def create_offline_credential(self, username: str = "Player") -> _types.Credential:
         """Create offline Credential for testing."""
         import uuid
+
         fake_uuid = str(uuid.uuid4())
 
         return _types.Credential(
-            access_token="offline",
-            username=username,
-            uuid=fake_uuid
+            access_token="offline", username=username, uuid=fake_uuid
         )
 
     async def launch_forge(
@@ -212,7 +221,7 @@ class ForgeLauncher:
         username: str = "Player",
         memory: int = 4096,
         additional_jvm_args: Optional[List[str]] = None,
-        Credential: Optional[_types.Credential] = None
+        Credential: Optional[_types.Credential] = None,
     ) -> bool:
         """
         Launch Minecraft with Forge.
@@ -237,7 +246,7 @@ class ForgeLauncher:
                 self.logger.warning(f"Forge version {forge_version} not installed")
                 install_choice = input("Install it now? (Y/n): ").strip().lower()
 
-                if install_choice != 'n':
+                if install_choice != "n":
                     if not await self.install_forge(forge_version):
                         return False
                 else:
@@ -251,14 +260,16 @@ class ForgeLauncher:
             jvm_args = [f"-Xmx{memory}M", f"-Xms{memory//2}M"]
 
             # Add Forge-specific JVM arguments
-            jvm_args.extend([
-                "-XX:+UnlockExperimentalVMOptions",
-                "-XX:+UseG1GC",
-                "-XX:G1NewSizePercent=20",
-                "-XX:G1ReservePercent=20",
-                "-XX:MaxGCPauseMillis=50",
-                "-XX:G1HeapRegionSize=32M"
-            ])
+            jvm_args.extend(
+                [
+                    "-XX:+UnlockExperimentalVMOptions",
+                    "-XX:+UseG1GC",
+                    "-XX:G1NewSizePercent=20",
+                    "-XX:G1ReservePercent=20",
+                    "-XX:MaxGCPauseMillis=50",
+                    "-XX:G1HeapRegionSize=32M",
+                ]
+            )
 
             if additional_jvm_args:
                 jvm_args.extend(additional_jvm_args)
@@ -283,7 +294,7 @@ class ForgeLauncher:
                 installed_version,
                 str(self.minecraft_dir),
                 options,
-                Credential=Credential
+                Credential=Credential,
             )
 
             self.logger.info("✅ Launch command generated successfully!")
@@ -301,15 +312,16 @@ class ForgeLauncher:
 
             # Ask user if they want to launch
             launch_choice = input("\nLaunch now? (Y/n): ").strip().lower()
-            if launch_choice != 'n':
+            if launch_choice != "n":
                 print("🚀 Launching Minecraft with Forge...")
 
                 import subprocess
+
                 process = subprocess.Popen(
                     minecraft_command,
                     cwd=str(self.minecraft_dir),
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
+                    stderr=subprocess.PIPE,
                 )
 
                 print(f"✅ Minecraft launched with PID: {process.pid}")
@@ -341,7 +353,9 @@ async def interactive_forge_launcher():
     print("https://www.patreon.com/LexManos/")
 
     # Get Minecraft directory
-    minecraft_dir = input("\nEnter Minecraft directory (or press Enter for default): ").strip()
+    minecraft_dir = input(
+        "\nEnter Minecraft directory (or press Enter for default): "
+    ).strip()
     if not minecraft_dir:
         minecraft_dir = os.path.join(os.path.expanduser("~"), ".minecraft")
 
@@ -351,7 +365,7 @@ async def interactive_forge_launcher():
     launcher = ForgeLauncher(minecraft_dir)
 
     while True:
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Forge Launcher Options:")
         print("1. Browse available Forge versions")
         print("2. Find recommended Forge version")
@@ -365,7 +379,9 @@ async def interactive_forge_launcher():
 
         if choice == "1":
             # Browse Forge versions
-            minecraft_version = input("Filter by Minecraft version (or press Enter for all): ").strip()
+            minecraft_version = input(
+                "Filter by Minecraft version (or press Enter for all): "
+            ).strip()
             minecraft_version = minecraft_version if minecraft_version else None
 
             versions = await launcher.list_available_forge_versions(minecraft_version)
@@ -384,19 +400,27 @@ async def interactive_forge_launcher():
 
         elif choice == "2":
             # Find recommended version
-            minecraft_version = input("Enter Minecraft version (e.g., 1.21.1): ").strip()
+            minecraft_version = input(
+                "Enter Minecraft version (e.g., 1.21.1): "
+            ).strip()
 
             if minecraft_version:
-                recommended = await launcher.find_recommended_forge_version(minecraft_version)
+                recommended = await launcher.find_recommended_forge_version(
+                    minecraft_version
+                )
 
                 if recommended:
                     print(f"✅ Recommended Forge version: {recommended}")
 
-                    install_choice = input("Install this version? (y/N): ").strip().lower()
-                    if install_choice == 'y':
+                    install_choice = (
+                        input("Install this version? (y/N): ").strip().lower()
+                    )
+                    if install_choice == "y":
                         await launcher.install_forge(recommended)
                 else:
-                    print(f"❌ No Forge version found for Minecraft {minecraft_version}")
+                    print(
+                        f"❌ No Forge version found for Minecraft {minecraft_version}"
+                    )
 
         elif choice == "3":
             # Install Forge version
@@ -436,7 +460,11 @@ async def interactive_forge_launcher():
             if version_choice.isdigit() and 1 <= int(version_choice) <= len(installed):
                 selected_version = installed[int(version_choice) - 1]
                 # Extract forge version from installed version name
-                forge_version = selected_version.split('-forge-')[1] if '-forge-' in selected_version else selected_version
+                forge_version = (
+                    selected_version.split("-forge-")[1]
+                    if "-forge-" in selected_version
+                    else selected_version
+                )
             else:
                 forge_version = version_choice
 

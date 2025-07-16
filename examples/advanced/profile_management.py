@@ -44,9 +44,16 @@ from launcher_core.exceptions import VersionNotFound
 class GameInstance:
     """Represents a complete Minecraft game instance."""
 
-    def __init__(self, name: str, directory: str, minecraft_version: str,
-                 mod_loader: str = "vanilla", mod_loader_version: str = "",
-                 description: str = "", tags: List[str] = None):
+    def __init__(
+        self,
+        name: str,
+        directory: str,
+        minecraft_version: str,
+        mod_loader: str = "vanilla",
+        mod_loader_version: str = "",
+        description: str = "",
+        tags: List[str] = None,
+    ):
         self.name = name
         self.directory = Path(directory)
         self.minecraft_version = minecraft_version
@@ -72,7 +79,7 @@ class GameInstance:
             "created_at": self.created_at,
             "last_played": self.last_played,
             "play_time": self.play_time,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
     @classmethod
@@ -85,7 +92,7 @@ class GameInstance:
             mod_loader=data.get("mod_loader", "vanilla"),
             mod_loader_version=data.get("mod_loader_version", ""),
             description=data.get("description", ""),
-            tags=data.get("tags", [])
+            tags=data.get("tags", []),
         )
         instance.created_at = data.get("created_at", instance.created_at)
         instance.last_played = data.get("last_played")
@@ -97,10 +104,17 @@ class GameInstance:
 class ProfileTemplate:
     """Template for creating new profiles with predefined settings."""
 
-    def __init__(self, name: str, minecraft_version: str, mod_loader: str = "vanilla",
-                 memory: int = 2048, jvm_args: List[str] = None,
-                 required_mods: List[str] = None, optional_mods: List[str] = None,
-                 description: str = ""):
+    def __init__(
+        self,
+        name: str,
+        minecraft_version: str,
+        mod_loader: str = "vanilla",
+        memory: int = 2048,
+        jvm_args: List[str] = None,
+        required_mods: List[str] = None,
+        optional_mods: List[str] = None,
+        description: str = "",
+    ):
         self.name = name
         self.minecraft_version = minecraft_version
         self.mod_loader = mod_loader
@@ -120,7 +134,7 @@ class ProfileTemplate:
             "jvm_args": self.jvm_args,
             "required_mods": self.required_mods,
             "optional_mods": self.optional_mods,
-            "description": self.description
+            "description": self.description,
         }
 
     @classmethod
@@ -134,15 +148,21 @@ class ProfileTemplate:
             jvm_args=data.get("jvm_args", []),
             required_mods=data.get("required_mods", []),
             optional_mods=data.get("optional_mods", []),
-            description=data.get("description", "")
+            description=data.get("description", ""),
         )
 
 
 class ModSet:
     """Represents a collection of mods that can be applied to instances."""
 
-    def __init__(self, name: str, description: str = "", mods: List[str] = None,
-                 compatible_loaders: List[str] = None, minecraft_versions: List[str] = None):
+    def __init__(
+        self,
+        name: str,
+        description: str = "",
+        mods: List[str] = None,
+        compatible_loaders: List[str] = None,
+        minecraft_versions: List[str] = None,
+    ):
         self.name = name
         self.description = description
         self.mods = mods or []  # List of mod filenames or IDs
@@ -160,7 +180,7 @@ class ModSet:
             "compatible_loaders": self.compatible_loaders,
             "minecraft_versions": self.minecraft_versions,
             "dependencies": self.dependencies,
-            "conflicts": self.conflicts
+            "conflicts": self.conflicts,
         }
 
     @classmethod
@@ -171,7 +191,7 @@ class ModSet:
             description=data.get("description", ""),
             mods=data.get("mods", []),
             compatible_loaders=data.get("compatible_loaders", ["fabric", "quilt"]),
-            minecraft_versions=data.get("minecraft_versions", [])
+            minecraft_versions=data.get("minecraft_versions", []),
         )
         mod_set.dependencies = data.get("dependencies", [])
         mod_set.conflicts = data.get("conflicts", [])
@@ -214,10 +234,12 @@ class AdvancedProfileManager:
         """Load game instances."""
         if self.instances_file.exists():
             try:
-                with open(self.instances_file, 'r') as f:
+                with open(self.instances_file, "r") as f:
                     data = json.load(f)
-                return {name: GameInstance.from_dict(instance_data)
-                       for name, instance_data in data.items()}
+                return {
+                    name: GameInstance.from_dict(instance_data)
+                    for name, instance_data in data.items()
+                }
             except Exception as e:
                 self.logger.warning(f"Failed to load instances: {e}")
         return {}
@@ -225,8 +247,10 @@ class AdvancedProfileManager:
     def save_instances(self):
         """Save game instances."""
         try:
-            data = {name: instance.to_dict() for name, instance in self.instances.items()}
-            with open(self.instances_file, 'w') as f:
+            data = {
+                name: instance.to_dict() for name, instance in self.instances.items()
+            }
+            with open(self.instances_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save instances: {e}")
@@ -235,10 +259,12 @@ class AdvancedProfileManager:
         """Load profile templates."""
         if self.templates_file.exists():
             try:
-                with open(self.templates_file, 'r') as f:
+                with open(self.templates_file, "r") as f:
                     data = json.load(f)
-                return {name: ProfileTemplate.from_dict(template_data)
-                       for name, template_data in data.items()}
+                return {
+                    name: ProfileTemplate.from_dict(template_data)
+                    for name, template_data in data.items()
+                }
             except Exception as e:
                 self.logger.warning(f"Failed to load templates: {e}")
         return {}
@@ -246,8 +272,10 @@ class AdvancedProfileManager:
     def save_templates(self):
         """Save profile templates."""
         try:
-            data = {name: template.to_dict() for name, template in self.templates.items()}
-            with open(self.templates_file, 'w') as f:
+            data = {
+                name: template.to_dict() for name, template in self.templates.items()
+            }
+            with open(self.templates_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save templates: {e}")
@@ -256,10 +284,12 @@ class AdvancedProfileManager:
         """Load mod sets."""
         if self.mod_sets_file.exists():
             try:
-                with open(self.mod_sets_file, 'r') as f:
+                with open(self.mod_sets_file, "r") as f:
                     data = json.load(f)
-                return {name: ModSet.from_dict(mod_set_data)
-                       for name, mod_set_data in data.items()}
+                return {
+                    name: ModSet.from_dict(mod_set_data)
+                    for name, mod_set_data in data.items()
+                }
             except Exception as e:
                 self.logger.warning(f"Failed to load mod sets: {e}")
         return {}
@@ -268,7 +298,7 @@ class AdvancedProfileManager:
         """Save mod sets."""
         try:
             data = {name: mod_set.to_dict() for name, mod_set in self.mod_sets.items()}
-            with open(self.mod_sets_file, 'w') as f:
+            with open(self.mod_sets_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save mod sets: {e}")
@@ -280,12 +310,12 @@ class AdvancedProfileManager:
             "default_java_args": ["-XX:+UnlockExperimentalVMOptions", "-XX:+UseG1GC"],
             "auto_backup": True,
             "backup_retention_days": 30,
-            "instance_isolation": True
+            "instance_isolation": True,
         }
 
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file, "r") as f:
                     config = json.load(f)
                 return {**default_config, **config}
             except Exception as e:
@@ -296,7 +326,7 @@ class AdvancedProfileManager:
     def save_config(self):
         """Save configuration."""
         try:
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(self.config, f, indent=2)
         except Exception as e:
             self.logger.error(f"Failed to save config: {e}")
@@ -305,24 +335,40 @@ class AdvancedProfileManager:
         """Create default profile templates."""
         templates = [
             ProfileTemplate(
-                "Vanilla Latest", "1.21.1", "vanilla", 2048,
-                description="Latest vanilla Minecraft"
+                "Vanilla Latest",
+                "1.21.1",
+                "vanilla",
+                2048,
+                description="Latest vanilla Minecraft",
             ),
             ProfileTemplate(
-                "Fabric Performance", "1.21.1", "fabric", 3072,
+                "Fabric Performance",
+                "1.21.1",
+                "fabric",
+                3072,
                 required_mods=["fabric-api", "sodium", "lithium", "phosphor"],
-                description="Optimized Fabric setup for performance"
+                description="Optimized Fabric setup for performance",
             ),
             ProfileTemplate(
-                "Forge Modded", "1.20.1", "forge", 6144,
-                jvm_args=["-XX:+UnlockExperimentalVMOptions", "-XX:+UseG1GC", "-XX:G1HeapRegionSize=32M"],
-                description="Heavy modded Forge setup"
+                "Forge Modded",
+                "1.20.1",
+                "forge",
+                6144,
+                jvm_args=[
+                    "-XX:+UnlockExperimentalVMOptions",
+                    "-XX:+UseG1GC",
+                    "-XX:G1HeapRegionSize=32M",
+                ],
+                description="Heavy modded Forge setup",
             ),
             ProfileTemplate(
-                "Quilt Enhanced", "1.21.1", "quilt", 4096,
+                "Quilt Enhanced",
+                "1.21.1",
+                "quilt",
+                4096,
                 required_mods=["quilted-fabric-api"],
-                description="Quilt with enhanced features"
-            )
+                description="Quilt with enhanced features",
+            ),
         ]
 
         for template in templates:
@@ -331,8 +377,9 @@ class AdvancedProfileManager:
         self.save_templates()
         self.logger.info("Created default profile templates")
 
-    async def create_instance_from_template(self, instance_name: str, template_name: str,
-                                          custom_directory: str = None) -> bool:
+    async def create_instance_from_template(
+        self, instance_name: str, template_name: str, custom_directory: str = None
+    ) -> bool:
         """
         Create a new instance from a template.
 
@@ -370,7 +417,7 @@ class AdvancedProfileManager:
                 minecraft_version=template.minecraft_version,
                 mod_loader=template.mod_loader,
                 mod_loader_version=template.mod_loader_version,
-                description=f"Created from template: {template_name}"
+                description=f"Created from template: {template_name}",
             )
 
             # Install Minecraft version
@@ -378,7 +425,9 @@ class AdvancedProfileManager:
 
             # Install mod loader if needed
             if template.mod_loader != "vanilla":
-                await self.install_mod_loader(instance, template.mod_loader, template.mod_loader_version)
+                await self.install_mod_loader(
+                    instance, template.mod_loader, template.mod_loader_version
+                )
 
             # Create mods directory
             mods_dir = instance_dir / "mods"
@@ -386,13 +435,17 @@ class AdvancedProfileManager:
 
             # Apply required mods (would need actual mod installation logic)
             if template.required_mods:
-                self.logger.info(f"Required mods for {instance_name}: {template.required_mods}")
+                self.logger.info(
+                    f"Required mods for {instance_name}: {template.required_mods}"
+                )
 
             # Save instance
             self.instances[instance_name] = instance
             self.save_instances()
 
-            self.logger.info(f"Created instance '{instance_name}' from template '{template_name}'")
+            self.logger.info(
+                f"Created instance '{instance_name}' from template '{template_name}'"
+            )
             return True
 
         except Exception as e:
@@ -415,9 +468,13 @@ class AdvancedProfileManager:
             "setMax": lambda m: None,
         }
 
-        await install.install_minecraft_version(version, str(instance.directory), callback)
+        await install.install_minecraft_version(
+            version, str(instance.directory), callback
+        )
 
-    async def install_mod_loader(self, instance: GameInstance, loader: str, version: str = ""):
+    async def install_mod_loader(
+        self, instance: GameInstance, loader: str, version: str = ""
+    ):
         """Install mod loader for an instance."""
         self.logger.info(f"Installing {loader} for {instance.name}")
 
@@ -430,13 +487,23 @@ class AdvancedProfileManager:
         if loader == "forge":
             if not version:
                 version = await forge.find_forge_version(instance.minecraft_version)
-            await forge.install_forge_version(version, str(instance.directory), callback)
+            await forge.install_forge_version(
+                version, str(instance.directory), callback
+            )
         elif loader == "fabric":
-            await fabric.install_fabric(instance.minecraft_version, str(instance.directory),
-                                       loader_version=version, callback=callback)
+            await fabric.install_fabric(
+                instance.minecraft_version,
+                str(instance.directory),
+                loader_version=version,
+                callback=callback,
+            )
         elif loader == "quilt":
-            await quilt.install_quilt(instance.minecraft_version, str(instance.directory),
-                                    loader_version=version, callback=callback)
+            await quilt.install_quilt(
+                instance.minecraft_version,
+                str(instance.directory),
+                loader_version=version,
+                callback=callback,
+            )
 
     def clone_instance(self, source_name: str, target_name: str) -> bool:
         """Clone an existing instance."""
@@ -463,7 +530,7 @@ class AdvancedProfileManager:
                 mod_loader=source.mod_loader,
                 mod_loader_version=source.mod_loader_version,
                 description=f"Cloned from {source_name}",
-                tags=source.tags.copy()
+                tags=source.tags.copy(),
             )
 
             self.instances[target_name] = target
@@ -510,20 +577,22 @@ class AdvancedProfileManager:
 
         try:
             # Create export archive
-            shutil.make_archive(export_path, 'zip', instance.directory)
+            shutil.make_archive(export_path, "zip", instance.directory)
 
             # Create metadata file
             metadata = {
                 "instance": instance.to_dict(),
                 "export_date": datetime.now().isoformat(),
-                "launcher_version": "async-mc-launcher-core"
+                "launcher_version": "async-mc-launcher-core",
             }
 
             metadata_path = f"{export_path}_metadata.json"
-            with open(metadata_path, 'w') as f:
+            with open(metadata_path, "w") as f:
                 json.dump(metadata, f, indent=2)
 
-            self.logger.info(f"Exported instance '{instance_name}' to {export_path}.zip")
+            self.logger.info(
+                f"Exported instance '{instance_name}' to {export_path}.zip"
+            )
             return True
 
         except Exception as e:
@@ -546,7 +615,7 @@ class AdvancedProfileManager:
                 # Look for metadata
                 metadata_path = f"{archive_path}_metadata.json"
                 if os.path.exists(metadata_path):
-                    with open(metadata_path, 'r') as f:
+                    with open(metadata_path, "r") as f:
                         metadata = json.load(f)
 
                     original_instance = GameInstance.from_dict(metadata["instance"])
@@ -569,7 +638,7 @@ class AdvancedProfileManager:
                 shutil.copytree(temp_dir, instance_dir)
 
                 # Create instance object
-                if 'original_instance' in locals():
+                if "original_instance" in locals():
                     instance = original_instance
                     instance.name = instance_name
                     instance.directory = Path(str(instance_dir))
@@ -578,13 +647,15 @@ class AdvancedProfileManager:
                         name=instance_name,
                         directory=str(instance_dir),
                         minecraft_version="unknown",
-                        description="Imported instance"
+                        description="Imported instance",
                     )
 
                 self.instances[instance_name] = instance
                 self.save_instances()
 
-                self.logger.info(f"Imported instance '{instance_name}' from {archive_path}")
+                self.logger.info(
+                    f"Imported instance '{instance_name}' from {archive_path}"
+                )
                 return True
 
         except Exception as e:
@@ -606,11 +677,18 @@ class AdvancedProfileManager:
 
         # Check compatibility
         if instance.mod_loader not in mod_set.compatible_loaders:
-            self.logger.error(f"Mod set '{mod_set_name}' not compatible with {instance.mod_loader}")
+            self.logger.error(
+                f"Mod set '{mod_set_name}' not compatible with {instance.mod_loader}"
+            )
             return False
 
-        if mod_set.minecraft_versions and instance.minecraft_version not in mod_set.minecraft_versions:
-            self.logger.warning(f"Mod set '{mod_set_name}' may not be compatible with Minecraft {instance.minecraft_version}")
+        if (
+            mod_set.minecraft_versions
+            and instance.minecraft_version not in mod_set.minecraft_versions
+        ):
+            self.logger.warning(
+                f"Mod set '{mod_set_name}' may not be compatible with Minecraft {instance.minecraft_version}"
+            )
 
         try:
             # Apply dependencies first
@@ -619,7 +697,9 @@ class AdvancedProfileManager:
                     self.apply_mod_set(instance_name, dep_name)
 
             # Apply mods (implementation would depend on mod sources)
-            self.logger.info(f"Applied mod set '{mod_set_name}' to instance '{instance_name}'")
+            self.logger.info(
+                f"Applied mod set '{mod_set_name}' to instance '{instance_name}'"
+            )
             self.logger.info(f"Mods in set: {mod_set.mods}")
 
             return True
@@ -630,11 +710,17 @@ class AdvancedProfileManager:
 
     def get_instances_by_tag(self, tag: str) -> List[GameInstance]:
         """Get instances with a specific tag."""
-        return [instance for instance in self.instances.values() if tag in instance.tags]
+        return [
+            instance for instance in self.instances.values() if tag in instance.tags
+        ]
 
     def get_instances_by_loader(self, loader: str) -> List[GameInstance]:
         """Get instances using a specific mod loader."""
-        return [instance for instance in self.instances.values() if instance.mod_loader == loader]
+        return [
+            instance
+            for instance in self.instances.values()
+            if instance.mod_loader == loader
+        ]
 
     def get_instance_statistics(self) -> Dict:
         """Get statistics about instances."""
@@ -648,7 +734,9 @@ class AdvancedProfileManager:
             by_loader[instance.mod_loader] = by_loader.get(instance.mod_loader, 0) + 1
 
             # Count by version
-            by_version[instance.minecraft_version] = by_version.get(instance.minecraft_version, 0) + 1
+            by_version[instance.minecraft_version] = (
+                by_version.get(instance.minecraft_version, 0) + 1
+            )
 
             # Sum play time
             total_play_time += instance.play_time
@@ -659,7 +747,7 @@ class AdvancedProfileManager:
             "by_minecraft_version": by_version,
             "total_play_time_hours": total_play_time / 3600,
             "templates_count": len(self.templates),
-            "mod_sets_count": len(self.mod_sets)
+            "mod_sets_count": len(self.mod_sets),
         }
 
     def print_statistics(self):
@@ -673,11 +761,11 @@ class AdvancedProfileManager:
         print(f"   Total Play Time: {stats['total_play_time_hours']:.1f} hours")
 
         print("\n🔧 By Mod Loader:")
-        for loader, count in stats['by_mod_loader'].items():
+        for loader, count in stats["by_mod_loader"].items():
             print(f"   {loader}: {count}")
 
         print("\n🎮 By Minecraft Version:")
-        for version, count in sorted(stats['by_minecraft_version'].items()):
+        for version, count in sorted(stats["by_minecraft_version"].items()):
             print(f"   {version}: {count}")
 
 
@@ -687,7 +775,9 @@ async def interactive_profile_manager():
     print("\nComprehensive instance and profile management system.")
 
     # Initialize manager
-    base_dir = input("Enter base directory for instances (or press Enter for default): ").strip()
+    base_dir = input(
+        "Enter base directory for instances (or press Enter for default): "
+    ).strip()
     if not base_dir:
         base_dir = "minecraft_instances"
 
@@ -695,7 +785,7 @@ async def interactive_profile_manager():
     print(f"Using base directory: {manager.base_directory}")
 
     while True:
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("Profile Manager Options:")
         print("1.  List instances")
         print("2.  Create instance from template")
@@ -722,7 +812,9 @@ async def interactive_profile_manager():
             for name, instance in manager.instances.items():
                 tags_str = f"[{', '.join(instance.tags)}]" if instance.tags else ""
                 print(f"   🟢 {name}")
-                print(f"      Version: {instance.minecraft_version} ({instance.mod_loader})")
+                print(
+                    f"      Version: {instance.minecraft_version} ({instance.mod_loader})"
+                )
                 print(f"      Directory: {instance.directory}")
                 print(f"      Description: {instance.description}")
                 if tags_str:
@@ -761,8 +853,12 @@ async def interactive_profile_manager():
                 print("Instance name required")
                 continue
 
-            print(f"Creating instance '{instance_name}' from template '{template_name}'...")
-            success = await manager.create_instance_from_template(instance_name, template_name)
+            print(
+                f"Creating instance '{instance_name}' from template '{template_name}'..."
+            )
+            success = await manager.create_instance_from_template(
+                instance_name, template_name
+            )
 
             if success:
                 print("✅ Instance created successfully!")
@@ -831,10 +927,12 @@ async def interactive_profile_manager():
                 print("Instance not found")
                 continue
 
-            delete_files = input("Delete files from disk? (Y/n): ").strip().lower() != 'n'
+            delete_files = (
+                input("Delete files from disk? (Y/n): ").strip().lower() != "n"
+            )
             confirm = input(f"Really delete '{instance_name}'? (y/N): ").strip().lower()
 
-            if confirm == 'y':
+            if confirm == "y":
                 success = manager.delete_instance(instance_name, delete_files)
                 if success:
                     print("✅ Instance deleted successfully!")
@@ -881,7 +979,9 @@ async def interactive_profile_manager():
                 print("Import path required")
                 continue
 
-            instance_name = input("Enter instance name (or press Enter for auto): ").strip()
+            instance_name = input(
+                "Enter instance name (or press Enter for auto): "
+            ).strip()
             instance_name = instance_name if instance_name else None
 
             success = manager.import_instance(import_path, instance_name)

@@ -31,6 +31,8 @@ class VersionRuntimeInformation(BaseModel):
 
     version: str = Field(..., description="Minecraft 版本")
     java_version: str = Field(..., description="所需 Java 版本")
-    jvm_runtime: Optional[JvmRuntimeInformation] = Field(None, description="JVM 運行時信息")
+    jvm_runtime: Optional[JvmRuntimeInformation] = Field(
+        None, description="JVM 運行時信息"
+    )
     arguments: List[str] = Field(default_factory=list, description="JVM 參數")
     environment: Dict[str, str] = Field(default_factory=dict, description="環境變量")

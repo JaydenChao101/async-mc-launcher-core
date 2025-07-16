@@ -29,7 +29,9 @@ class MinecraftProfileResponse(BaseModel):
 
     id: str = Field(..., description="玩家 UUID")
     name: str = Field(..., description="玩家名稱")
-    properties: List[Dict[str, str]] = Field(default_factory=list, description="檔案屬性")
+    properties: List[Dict[str, str]] = Field(
+        default_factory=list, description="檔案屬性"
+    )
     legacy: bool = Field(default=False, description="是否為舊版檔案")
     demo: bool = Field(default=False, description="是否為演示檔案")
     skins: List[SkinData] = Field(default_factory=list, description="皮膚列表")

@@ -15,6 +15,7 @@ from launcher_core import install, command, java_utils
 
 class AsyncContextManagerMock:
     """Helper class to mock async context managers"""
+
     def __init__(self, return_value):
         self.return_value = return_value
 
@@ -94,9 +95,16 @@ class TestInstall:
         """Test installing Minecraft version"""
         if hasattr(install, "install_minecraft_version"):
             # Mock at a higher level to avoid deep implementation issues
-            with patch("launcher_core.install.do_version_install", AsyncMock()) as mock_do_install:
-                with patch("aiohttp.ClientSession") as mock_session, \
-                     patch("launcher_core._helper.get_user_agent", return_value="test-agent"):
+            with patch(
+                "launcher_core.install.do_version_install", AsyncMock()
+            ) as mock_do_install:
+                with (
+                    patch("aiohttp.ClientSession") as mock_session,
+                    patch(
+                        "launcher_core._helper.get_user_agent",
+                        return_value="test-agent",
+                    ),
+                ):
                     # Mock the version manifest response (first call)
                     mock_manifest_response = Mock()
                     mock_manifest_response.json = AsyncMock(
@@ -105,20 +113,26 @@ class TestInstall:
                                 {
                                     "id": "1.20.4",
                                     "url": "https://example.com/1.20.4.json",
-                                    "sha1": "abc123"
+                                    "sha1": "abc123",
                                 }
                             ]
                         }
                     )
 
                     # Set up proper async context manager mock
-                    mock_get = Mock(return_value=AsyncContextManagerMock(mock_manifest_response))
+                    mock_get = Mock(
+                        return_value=AsyncContextManagerMock(mock_manifest_response)
+                    )
                     mock_session_instance = Mock()
                     mock_session_instance.get = mock_get
-                    mock_session.return_value.__aenter__.return_value = mock_session_instance
+                    mock_session.return_value.__aenter__.return_value = (
+                        mock_session_instance
+                    )
 
                     # This demonstrates the async context manager fix
-                    await install.install_minecraft_version("1.20.4", temp_minecraft_dir)
+                    await install.install_minecraft_version(
+                        "1.20.4", temp_minecraft_dir
+                    )
 
                     # Verify the mock was called correctly
                     mock_do_install.assert_called_once()
@@ -150,8 +164,13 @@ def temp_minecraft_dir():
                 "libraries": [],
                 "minecraftArguments": "--username ${auth_player_name} --version ${version_name}",
                 "arguments": {
-                    "game": ["--username", "${auth_player_name}", "--version", "${version_name}"],
-                    "jvm": ["-Xmx2G", "-XX:+UnlockExperimentalVMOptions"]
+                    "game": [
+                        "--username",
+                        "${auth_player_name}",
+                        "--version",
+                        "${version_name}",
+                    ],
+                    "jvm": ["-Xmx2G", "-XX:+UnlockExperimentalVMOptions"],
                 },
                 "downloads": {
                     "client": {
@@ -161,12 +180,12 @@ def temp_minecraft_dir():
                     }
                 },
                 "releaseTime": "2024-01-01T00:00:00+00:00",
-                "time": "2024-01-01T00:00:00+00:00"
+                "time": "2024-01-01T00:00:00+00:00",
             }
 
             # Create version json file
             version_file = os.path.join(version_dir, "1.20.4.json")
-            with open(version_file, 'w') as f:
+            with open(version_file, "w") as f:
                 json.dump(version_info, f)
 
             options = {
@@ -178,13 +197,15 @@ def temp_minecraft_dir():
             }
 
             # Mock the executable path
-            with patch("launcher_core.runtime.get_executable_path") as mock_get_executable:
+            with patch(
+                "launcher_core.runtime.get_executable_path"
+            ) as mock_get_executable:
                 mock_get_executable.return_value = "java"
 
                 result = await command.get_minecraft_command(
                     version="1.20.4",
                     minecraft_directory=temp_minecraft_dir,
-                    options=options
+                    options=options,
                 )
 
                 # Basic checks

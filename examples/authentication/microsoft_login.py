@@ -55,7 +55,7 @@ class MicrosoftAuthenticator:
         """Load authentication data from config file."""
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file, "r") as f:
                     self.auth_data = json.load(f)
                 self.logger.info("Loaded existing authentication data")
             except Exception as e:
@@ -65,14 +65,16 @@ class MicrosoftAuthenticator:
     def save_auth_data(self, auth_data: Dict) -> None:
         """Save authentication data to config file."""
         try:
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(auth_data, f, indent=2)
             self.auth_data = auth_data
             self.logger.info("Saved authentication data")
         except Exception as e:
             self.logger.error(f"Failed to save auth data: {e}")
 
-    async def authenticate_new_user(self, azure_app: Optional[_types.AzureApplication] = None) -> Optional[Dict]:
+    async def authenticate_new_user(
+        self, azure_app: Optional[_types.AzureApplication] = None
+    ) -> Optional[Dict]:
         """
         Authenticate a new user with Microsoft OAuth2 flow.
 
@@ -94,21 +96,25 @@ class MicrosoftAuthenticator:
             self.logger.info("Getting authorization URL...")
             auth_url = await login.get_login_url()
 
-            print("\n" + "="*60)
+            print("\n" + "=" * 60)
             print("MICROSOFT AUTHENTICATION REQUIRED")
-            print("="*60)
+            print("=" * 60)
             print(f"Please visit this URL to authorize the application:")
             print(f"{auth_url}")
-            print("\nThe page will redirect you to a URL starting with 'http://localhost'")
+            print(
+                "\nThe page will redirect you to a URL starting with 'http://localhost'"
+            )
             print("Copy the ENTIRE redirect URL and paste it below.")
-            print("="*60)
+            print("=" * 60)
 
             # Optionally open browser automatically
             try_open = input("Open browser automatically? (Y/n): ").strip().lower()
-            if try_open != 'n':
+            if try_open != "n":
                 try:
                     webbrowser.open(auth_url)
-                    print("Browser opened. Complete authentication and copy the redirect URL.")
+                    print(
+                        "Browser opened. Complete authentication and copy the redirect URL."
+                    )
                 except Exception as e:
                     self.logger.warning(f"Could not open browser: {e}")
 
@@ -117,7 +123,9 @@ class MicrosoftAuthenticator:
                 redirect_url = input("\nPaste the redirect URL here: ").strip()
                 if redirect_url.startswith("http://localhost"):
                     break
-                print("❌ Invalid URL. Please paste the complete redirect URL starting with 'http://localhost'")
+                print(
+                    "❌ Invalid URL. Please paste the complete redirect URL starting with 'http://localhost'"
+                )
 
             # Extract authorization code
             self.logger.info("Extracting authorization code...")
@@ -129,11 +137,15 @@ class MicrosoftAuthenticator:
 
             # Get Xbox Live token
             self.logger.info("Getting Xbox Live token...")
-            xbl_token_data = await microsoft_account.Login.get_xbl_token(ms_token_data["access_token"])
+            xbl_token_data = await microsoft_account.Login.get_xbl_token(
+                ms_token_data["access_token"]
+            )
 
             # Get XSTS token
             self.logger.info("Getting XSTS token...")
-            xsts_token_data = await microsoft_account.Login.get_xsts_token(xbl_token_data["Token"])
+            xsts_token_data = await microsoft_account.Login.get_xsts_token(
+                xbl_token_data["Token"]
+            )
 
             # Extract UHS
             uhs = xbl_token_data["DisplayClaims"]["xui"][0]["uhs"]
@@ -161,13 +173,15 @@ class MicrosoftAuthenticator:
                 "xsts_token": xsts_token_data["Token"],
                 "xbl_token": xbl_token_data["Token"],
                 "profile": profile,
-                "authenticated_at": asyncio.get_event_loop().time()
+                "authenticated_at": asyncio.get_event_loop().time(),
             }
 
             # Save auth data
             self.save_auth_data(auth_data)
 
-            self.logger.info(f"✅ Successfully authenticated as {profile['name']} ({profile['id']})")
+            self.logger.info(
+                f"✅ Successfully authenticated as {profile['name']} ({profile['id']})"
+            )
             return auth_data
 
         except AccountNotOwnMinecraft:
@@ -205,10 +219,14 @@ class MicrosoftAuthenticator:
             ms_token_data = await login.refresh_ms_token(refresh_token)
 
             # Get new Xbox Live token
-            xbl_token_data = await microsoft_account.Login.get_xbl_token(ms_token_data["access_token"])
+            xbl_token_data = await microsoft_account.Login.get_xbl_token(
+                ms_token_data["access_token"]
+            )
 
             # Get new XSTS token
-            xsts_token_data = await microsoft_account.Login.get_xsts_token(xbl_token_data["Token"])
+            xsts_token_data = await microsoft_account.Login.get_xsts_token(
+                xbl_token_data["Token"]
+            )
 
             # Extract UHS
             uhs = xbl_token_data["DisplayClaims"]["xui"][0]["uhs"]
@@ -233,12 +251,14 @@ class MicrosoftAuthenticator:
                 "xsts_token": xsts_token_data["Token"],
                 "xbl_token": xbl_token_data["Token"],
                 "profile": profile,
-                "authenticated_at": asyncio.get_event_loop().time()
+                "authenticated_at": asyncio.get_event_loop().time(),
             }
 
             self.save_auth_data(refreshed_auth_data)
 
-            self.logger.info(f"✅ Successfully refreshed authentication for {profile['name']}")
+            self.logger.info(
+                f"✅ Successfully refreshed authentication for {profile['name']}"
+            )
             return refreshed_auth_data
 
         except InvalidRefreshToken:
@@ -277,7 +297,7 @@ class MicrosoftAuthenticator:
         return _types.Credential(
             access_token=self.auth_data["access_token"],
             username=profile["name"],
-            uuid=profile["id"]
+            uuid=profile["id"],
         )
 
     def get_profile_info(self) -> Optional[Dict]:
@@ -313,7 +333,7 @@ async def launch_with_microsoft_auth(minecraft_dir: str, version: str = "1.21.1"
     if profile:
         print(f"✅ Authenticated as: {profile['name']}")
         print(f"   UUID: {profile['id']}")
-        if 'skins' in profile and profile['skins']:
+        if "skins" in profile and profile["skins"]:
             print(f"   Skin: {profile['skins'][0].get('url', 'Default')}")
 
     # Set up launch options
@@ -332,10 +352,7 @@ async def launch_with_microsoft_auth(minecraft_dir: str, version: str = "1.21.1"
 
         # Generate launch command
         minecraft_command = await command.get_minecraft_command(
-            version,
-            str(minecraft_path),
-            options,
-            Credential=Credential
+            version, str(minecraft_path), options, Credential=Credential
         )
 
         print("✅ Launch command generated successfully!")
@@ -343,15 +360,16 @@ async def launch_with_microsoft_auth(minecraft_dir: str, version: str = "1.21.1"
 
         # Ask user if they want to launch
         launch_choice = input("\nLaunch Minecraft now? (y/N): ").strip().lower()
-        if launch_choice == 'y':
+        if launch_choice == "y":
             print("🚀 Launching Minecraft...")
 
             import subprocess
+
             process = subprocess.Popen(
                 minecraft_command,
                 cwd=str(minecraft_path),
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
 
             print(f"✅ Minecraft launched with PID: {process.pid}")
@@ -373,7 +391,9 @@ async def main():
     print("You'll need to complete authentication in your web browser.")
 
     # Get Minecraft directory
-    minecraft_dir = input("\nEnter Minecraft directory (or press Enter for default): ").strip()
+    minecraft_dir = input(
+        "\nEnter Minecraft directory (or press Enter for default): "
+    ).strip()
     if not minecraft_dir:
         minecraft_dir = os.path.join(os.path.expanduser("~"), ".minecraft")
 
@@ -383,7 +403,7 @@ async def main():
     authenticator = MicrosoftAuthenticator()
 
     while True:
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Microsoft Authentication Options:")
         print("1. Authenticate new user")
         print("2. Refresh existing authentication")
@@ -422,8 +442,8 @@ async def main():
                 print(f"\n👤 Current Profile:")
                 print(f"   Name: {profile['name']}")
                 print(f"   UUID: {profile['id']}")
-                if 'skins' in profile and profile['skins']:
-                    for i, skin in enumerate(profile['skins']):
+                if "skins" in profile and profile["skins"]:
+                    for i, skin in enumerate(profile["skins"]):
                         print(f"   Skin {i+1}: {skin.get('url', 'Default')}")
                         print(f"            State: {skin.get('state', 'Unknown')}")
             else:
