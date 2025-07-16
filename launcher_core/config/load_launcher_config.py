@@ -9,7 +9,6 @@ Enhanced with automatic environment variable support and type validation.
 
 # 標準庫導入
 import os
-import sys
 from pathlib import Path
 from typing import Optional, Union
 
