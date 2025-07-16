@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause
 """
 
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Callable
 
 
 class DownloadInfo(BaseModel):
@@ -31,3 +31,7 @@ class LibraryInfo(BaseModel):
     natives: Optional[Dict[str, str]] = Field(None, description="原生庫映射")
     extract: Optional[Dict[str, Any]] = Field(None, description="提取規則")
     rules: Optional[List[Dict[str, Any]]] = Field(None, description="應用規則")
+
+
+# 回調字典類型，用於下載進度回調
+CallbackDict = Dict[str, Callable[..., Any]]

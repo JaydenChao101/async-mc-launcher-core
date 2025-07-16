@@ -16,70 +16,67 @@ from launcher_core._internal_types import runtime_types, shared_types
 class TestNews:
     """Test cases for Minecraft news module"""
 
-    @patch("aiohttp.ClientSession")
-    async def test_get_minecraft_news(self, mock_session):
+    @patch("launcher_core.http_client.HTTPClient.get_json")
+    async def test_get_minecraft_news(self, mock_get_json):
         """Test getting Minecraft news"""
-        mock_response = Mock()
-        mock_response.json = Mock(
-            return_value={
-                "article_count": 2,
-                "article_grid": [
-                    {
-                        "id": "news1",
-                        "title": "Minecraft Update 1.20.4",
-                        "tag": "Update",
-                        "category": "News",
-                        "date": "2024-01-01T00:00:00.000Z",
-                        "text": "New features and bug fixes",
-                        "readMoreLink": "https://minecraft.net/news/update-1-20-4",
-                    },
-                    {
-                        "id": "news2",
-                        "title": "Minecraft Live 2024",
-                        "tag": "Event",
-                        "category": "News",
-                        "date": "2024-01-02T00:00:00.000Z",
-                        "text": "Join us for Minecraft Live",
-                        "readMoreLink": "https://minecraft.net/news/minecraft-live-2024",
-                    },
-                ],
-            }
-        )
-        mock_session.return_value.__aenter__.return_value.get.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        mock_get_json.return_value = {
+            "article_count": 2,
+            "entries": [  # 修正：使用 "entries" 而不是 "article_grid"
+                {
+                    "id": "news1",
+                    "title": "Minecraft Update 1.20.4",
+                    "tag": "Update",
+                    "category": "News",
+                    "date": "2024-01-01",
+                    "text": "New features and bug fixes",
+                    "readMoreLink": "https://minecraft.net/news/update-1-20-4",
+                },
+                {
+                    "id": "news2",
+                    "title": "Minecraft Live 2024",
+                    "tag": "Event",
+                    "category": "News",
+                    "date": "2024-01-02",
+                    "text": "Join us for Minecraft Live",
+                    "readMoreLink": "https://minecraft.net/news/minecraft-live-2024",
+                },
+            ],
+        }
 
         if hasattr(news, "get_minecraft_news"):
             result = await news.get_minecraft_news()
             assert result is not None
             assert result["article_count"] == 2
-            assert len(result["article_grid"]) == 2
-            assert result["article_grid"][0]["title"] == "Minecraft Update 1.20.4"
+            assert len(result["entries"]) == 2  # 修正：使用 "entries"
+            assert result["entries"][0]["title"] == "Minecraft Update 1.20.4"
 
-    @patch("aiohttp.ClientSession")
-    async def test_get_minecraft_news_with_filter(self, mock_session):
+    @patch("launcher_core.http_client.HTTPClient.get_json")
+    async def test_get_minecraft_news_with_filter(self, mock_get_json):
         """Test getting filtered Minecraft news"""
-        mock_response = Mock()
-        mock_response.json = Mock(
-            return_value={
-                "article_count": 1,
-                "article_grid": [
-                    {
-                        "id": "news1",
-                        "title": "Minecraft Update 1.20.4",
-                        "tag": "Update",
-                        "category": "News",
-                    }
-                ],
-            }
-        )
-        mock_session.return_value.__aenter__.return_value.get.return_value.__aenter__.return_value = (
-            mock_response
-        )
+        mock_get_json.return_value = {
+            "article_count": 2,
+            "entries": [  # 修正：使用 "entries" 而不是 "article_grid"
+                {
+                    "id": "news1",
+                    "title": "Minecraft Update 1.20.4",
+                    "tag": "Update",
+                    "category": "Update",
+                    "date": "2024-01-01",  # 添加缺失的 date 字段
+                },
+                {
+                    "id": "news2",
+                    "title": "Minecraft Live 2024",
+                    "tag": "Event",
+                    "category": "News",
+                    "date": "2024-01-02",  # 添加缺失的 date 字段
+                },
+            ],
+        }
 
         if hasattr(news, "get_minecraft_news"):
             result = await news.get_minecraft_news(category="Update")
             assert result is not None
+            # 過濾後應該只有1個 Update 類別的條目
             assert result["article_count"] == 1
 
 
@@ -206,15 +203,33 @@ class TestNatives:
             assert result is not None
             assert "natives-windows" in result
 
-    def test_extract_natives(self):
+    async def test_extract_natives(self):
         """Test extracting native libraries"""
         if hasattr(natives, "extract_natives"):
             with patch("zipfile.ZipFile") as mock_zip:
                 mock_zip.return_value.__enter__.return_value.extractall = Mock()
 
-                native_jars = ["/path/to/natives.jar"]
-                result = natives.extract_natives(native_jars, "/temp/natives")
-                assert result is not None
+                # 修復參數：需要 versionid, path, extract_path
+                version_id = "1.20.1"
+                minecraft_path = "/temp/minecraft"
+                extract_path = "/temp/natives"
+
+                # 模擬版本 JSON 文件存在和讀取
+                with patch("os.path.isfile", return_value=True), \
+                     patch("aiofiles.open") as mock_open, \
+                     patch("os.path.exists", return_value=True), \
+                     patch("os.makedirs"):
+
+                    # 修復異步 mock：創建一個異步函數返回字符串
+                    async def mock_read():
+                        return '{"libraries": []}'
+
+                    mock_file = Mock()
+                    mock_file.read = mock_read  # 使用異步函數
+                    mock_open.return_value.__aenter__.return_value = mock_file
+
+                    result = await natives.extract_natives(version_id, minecraft_path, extract_path)
+                    # extract_natives 函數返回 None，所以檢查它沒有拋出異常就算成功
 
     def test_get_platform_classifier(self):
         """Test getting platform classifier for natives"""

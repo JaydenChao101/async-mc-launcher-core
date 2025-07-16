@@ -9,7 +9,7 @@ from pathlib import Path
 
 # 從配置模組導入必要的類
 from launcher_core.config.load_launcher_config import ConfigManager, LauncherConfig
-from launcher_core.pydantic_models import MinecraftOptions
+from launcher_core.models import MinecraftOptions
 
 
 async def basic_config_usage():

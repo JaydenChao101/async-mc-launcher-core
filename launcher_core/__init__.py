@@ -7,6 +7,7 @@ __version__ = "0.3.1"
 from .logging_utils import logger
 from .check_version import check_version
 from .config.load_launcher_config import ConfigManager, LauncherConfig
+
 # 導入 Pydantic 模型
 from .models.auth import MinecraftUUID, Credential, AzureApplication
 

@@ -74,3 +74,15 @@ class ModInfo(BaseModel):
     file_path: Optional[str] = Field(None, description="本地文件路徑")
     enabled: bool = Field(default=True, description="是否啟用")
     dependencies: List[str] = Field(default_factory=list, description="依賴模組")
+
+
+class MrpackInstallOptions(BaseModel):
+    """MRPack 安裝選項模型"""
+
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+
+    overwrite_existing: bool = Field(default=False, description="是否覆蓋現有文件")
+    install_dependencies: bool = Field(default=True, description="是否安裝依賴")
+    target_directory: Optional[str] = Field(None, description="目標安裝目錄")
+    loader_version: Optional[str] = Field(None, description="模組載入器版本")
+    minecraft_version: Optional[str] = Field(None, description="Minecraft 版本")

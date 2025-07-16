@@ -30,11 +30,21 @@ from .modding import (
     QuiltMinecraftVersion,
     QuiltLoader,
     MrpackInformation,
+    MrpackInstallOptions,
     ModInfo,
 )
 
 # 下載和庫文件相關模型
-from .downloads import DownloadInfo, LibraryInfo
+from .downloads import DownloadInfo, LibraryInfo, CallbackDict
+
+# 運行時相關模型
+from .runtime import JvmRuntimeInformation, VersionRuntimeInformation
+
+# 新聞相關模型
+from .news import MinecraftNews, JavaPatchNotes
+
+# Mojang 相關模型
+from .mojang import SkinData, MinecraftProfileResponse
 
 # 設定檔相關模型
 from .profiles import LaunchProfile
@@ -66,10 +76,21 @@ __all__ = [
     "QuiltMinecraftVersion",
     "QuiltLoader",
     "MrpackInformation",
+    "MrpackInstallOptions",
     "ModInfo",
     # 下載相關
     "DownloadInfo",
     "LibraryInfo",
+    "CallbackDict",
+    # 運行時相關
+    "JvmRuntimeInformation",
+    "VersionRuntimeInformation",
+    # 新聞相關
+    "MinecraftNews",
+    "JavaPatchNotes",
+    # Mojang 相關
+    "SkinData",
+    "MinecraftProfileResponse",
     # 設定檔相關
     "LaunchProfile",
     # 伺服器相關

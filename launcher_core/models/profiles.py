@@ -24,7 +24,7 @@ class LaunchProfile(BaseModel):
     java_executable: Optional[str] = Field(None, description="Java 可執行文件")
     jvm_arguments: List[str] = Field(default_factory=list, description="JVM 參數")
     game_arguments: List[str] = Field(default_factory=list, description="遊戲參數")
-    Credential: Optional[Credential] = Field(None, description="登入憑證")
+    credential: Optional[Credential] = Field(None, description="登入憑證")
     minecraft_options: Optional[MinecraftOptions] = Field(
         None, description="Minecraft 選項"
     )

@@ -5,6 +5,7 @@ from uuid import UUID
 # 重新定義 MinecraftUUID
 MinecraftUUID = NewType("MinecraftUUID", UUID)
 
+
 @dataclass
 class AzureApplication:
     """The Azure Application ID and Secret"""
