@@ -6,6 +6,7 @@ runtime allows to install the java runtime. This module is used by
 :func:`~launcher_core..install.install_minecraft_version`,
 so you don't need to use it in your code most of the time.
 """
+
 import subprocess
 import datetime
 import platform
@@ -27,7 +28,7 @@ from ._internal_types.runtime_types import (
     PlatformManifestJson,
     _PlatformManifestJsonFile,
 )
-from ._types import CallbackDict, JvmRuntimeInformation, VersionRuntimeInformation
+from .models import CallbackDict, JvmRuntimeInformation, VersionRuntimeInformation
 from .exceptions import VersionNotFound, PlatformNotSupported
 
 

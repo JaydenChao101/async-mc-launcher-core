@@ -2,7 +2,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025 JaydenChao101 <jaydenchao@proton.me> and contributors
 # SPDX-License-Identifier: BSD-2-Clause
 "exceptions contains all custom exceptions that can be raised by minecraft_launcher_lib"
-from ._types import VanillaLauncherProfile
+
+from .models import VanillaLauncherProfile
 
 
 class VersionNotFound(ValueError):

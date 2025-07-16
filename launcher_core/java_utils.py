@@ -5,7 +5,7 @@ import platform
 import re
 import os
 from ._helper import SUBPROCESS_STARTUP_INFO
-from ._types import JavaInformation
+from .models import JavaInformation
 
 
 async def get_java_information(path: str | os.PathLike) -> JavaInformation:

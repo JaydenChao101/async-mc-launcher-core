@@ -30,9 +30,13 @@ classifiers = [
 ]
 dependencies = [
   "aiofiles>=24.1.0",
-  "aiohttp>=3.11.18",
+  "aiohttp>=3.12.14",
   "cryptography>=45.0.2",
+  "flake8>=7.3.0",
+  "pydantic>=2.11.7",
+  "pydantic-settings>=2.7.0",
   "pyjwt>=2.10.1",
+  "tomli>=1.2.0; python_version<'3.11'",
   "tomli-w>=1.2.0",
 ]
 dynamic = ["version"]
@@ -46,11 +50,26 @@ version = {attr = "launcher_core.__version__"}
 
 [dependency-groups]
 dev = [
+    "black>=25.1.0",
+    "coverage>=7.9.2",
+    "datamodel-code-generator>=0.31.2",
+    "mypy>=1.17.0",
+    "pylint>=3.3.7",
     "pytest>=8.4.1",
     "pytest-asyncio>=1.0.0",
     "pytest-cov>=6.2.1",
     "pytest-mock>=3.14.1",
+    "ruff>=0.12.3",
+    "vulture>=2.14",
 ]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
 
 [tool.setuptools]
 packages = {find = {where = ["."], include = ["launcher_core*"]}}  # 自動發現所有 launcher_core 子包

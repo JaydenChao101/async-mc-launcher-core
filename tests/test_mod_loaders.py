@@ -11,12 +11,13 @@ from launcher_core import forge, fabric, quilt, mrpack
 
 class AsyncContextManagerMock:
     """Helper class to mock async context managers"""
+
     def __init__(self, return_value):
         self.return_value = return_value
-    
+
     async def __aenter__(self):
         return self.return_value
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
 
@@ -135,7 +136,7 @@ class TestFabric:
                 "mainClass": "net.fabricmc.loader.launch.knot.KnotClient",
             }
         )
-        
+
         # Set up proper async context manager mock (this is the key fix)
         mock_get = Mock(return_value=AsyncContextManagerMock(mock_response))
         mock_session_instance = Mock()
@@ -144,14 +145,19 @@ class TestFabric:
 
         # Just test that we can import and call the function without async CM protocol error
         # Mock the deep dependencies to avoid going into implementation details
-        with patch("launcher_core.utils.is_version_valid", AsyncMock(return_value=False)):
+        with patch(
+            "launcher_core.utils.is_version_valid", AsyncMock(return_value=False)
+        ):
             # This should exit early due to version validation but demonstrate the fix
             if hasattr(fabric, "install_fabric"):
                 try:
                     await fabric.install_fabric("1.20.4", "0.14.24", "/temp/minecraft")
                 except Exception as e:
                     # We expect this to fail for other reasons, but NOT the async context manager protocol
-                    assert "does not support the asynchronous context manager protocol" not in str(e)
+                    assert (
+                        "does not support the asynchronous context manager protocol"
+                        not in str(e)
+                    )
                     # This demonstrates the async context manager fix works
 
 
@@ -182,7 +188,7 @@ class TestQuilt:
                 "mainClass": "org.quiltmc.loader.launch.knot.KnotClient",
             }
         )
-        
+
         # Set up proper async context manager mock (this is the key fix)
         mock_get = Mock(return_value=AsyncContextManagerMock(mock_response))
         mock_session_instance = Mock()
@@ -191,14 +197,19 @@ class TestQuilt:
 
         # Just test that we can import and call the function without async CM protocol error
         # Mock the deep dependencies to avoid going into implementation details
-        with patch("launcher_core.utils.is_version_valid", AsyncMock(return_value=False)):
+        with patch(
+            "launcher_core.utils.is_version_valid", AsyncMock(return_value=False)
+        ):
             # This should exit early due to version validation but demonstrate the fix
             if hasattr(quilt, "install_quilt"):
                 try:
                     await quilt.install_quilt("1.20.4", "0.20.2", "/temp/minecraft")
                 except Exception as e:
                     # We expect this to fail for other reasons, but NOT the async context manager protocol
-                    assert "does not support the asynchronous context manager protocol" not in str(e)
+                    assert (
+                        "does not support the asynchronous context manager protocol"
+                        not in str(e)
+                    )
                     # This demonstrates the async context manager fix works
 
 
@@ -255,33 +266,40 @@ class TestMrpack:
             import tempfile
             import zipfile
             import json
-            with tempfile.NamedTemporaryFile(suffix=".mrpack", delete=False) as temp_file:
-                with zipfile.ZipFile(temp_file.name, 'w') as zf:
+
+            with tempfile.NamedTemporaryFile(
+                suffix=".mrpack", delete=False
+            ) as temp_file:
+                with zipfile.ZipFile(temp_file.name, "w") as zf:
                     mrpack_data = {
                         "name": "test",
                         "dependencies": {"minecraft": "1.20.4"},
-                        "files": []
+                        "files": [],
                     }
                     zf.writestr("modrinth.index.json", json.dumps(mrpack_data))
-                
+
                 temp_path = temp_file.name
-            
+
             try:
                 # Test that os.path.abspath(path) works with string path (the original error was about dict)
                 import os
+
                 # This would fail with "TypeError: expected str, bytes or os.PathLike object, not dict"
                 # if we passed a dict instead of a string path
                 result_path = os.path.abspath(temp_path)
                 assert isinstance(result_path, str)
                 assert temp_path in result_path
-                
+
                 # The original test was passing sample_mrpack_data (dict) instead of a path string
                 # This demonstrates the fix: pass temp_path (string) instead of sample_mrpack_data (dict)
-                print(f"✓ Path parameter fix works: {type(temp_path)} instead of {type(sample_mrpack_data)}")
-                
+                print(
+                    f"✓ Path parameter fix works: {type(temp_path)} instead of {type(sample_mrpack_data)}"
+                )
+
             finally:
                 # Clean up
                 import os
+
                 if os.path.exists(temp_path):
                     os.unlink(temp_path)
 

@@ -123,9 +123,7 @@ def main():
         default="all",
         help="Test mode to run",
     )
-    parser.add_argument(
-        "--pattern", help="Test pattern to match (for specific mode)"
-    )
+    parser.add_argument("--pattern", help="Test pattern to match (for specific mode)")
 
     args = parser.parse_args()
 
