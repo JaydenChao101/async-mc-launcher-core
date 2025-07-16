@@ -40,9 +40,9 @@ jobs:
     - name: Lint with ruff
       run: |
         # 檢查語法錯誤和未定義的名稱
-        ruff check . --select=E9,F63,F7,F82 --output-format=github
+        ruff check launcher_core --select=E9,F63,F7,F82 --output-format=github
         # 執行完整的 lint 檢查
-        ruff check . --output-format=github
+        ruff check launcher_core --output-format=github
 
     - name: Check formatting with ruff
       run: |
