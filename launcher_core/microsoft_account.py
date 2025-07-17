@@ -129,11 +129,15 @@ class XboxAuthenticator:
         return data
 
 
-class Login:
-    """Microsoft帳戶登入處理器"""
+class BaseLogin:
+    """Base class providing azure_app attribute initialization"""
 
     def __init__(self, azure_app: AzureApplication = AzureApplication()):
         self.azure_app = azure_app
+
+
+class Login(BaseLogin):
+    """Microsoft帳戶登入處理器"""
 
     async def get_login_url(self) -> str:
         """生成登入URL"""
@@ -207,13 +211,11 @@ class Login:
         )
 
 
-class DeviceCodeLogin:
+class DeviceCodeLogin(BaseLogin):
     """設備代碼登入處理器"""
 
-    def __init__(
-        self, azure_app: AzureApplication = AzureApplication(), language: str = "en"
-    ):
-        self.azure_app = azure_app
+    def __init__(self, azure_app: AzureApplication = AzureApplication(), language: str = "en"):
+        super().__init__(azure_app)
         self.language = language
 
     async def get_device_code(self) -> Dict[str, Any]:
