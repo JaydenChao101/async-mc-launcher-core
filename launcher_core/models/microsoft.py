@@ -6,10 +6,11 @@ This module contains all Types for the :doc:`microsoft_account` module.
 It has it's own module because of the many types needed that are not used somewhere else.
 """
 
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal
+from pydantic import BaseModel
 
 
-class AuthorizationTokenResponse(TypedDict):
+class AuthorizationTokenResponse(BaseModel):
     access_token: str
     token_type: Literal["Bearer"]
     expires_in: int
@@ -17,40 +18,40 @@ class AuthorizationTokenResponse(TypedDict):
     refresh_token: str
 
 
-class _Xui(TypedDict):
+class _Xui(BaseModel):
     uhs: str
 
 
-class _DisplayClaims(TypedDict):
+class _DisplayClaims(BaseModel):
     xui: list[_Xui]
 
 
-class XBLResponse(TypedDict):
+class XBLResponse(BaseModel):
     IssueInstant: str
     NotAfter: str
     Token: str
     DisplayClaims: _DisplayClaims
 
 
-class XSTSResponse(TypedDict):
+class XSTSResponse(BaseModel):
     IssueInstant: str
     NotAfter: str
     Token: str
     DisplayClaimns: _DisplayClaims
 
 
-class _MinecraftStoreItem(TypedDict):
+class _MinecraftStoreItem(BaseModel):
     name: str
     signature: str
 
 
-class MinecraftStoreResponse(TypedDict):
+class MinecraftStoreResponse(BaseModel):
     items: list[_MinecraftStoreItem]
     signature: str
     keyId: str
 
 
-class MinecraftAuthenticateResponse(TypedDict):
+class MinecraftAuthenticateResponse(BaseModel):
     username: str
     roles: list[Any]
     access_token: str
@@ -58,7 +59,7 @@ class MinecraftAuthenticateResponse(TypedDict):
     expires_in: int
 
 
-class _MinecraftProfileInfo(TypedDict):
+class _MinecraftProfileInfo(BaseModel):
     id: str
     state: Literal["ACTIVE", "INACTIVE"]
     url: str
@@ -72,7 +73,7 @@ class _MinecraftProfileCape(_MinecraftProfileInfo):
     alias: str
 
 
-class MinecraftProfileResponse(TypedDict):
+class MinecraftProfileResponse(BaseModel):
     id: str
     name: str
     skins: list[_MinecraftProfileSkin]
