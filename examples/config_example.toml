@@ -1,0 +1,190 @@
+# AsyncMCLauncher 配置示例
+# 這個配置文件展示了新的結構，支援多帳戶和清晰的分組
+
+config_version = "2.0.0"
+last_modified = 2025-07-18T10:30:00
+
+# 多帳戶憑證設定 - 支援多個帳戶
+[[Credentials]]
+username = "Player1"
+uuid = "550e8400-e29b-41d4-a716-446655440000"
+access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+refresh_token = "M.R3_BAY.CgAA..."
+account_type = "microsoft"
+is_default = true
+last_used = 2025-07-18T09:15:00
+display_name = "Player1"
+skin_url = "http://textures.minecraft.net/texture/..."
+cape_url = "http://textures.minecraft.net/texture/..."
+
+[[Credentials]]
+username = "Player2"
+uuid = "550e8400-e29b-41d4-a716-446655440001"
+access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+refresh_token = "M.R3_BAY.CgBB..."
+account_type = "microsoft"
+is_default = false
+last_used = 2025-07-17T14:30:00
+display_name = "Player2"
+
+# 啟動器主要設定
+[LauncherSetting]
+launcher_name = "AsyncMCLauncher"
+launcher_version = "1.0.0"
+launcher_uuid = "12345678-1234-1234-1234-123456789abc"
+
+# 目錄設定
+minecraft_directory = "~/.minecraft"
+config_directory = "~/.asyncmc/config"
+cache_directory = "~/.asyncmc/cache"
+logs_directory = "~/.asyncmc/logs"
+
+# 帳戶設定
+auto_login = true
+remember_credentials = true
+auto_refresh_token = true
+
+# 下載設定
+max_concurrent_downloads = 6
+download_timeout = 300
+verify_checksums = true
+verify_signatures = false
+retry_attempts = 3
+
+# 代理設定
+use_proxy = false
+proxy_host = ""
+proxy_port = 8080
+proxy_username = ""
+proxy_password = ""
+
+# 鏡像設定
+use_mirror = false
+mirror_url = "https://download.mcbbs.net"
+
+# Java 設定
+java_executable = "/usr/bin/java"
+jvm_arguments = ["-Xmx4G", "-XX:+UseG1GC"]
+
+# 遊戲設定
+default_version = "1.20.4"
+demo_mode = false
+custom_resolution = true
+resolution_width = 1920
+resolution_height = 1080
+
+# UI 設定
+window_width = 1200
+window_height = 800
+window_maximized = false
+window_position_x = 100
+window_position_y = 100
+theme = "dark"
+accent_color = "#0078d4"
+font_family = "Microsoft JhengHei"
+font_size = 14
+language = "zh-TW"
+
+# 功能設定
+show_news = true
+show_release_notes = true
+show_advanced_options = false
+auto_close_launcher = false
+enable_logging = true
+log_level = "INFO"
+
+# 遊戲設定檔 - 支援多個設定檔
+[[GameProfiles]]
+profile_id = "vanilla-1.20.4"
+profile_name = "原版 1.20.4"
+minecraft_version = "1.20.4"
+loader_type = ""
+loader_version = ""
+created_time = 2025-07-18T09:00:00
+last_used = 2025-07-18T09:15:00
+java_executable = "/usr/bin/java"
+jvm_arguments = ["-Xmx4G"]
+game_arguments = []
+enabled_mods = []
+disabled_mods = []
+enabled_resource_packs = []
+icon_path = ""
+description = "原版 Minecraft 1.20.4"
+is_default = true
+
+[[GameProfiles]]
+profile_id = "modded-1.20.1"
+profile_name = "模組包 1.20.1"
+minecraft_version = "1.20.1"
+loader_type = "forge"
+loader_version = "47.2.20"
+created_time = 2025-07-15T16:30:00
+last_used = 2025-07-17T20:45:00
+java_executable = "/usr/bin/java"
+jvm_arguments = ["-Xmx8G", "-XX:+UseG1GC"]
+game_arguments = []
+enabled_mods = [
+    "jei-1.20.1-15.3.0.4",
+    "optifine-1.20.1-hd-u-i6",
+    "journeymap-1.20.1-5.9.18"
+]
+disabled_mods = ["laggoggles-1.20.1-8.0.3"]
+enabled_resource_packs = ["faithful-32x", "vanilla-tweaks"]
+icon_path = "icons/modded.png"
+description = "包含 JEI、OptiFine 和 JourneyMap 的模組包"
+is_default = false
+
+# 伺服器列表
+[[Servers]]
+name = "Hypixel"
+address = "mc.hypixel.net"
+port = 25565
+icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA..."
+description = "最受歡迎的 Minecraft 伺服器"
+version = "1.8-1.20"
+is_favorite = true
+last_ping = 2025-07-18T10:25:00
+last_players = 45230
+max_players = 200000
+
+[[Servers]]
+name = "本地測試伺服器"
+address = "localhost"
+port = 25565
+icon = ""
+description = "本地開發測試用伺服器"
+version = "1.20.4"
+is_favorite = false
+last_ping = 2025-07-18T09:30:00
+last_players = 1
+max_players = 20
+
+# 其他設定 - 給調用這個 lib 的程式使用
+[Other]
+# 這裡可以放置第三方程式的自定義設定
+custom_launcher_theme = "neon"
+enable_discord_rpc = true
+discord_client_id = "123456789012345678"
+auto_backup_saves = true
+backup_interval_hours = 24
+max_backup_count = 5
+
+# 自定義快捷鍵
+[Other.keybindings]
+quick_launch = "F5"
+open_mods_folder = "Ctrl+M"
+open_saves_folder = "Ctrl+S"
+
+# 第三方整合設定
+[Other.integrations]
+curseforge_api_key = ""
+modrinth_enabled = true
+ftb_enabled = true
+technic_enabled = false
+
+# 效能監控設定
+[Other.performance]
+enable_fps_monitoring = true
+enable_memory_monitoring = true
+warn_low_memory = true
+memory_threshold_mb = 1024
