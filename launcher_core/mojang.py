@@ -211,5 +211,10 @@ async def verify_mojang_jwt(token: str) -> bool:
     :return: True if the token is valid, False otherwise
     """
     public_key = serialization.load_pem_public_key(__MOGANG_SIGNATURE__)
-    jwt.decode(token, public_key, algorithms=["RS256"])
+    try:
+        # Decode the JWT token using the public key
+        # This will raise an exception if the token is invalid
+        jwt.decode(token, public_key, algorithms=["RS256"])
+    except jwt.ExpiredSignatureError:
+        return False
     return True

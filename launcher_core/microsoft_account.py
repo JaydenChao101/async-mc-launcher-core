@@ -27,6 +27,7 @@ from .exceptions import (
 from .models import AzureApplication
 from .models import Credential as AuthCredential
 from .logging_utils import logger
+from . import mojang
 
 # API 端點常量
 AUTH_URL = "https://login.live.com/oauth20_authorize.srf"
@@ -203,8 +204,12 @@ class Login(BaseLogin):
         minecraft_token = await XboxAuthenticator.get_minecraft_access_token(
             xsts_token["Token"], uhs
         )
-
+        user_profile = await mojang.get_minecraft_profile(
+            minecraft_token["access_token"]
+        )
         return AuthCredential(
+            uuid=user_profile["id"],
+            username=user_profile["name"],
             access_token=minecraft_token["access_token"],
             refresh_token=ms_token["refresh_token"],
             expires_in=minecraft_token["expires_in"],
@@ -214,7 +219,9 @@ class Login(BaseLogin):
 class DeviceCodeLogin(BaseLogin):
     """設備代碼登入處理器"""
 
-    def __init__(self, azure_app: AzureApplication = AzureApplication(), language: str = "en"):
+    def __init__(
+        self, azure_app: AzureApplication = AzureApplication(), language: str = "en"
+    ):
         super().__init__(azure_app)
         self.language = language
 
