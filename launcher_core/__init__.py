@@ -7,53 +7,27 @@ __version__ = "0.4-rc"
 from .logging_utils import logger
 from .check_version import check_version
 from .config.load_launcher_config import ConfigManager, LauncherConfig
-
-# 導入 Pydantic 模型
-from .models.auth import MinecraftUUID, Credential, AzureApplication
-
+from .models.auth import Credential
 from . import (
-    command,
-    install,
-    microsoft_account,
-    utils,
-    java_utils,
-    forge,
-    fabric,
-    quilt,
-    news,
-    runtime,
-    mrpack,
     exceptions,
+    _helper,
+    CustomClass,
+    setting,
+    microsoft_account,
     microsoft_types,
-    config,
 )
-from .utils import sync
-from .mojang import verify_mojang_jwt
 
 __all__ = [
-    "command",
-    "install",
-    "microsoft_account",
-    "utils",
-    "news",
-    "java_utils",
-    "forge",
-    "fabric",
-    "quilt",
-    "runtime",
-    "mrpack",
     "exceptions",
-    "models",
-    "microsoft_types",
-    "config",
-    "logger",
-    "sync",
-    "Credential",
-    "AzureApplication",
+    "_helper",
     "ConfigManager",
     "LauncherConfig",
-    "MinecraftUUID",
+    "Credential",
+    "CustomClass",
+    "setting",
+    "microsoft_account",
+    "microsoft_types",
+    "logger",
     "__version__",
     "check_version",
-    "verify_mojang_jwt",
 ]

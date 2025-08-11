@@ -27,7 +27,6 @@ from .exceptions import (
 from .models import AzureApplication
 from .models import Credential as AuthCredential
 from .logging_utils import logger
-from . import mojang
 
 # API 端點常量
 AUTH_URL = "https://login.live.com/oauth20_authorize.srf"
@@ -204,6 +203,9 @@ class Login(BaseLogin):
         minecraft_token = await XboxAuthenticator.get_minecraft_access_token(
             xsts_token["Token"], uhs
         )
+
+        from . import mojang  # local import to avoid heavy dependency at module import time
+
         user_profile = await mojang.get_minecraft_profile(
             minecraft_token["access_token"]
         )

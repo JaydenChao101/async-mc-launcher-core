@@ -4,7 +4,6 @@ import datetime
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from . import Credential as AuthCredential
 from .exceptions import NeedAccountInfo, AccountNotOwnMinecraft
-from .mojang import have_minecraft
 from .models import MinecraftOptions, Credential, LauncherSettings, ServerInfo, ModInfo
 
 if TYPE_CHECKING:
@@ -33,6 +32,9 @@ class AccountManager:
         """
         if not Credential.access_token:
             raise NeedAccountInfo("帳戶憑證無效或未提供")
+
+        # Import here to avoid requiring heavy dependencies at module import time
+        from .mojang import have_minecraft
 
         try:
             await have_minecraft(Credential.access_token)

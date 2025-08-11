@@ -18,6 +18,7 @@ from .logging_utils import logger
 from .models import MinecraftOptions, LatestMinecraftVersions, MinecraftVersionInfo
 from ._internal_types.shared_types import ClientJson, VersionListManifestJson
 from ._helper import get_requests_response_cache, assert_func
+from .http_client import HTTPClient
 
 
 async def get_minecraft_directory() -> str:
@@ -66,10 +67,9 @@ async def get_latest_version() -> LatestMinecraftVersions:
     """
     logger.debug("正在獲取最新 Minecraft 版本信息")
     try:
-        response = await get_requests_response_cache(
+        data = await HTTPClient.get_json(
             "https://launchermeta.mojang.com/mc/game/version_manifest_v2.json"
         )
-        data = json.loads(response["content"])
         latest = data["latest"]
         logger.info(
             f"最新版本 - Release: {latest['release']}, Snapshot: {latest['snapshot']}"
