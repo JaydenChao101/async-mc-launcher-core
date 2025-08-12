@@ -35,7 +35,7 @@ class ConfigManager:
 
         if self._config is None or reload:
             if self.config_path.exists():
-                async with aiofiles.open(self.config_path, "r", encoding="utf-8") as f:
+                async with aiofiles.open(self.config_path, "rb") as f:
                     data = tomllib.loads(await f.read())
                 self._config = LauncherConfig(**data)
             else:
