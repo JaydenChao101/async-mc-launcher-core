@@ -54,6 +54,7 @@ from .server import ServerInfo
 
 # 啟動器設定相關模型
 from .launcher import LauncherSettings
+from .config import LauncherConfig
 
 # 導出所有模型
 __all__ = [
@@ -97,4 +98,5 @@ __all__ = [
     "ServerInfo",
     # 啟動器設定相關
     "LauncherSettings",
+    "LauncherConfig",
 ]
